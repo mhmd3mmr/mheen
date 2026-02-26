@@ -2,7 +2,7 @@ export const runtime = 'edge';
 
 import { getTranslations } from "next-intl/server";
 import { FadeUp } from "@/components/FadeUp";
-import { approveMartyr, deleteMartyr, getMartyrs } from "@/app/actions/adminActions";
+import { getMartyrs } from "@/app/actions/adminActions";
 import { AdminMartyrForm } from "./ui/AdminMartyrForm";
 
 export default async function AdminMartyrsPage() {
@@ -102,7 +102,9 @@ export default async function AdminMartyrsPage() {
                   <td className="px-4 py-3 align-top">
                     <div className="flex items-center gap-2">
                       {m.status === "pending" && (
-                        <form action={approveMartyr}>
+                        <form action="/api/admin/moderation" method="post">
+                          <input type="hidden" name="entity" value="martyr" />
+                          <input type="hidden" name="op" value="approve" />
                           <input type="hidden" name="id" value={m.id} />
                           <button
                             type="submit"
@@ -112,7 +114,9 @@ export default async function AdminMartyrsPage() {
                           </button>
                         </form>
                       )}
-                      <form action={deleteMartyr}>
+                      <form action="/api/admin/moderation" method="post">
+                        <input type="hidden" name="entity" value="martyr" />
+                        <input type="hidden" name="op" value="delete" />
                         <input type="hidden" name="id" value={m.id} />
                         <button
                           type="submit"

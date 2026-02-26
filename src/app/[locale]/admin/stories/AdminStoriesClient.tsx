@@ -16,11 +16,6 @@ import {
   Calendar,
   Save,
 } from "lucide-react";
-import {
-  approveStory,
-  deleteStory,
-  updateStory,
-} from "@/app/actions/adminActions";
 
 type StoryRow = {
   id: string;
@@ -81,13 +76,18 @@ export default function AdminStoriesClient({ initialStories }: Props) {
 
   async function handleSave(id: string) {
     setSaving(true);
-    const fd = new FormData();
-    fd.set("id", id);
-    fd.set("author_name", editAuthor);
-    fd.set("content", editContent);
-    const res = await updateStory(fd);
+    const response = await fetch("/api/admin/stories", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id,
+        author_name: editAuthor,
+        content: editContent,
+      }),
+    });
+    const res = (await response.json()) as { success?: boolean; error?: string };
     setSaving(false);
-    if (res.success) {
+    if (response.ok && res.success) {
       setStories((prev) =>
         prev.map((s) =>
           s.id === id ? { ...s, author_name: editAuthor, content: editContent } : s
@@ -102,9 +102,16 @@ export default function AdminStoriesClient({ initialStories }: Props) {
   }
 
   async function handleApprove(id: string) {
-    const fd = new FormData();
-    fd.set("id", id);
-    await approveStory(fd);
+    const response = await fetch("/api/admin/stories", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    if (!response.ok) {
+      const res = (await response.json()) as { error?: string };
+      showToast(res.error ?? "فشل اعتماد القصة", "error");
+      return;
+    }
     setStories((prev) =>
       prev.map((s) => (s.id === id ? { ...s, status: "approved" } : s))
     );
@@ -114,9 +121,16 @@ export default function AdminStoriesClient({ initialStories }: Props) {
 
   async function handleDelete(id: string) {
     if (!confirm("هل أنت متأكد من حذف هذه القصة؟")) return;
-    const fd = new FormData();
-    fd.set("id", id);
-    await deleteStory(fd);
+    const response = await fetch("/api/admin/stories", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    if (!response.ok) {
+      const res = (await response.json()) as { error?: string };
+      showToast(res.error ?? "فشل حذف القصة", "error");
+      return;
+    }
     setStories((prev) => prev.filter((s) => s.id !== id));
     showToast("تم حذف القصة", "success");
     startTransition(() => router.refresh());

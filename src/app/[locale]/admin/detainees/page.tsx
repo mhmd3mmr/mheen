@@ -2,7 +2,7 @@ export const runtime = 'edge';
 
 import { getTranslations } from "next-intl/server";
 import { FadeUp } from "@/components/FadeUp";
-import { approveDetainee, deleteDetainee, getDetainees } from "@/app/actions/adminActions";
+import { getDetainees } from "@/app/actions/adminActions";
 import { AdminDetaineeForm } from "./ui/AdminDetaineeForm";
 
 export default async function AdminDetaineesPage() {
@@ -100,7 +100,9 @@ export default async function AdminDetaineesPage() {
                   <td className="px-4 py-3 align-top">
                     <div className="flex items-center gap-2">
                       {d.status === "pending" && (
-                        <form action={approveDetainee}>
+                        <form action="/api/admin/moderation" method="post">
+                          <input type="hidden" name="entity" value="detainee" />
+                          <input type="hidden" name="op" value="approve" />
                           <input type="hidden" name="id" value={d.id} />
                           <button
                             type="submit"
@@ -110,7 +112,9 @@ export default async function AdminDetaineesPage() {
                           </button>
                         </form>
                       )}
-                      <form action={deleteDetainee}>
+                      <form action="/api/admin/moderation" method="post">
+                        <input type="hidden" name="entity" value="detainee" />
+                        <input type="hidden" name="op" value="delete" />
                         <input type="hidden" name="id" value={d.id} />
                         <button
                           type="submit"
