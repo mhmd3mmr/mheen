@@ -1,3 +1,5 @@
+export const runtime = 'edge';
+
 import { FadeUp } from "@/components/FadeUp";
 import { getTranslations } from "next-intl/server";
 

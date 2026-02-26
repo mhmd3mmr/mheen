@@ -1,4 +1,4 @@
-export const runtime = "edge";
+export const runtime = 'edge';
 
 import { setRequestLocale } from "next-intl/server";
 import { getDB } from "@/lib/db";

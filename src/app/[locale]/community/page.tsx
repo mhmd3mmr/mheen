@@ -1,5 +1,7 @@
 "use client";
 
+export const runtime = 'edge';
+
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { useLocale } from "next-intl";

@@ -1,3 +1,5 @@
+export const runtime = 'edge';
+
 import { getTranslations } from "next-intl/server";
 import { FadeUp } from "@/components/FadeUp";
 import { approveMartyr, deleteMartyr, getMartyrs } from "@/app/actions/adminActions";

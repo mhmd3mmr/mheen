@@ -1,5 +1,7 @@
 "use client";
 
+export const runtime = 'edge';
+
 import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
