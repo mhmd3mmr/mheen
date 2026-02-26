@@ -5,7 +5,6 @@ import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Calendar, RotateCcw, Users, ShieldAlert, Plus, CheckCircle2, X } from "lucide-react";
 import { FileUpload } from "@/components/FileUpload";
-import { submitDetainee } from "@/app/actions/publicActions";
 
 type Detainee = {
   id: string;
@@ -44,11 +43,15 @@ export function DetaineesClient({ initialDetainees, locale }: Props) {
     try {
       const formData = new FormData(e.currentTarget);
       if (imageUrl) formData.set("image_url", imageUrl);
-      const result = await submitDetainee(formData);
-      if (result.success) {
+      const response = await fetch("/api/detainees", {
+        method: "POST",
+        body: formData,
+      });
+      const result = (await response.json()) as { success?: boolean; error?: string };
+      if (response.ok && result.success) {
         setFormSuccess(true);
       } else {
-        setFormError(result.error ?? "");
+        setFormError(result.error ?? "Failed to submit detainee");
       }
     } catch {
       setFormError("تعذر الاتصال / Connection failed");

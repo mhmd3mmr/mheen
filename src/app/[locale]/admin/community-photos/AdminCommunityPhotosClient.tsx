@@ -110,13 +110,14 @@ export default function AdminCommunityPhotosClient({ initialPhotos }: Props) {
   }
 
   async function handleApprove(id: string) {
-    const res = await fetch("/api/community-photos", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id }),
+    const formData = new FormData();
+    formData.set("id", id);
+    const res = await fetch("/api/admin/approve-photo", {
+      method: "POST",
+      body: formData,
     });
     if (!res.ok) {
-      const result = (await res.json()) as { error?: string };
+      const result = (await res.json()) as { error?: string; success?: boolean };
       showToast(result.error ?? "فشل اعتماد الصورة", "error");
       return;
     }

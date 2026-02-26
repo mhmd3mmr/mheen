@@ -30,14 +30,62 @@ export function FileUpload({
     onUploadingChange?.(v);
   };
 
+  async function convertImageToWebP(file: File): Promise<File> {
+    if (!file.type.startsWith("image/") || file.type === "image/webp" || file.type === "image/svg+xml") {
+      return file;
+    }
+
+    const objectUrl = URL.createObjectURL(file);
+    try {
+      const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error("Image decode failed"));
+        img.src = objectUrl;
+      });
+
+      const canvas = document.createElement("canvas");
+      canvas.width = image.naturalWidth || image.width;
+      canvas.height = image.naturalHeight || image.height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return file;
+      ctx.drawImage(image, 0, 0);
+
+      const webpBlob = await new Promise<Blob | null>((resolve) => {
+        canvas.toBlob((blob) => resolve(blob), "image/webp", 0.8);
+      });
+      if (!webpBlob) return file;
+
+      const baseName = file.name.replace(/\.[^.]+$/, "") || "upload";
+      const webpFile = new File([webpBlob], `${baseName}.webp`, {
+        type: "image/webp",
+        lastModified: Date.now(),
+      });
+
+      const savedBytes = file.size - webpFile.size;
+      const savedPercent = file.size > 0 ? ((savedBytes / file.size) * 100).toFixed(1) : "0.0";
+      console.log(
+        `[upload:webp] ${file.name} -> ${webpFile.name} | ${(file.size / 1024).toFixed(1)}KB -> ${(webpFile.size / 1024).toFixed(1)}KB | saved ${savedPercent}%`
+      );
+
+      return webpFile;
+    } catch (err) {
+      console.warn("[upload:webp] conversion failed, using original file", err);
+      return file;
+    } finally {
+      URL.revokeObjectURL(objectUrl);
+    }
+  }
+
   const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
     onUploadError?.("");
     try {
+      const optimizedFile = await convertImageToWebP(file);
       const formData = new FormData();
-      formData.set("file", file);
+      formData.set("file", optimizedFile);
       formData.set("folder", folder);
       const res = await fetch("/api/upload", { method: "POST", body: formData });
       if (res.ok) {

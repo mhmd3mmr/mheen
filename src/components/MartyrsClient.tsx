@@ -5,7 +5,6 @@ import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Calendar, RotateCcw, Users, Plus, CheckCircle2, X } from "lucide-react";
 import { FileUpload } from "@/components/FileUpload";
-import { submitMartyr } from "@/app/actions/publicActions";
 
 type Martyr = {
   id: string;
@@ -45,11 +44,15 @@ export function MartyrsClient({ initialMartyrs, locale }: Props) {
     try {
       const formData = new FormData(e.currentTarget);
       if (imageUrl) formData.set("image_url", imageUrl);
-      const result = await submitMartyr(formData);
-      if (result.success) {
+      const response = await fetch("/api/martyrs", {
+        method: "POST",
+        body: formData,
+      });
+      const result = (await response.json()) as { success?: boolean; error?: string };
+      if (response.ok && result.success) {
         setFormSuccess(true);
       } else {
-        setFormError(result.error ?? "");
+        setFormError(result.error ?? "Failed to submit martyr");
       }
     } catch {
       setFormError("تعذر الاتصال / Connection failed");

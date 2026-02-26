@@ -4,7 +4,6 @@ import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { FileUpload } from "@/components/FileUpload";
-import { submitStory } from "@/app/actions/publicActions";
 
 type SubmitFormProps = {
   onError?: (message: string) => void;
@@ -34,19 +33,19 @@ export function SubmitForm({ onError }: SubmitFormProps) {
       const form = e.currentTarget;
       const formData = new FormData(form);
       if (imageUrl) formData.set("image_url", imageUrl);
-      const result = await submitStory(formData);
-      if (result.success) {
+      const response = await fetch("/api/stories/submit", {
+        method: "POST",
+        body: formData,
+      });
+      const result = (await response.json()) as { success?: boolean; error?: string };
+      if (response.ok && result.success) {
         setIsSuccess(true);
       } else {
-        onError?.(
-          "تعذر الاتصال بقاعدة البيانات. يرجى المحاولة لاحقاً. / Database connection failed. Please try again."
-        );
+        onError?.(result.error ?? "Database connection failed. Please try again later.");
       }
     } catch (err) {
       console.error("Submit failed:", err);
-      onError?.(
-        "تعذر الاتصال بقاعدة البيانات. يرجى المحاولة لاحقاً. / Database connection failed. Please try again."
-      );
+      onError?.("Database connection failed. Please try again later.");
     } finally {
       setIsSubmitting(false);
     }

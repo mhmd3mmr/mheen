@@ -4,7 +4,6 @@ import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { FileUpload } from "@/components/FileUpload";
-import { submitDetainee } from "@/app/actions/publicActions";
 import { CheckCircle2 } from "lucide-react";
 
 type Props = { onError?: (msg: string) => void };
@@ -26,8 +25,12 @@ export function SubmitDetaineeForm({ onError }: Props) {
     try {
       const formData = new FormData(e.currentTarget);
       if (imageUrl) formData.set("image_url", imageUrl);
-      const result = await submitDetainee(formData);
-      if (result.success) {
+      const response = await fetch("/api/detainees", {
+        method: "POST",
+        body: formData,
+      });
+      const result = (await response.json()) as { success?: boolean; error?: string };
+      if (response.ok && result.success) {
         setIsSuccess(true);
       } else {
         onError?.(result.error ?? "حدث خطأ غير متوقع / Unexpected error");
