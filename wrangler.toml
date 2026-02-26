@@ -1,15 +1,18 @@
+
 name = "mheen"
-compatibility_date = "2024-02-26"
+# 1. تحديث التاريخ ليقبل الميزات الحديثة (مهم جداً!)
+compatibility_date = "2024-11-18" 
+
+# 2. التأكد من وجود العلم
 compatibility_flags = [ "nodejs_compat" ]
+
 pages_build_output_dir = ".vercel/output/static"
 
-# ربط قاعدة البيانات
 [[d1_databases]]
 binding = "DB"
 database_name = "mheen-archive-db"
 database_id = "9ea9374e-7e0e-4c2f-af94-cb4782ea8f57"
 
-# ربط مخزن الصور
 [[r2_buckets]]
 binding = "BUCKET"
 bucket_name = "mheen-media"
