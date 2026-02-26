@@ -97,7 +97,7 @@ export default function AdminStoriesClient({ initialStories }: Props) {
       showToast("تم تحديث القصة بنجاح", "success");
       startTransition(() => router.refresh());
     } else {
-      showToast(res.error, "error");
+      showToast(res.error ?? "فشل تحديث القصة", "error");
     }
   }
 
