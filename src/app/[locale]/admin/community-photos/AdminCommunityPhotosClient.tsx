@@ -15,9 +15,6 @@ import {
   User,
 } from "lucide-react";
 import {
-  approveCommunityPhoto,
-  deleteCommunityPhoto,
-  updateCommunityPhoto,
   type CommunityPhotoRow,
 } from "@/app/actions/adminActions";
 
@@ -78,14 +75,19 @@ export default function AdminCommunityPhotosClient({ initialPhotos }: Props) {
 
   async function handleSave(id: string) {
     setSaving(true);
-    const fd = new FormData();
-    fd.set("id", id);
-    fd.set("title_ar", editTitleAr);
-    fd.set("title_en", editTitleEn);
-    fd.set("image_url", editImageUrl);
-    const res = await updateCommunityPhoto(fd);
+    const res = await fetch("/api/community-photos", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id,
+        title_ar: editTitleAr,
+        title_en: editTitleEn,
+        image_url: editImageUrl,
+      }),
+    });
+    const result = (await res.json()) as { success?: boolean; error?: string };
     setSaving(false);
-    if (res.success) {
+    if (res.ok && result.success) {
       setPhotos((prev) =>
         prev.map((p) =>
           p.id === id
@@ -103,14 +105,21 @@ export default function AdminCommunityPhotosClient({ initialPhotos }: Props) {
       showToast("تم تحديث الصورة بنجاح", "success");
       startTransition(() => router.refresh());
     } else {
-      showToast(res.error, "error");
+      showToast(result.error ?? "فشل تحديث الصورة", "error");
     }
   }
 
   async function handleApprove(id: string) {
-    const fd = new FormData();
-    fd.set("id", id);
-    await approveCommunityPhoto(fd);
+    const res = await fetch("/api/community-photos", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    if (!res.ok) {
+      const result = (await res.json()) as { error?: string };
+      showToast(result.error ?? "فشل اعتماد الصورة", "error");
+      return;
+    }
     setPhotos((prev) =>
       prev.map((p) => (p.id === id ? { ...p, status: "approved" } : p))
     );
@@ -120,9 +129,16 @@ export default function AdminCommunityPhotosClient({ initialPhotos }: Props) {
 
   async function handleDelete(id: string) {
     if (!confirm("هل أنت متأكد من حذف هذه الصورة؟")) return;
-    const fd = new FormData();
-    fd.set("id", id);
-    await deleteCommunityPhoto(fd);
+    const res = await fetch("/api/community-photos", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    if (!res.ok) {
+      const result = (await res.json()) as { error?: string };
+      showToast(result.error ?? "فشل حذف الصورة", "error");
+      return;
+    }
     setPhotos((prev) => prev.filter((p) => p.id !== id));
     showToast("تم حذف الصورة", "success");
     startTransition(() => router.refresh());

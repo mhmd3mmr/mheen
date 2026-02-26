@@ -1,7 +1,18 @@
 import { NextResponse } from "next/server";
 import { getDB } from "@/lib/db";
+import { auth } from "@/auth";
+import { revalidatePath } from "next/cache";
+import { extractR2KeyFromImageUrl, getR2Bucket } from "@/lib/r2";
 
 export const runtime = "edge";
+
+async function assertAdmin() {
+  const session = await auth();
+  const role = (session?.user as { role?: string } | null)?.role;
+  if (!session?.user || role !== "admin") {
+    throw new Error("Unauthorized");
+  }
+}
 
 async function ensureCommunityPhotosTable() {
   const db = await getDB();
@@ -104,5 +115,107 @@ export async function GET() {
   } catch (err) {
     console.error("GET /api/community-photos failed:", err);
     return NextResponse.json({ photos: [] }, { status: 200 });
+  }
+}
+
+export async function PUT(request: Request) {
+  // Approve photo (admin only)
+  try {
+    await assertAdmin();
+    const { id } = (await request.json()) as { id?: string };
+    const photoId = String(id ?? "").trim();
+    if (!photoId) {
+      return NextResponse.json({ error: "Photo id is required" }, { status: 400 });
+    }
+
+    const db = await ensureCommunityPhotosTable();
+    await db
+      .prepare(`UPDATE community_photos SET status = 'approved', updated_at = unixepoch() WHERE id = ?`)
+      .bind(photoId)
+      .run();
+
+    revalidatePath("/[locale]/admin/community-photos", "page");
+    revalidatePath("/[locale]/community", "page");
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to approve photo";
+    const status = message === "Unauthorized" ? 401 : 500;
+    return NextResponse.json({ error: message }, { status });
+  }
+}
+
+export async function PATCH(request: Request) {
+  // Update photo (admin only)
+  try {
+    await assertAdmin();
+    const payload = (await request.json()) as {
+      id?: string;
+      title_ar?: string;
+      title_en?: string;
+      image_url?: string;
+    };
+    const id = String(payload.id ?? "").trim();
+    const titleAr = String(payload.title_ar ?? "").trim();
+    const titleEn = String(payload.title_en ?? "").trim();
+    const imageUrl = String(payload.image_url ?? "").trim();
+
+    if (!id) return NextResponse.json({ error: "Photo id is required" }, { status: 400 });
+    if (!titleAr) return NextResponse.json({ error: "Arabic title is required" }, { status: 400 });
+    if (!titleEn) return NextResponse.json({ error: "English title is required" }, { status: 400 });
+    if (!imageUrl) return NextResponse.json({ error: "Image URL is required" }, { status: 400 });
+
+    const db = await ensureCommunityPhotosTable();
+    await db
+      .prepare(
+        `UPDATE community_photos
+         SET title = ?, title_ar = ?, title_en = ?, image_url = ?, updated_at = unixepoch()
+         WHERE id = ?`
+      )
+      .bind(titleAr, titleAr, titleEn, imageUrl, id)
+      .run();
+
+    revalidatePath("/[locale]/admin/community-photos", "page");
+    revalidatePath("/[locale]/community", "page");
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to update photo";
+    const status = message === "Unauthorized" ? 401 : 500;
+    return NextResponse.json({ error: message }, { status });
+  }
+}
+
+export async function DELETE(request: Request) {
+  // Delete photo (admin only)
+  try {
+    await assertAdmin();
+    const { id } = (await request.json()) as { id?: string };
+    const photoId = String(id ?? "").trim();
+    if (!photoId) {
+      return NextResponse.json({ error: "Photo id is required" }, { status: 400 });
+    }
+
+    const db = await ensureCommunityPhotosTable();
+    const row = await db
+      .prepare(`SELECT image_url FROM community_photos WHERE id = ?`)
+      .bind(photoId)
+      .first<{ image_url: string | null }>();
+
+    await db.prepare(`DELETE FROM community_photos WHERE id = ?`).bind(photoId).run();
+
+    const key = extractR2KeyFromImageUrl(row?.image_url ?? "");
+    const bucket = getR2Bucket();
+    if (key && bucket?.delete) {
+      try {
+        await bucket.delete(key);
+      } catch {}
+    }
+
+    revalidatePath("/[locale]/admin/community-photos", "page");
+    revalidatePath("/[locale]/community", "page");
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to delete photo";
+    const status = message === "Unauthorized" ? 401 : 500;
+    return NextResponse.json({ error: message }, { status });
   }
 }
