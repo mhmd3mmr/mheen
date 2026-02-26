@@ -6,7 +6,7 @@ pages_build_output_dir = ".vercel/output/static"
 [[d1_databases]]
 binding = "DB"
 database_name = "mheen-archive-db"
-database_id = "هنا_الرمز_الطويل"
+database_id = "9ea9374e-7e0e-4c2f-af94-cb4782ea8f57"
 
 # ربط مخزن الصور
 [[r2_buckets]]
