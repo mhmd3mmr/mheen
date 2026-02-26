@@ -162,9 +162,9 @@ export default function StoriesClient({ initialStories, locale }: Props) {
   }, [initialStories, searchQuery]);
 
   return (
-    <div>
+    <div className="overflow-x-hidden">
       {/* Hero */}
-      <section className="relative -mx-4 -mt-4 overflow-hidden bg-primary px-4 pb-32 pt-16 md:-mx-8 md:-mt-8 md:px-8 md:pb-36 md:pt-24">
+      <section className="relative overflow-hidden bg-primary px-4 pb-32 pt-16 md:-mx-8 md:-mt-8 md:px-8 md:pb-36 md:pt-24">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/80 via-primary to-primary" />
         <div
           className="absolute inset-0 opacity-[0.04]"

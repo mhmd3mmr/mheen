@@ -30,9 +30,9 @@ export default async function AboutProjectPage({ params }: Props) {
   ];
 
   return (
-    <div className="min-h-[60vh] pb-24">
+    <div className="min-h-[60vh] overflow-x-hidden pb-24">
       {/* Hero Header */}
-      <section className="relative -mx-4 -mt-4 overflow-hidden bg-primary px-4 pb-24 pt-16 md:-mx-8 md:-mt-8 md:px-8 md:pb-28 md:pt-24">
+      <section className="relative overflow-hidden bg-primary px-4 pb-24 pt-16 md:-mx-8 md:-mt-8 md:px-8 md:pb-28 md:pt-24">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/80 via-primary to-primary" />
         <div
           className="absolute inset-0 opacity-[0.04]"
