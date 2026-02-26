@@ -162,9 +162,9 @@ export default function CommunityPage() {
   }, [t, locale]);
 
   return (
-    <div className="min-h-screen bg-stone-50 text-foreground">
+    <div className="min-h-screen overflow-x-hidden bg-stone-50 text-foreground">
       {/* Hero */}
-      <section className="relative -mx-4 -mt-4 overflow-hidden md:-mx-8 md:-mt-8">
+      <section className="relative overflow-hidden md:-mx-8 md:-mt-8">
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
