@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   Mheen Memory Archive — Design System (CSS variables + Tailwind v4 @theme)
+   ========================================================================== */
+
+:root {
+  /* Design system tokens (used by Tailwind and raw CSS) */
+  --background: #edebe0;
+  --foreground: #002623;
+  --primary: #054239;
+  --secondary: #988561;
+  --accent: #b9a779;
+  --success: #428177;
+  /* Qomra: loaded via next/font in layout, variable applied on body */
+}
+
+/* Tailwind v4: expose design tokens for utility classes */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-success: var(--success);
+  /* Font family for Arabic / headings (--font-qomra set by next/font on body) */
+  --font-qomra: var(--font-qomra), "Georgia", serif;
+}
+
+/* Default page: background and text use design system */
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-qomra);
+}
