@@ -62,6 +62,7 @@ export function HomepageClient({
   const ArrowIcon = isAr ? ArrowLeft : ArrowRight;
   const [activeSlide, setActiveSlide] = useState(0);
   const [hideScrollCue, setHideScrollCue] = useState(false);
+  const [loadedSlideIndexes, setLoadedSlideIndexes] = useState<number[]>([0]);
 
   const slides = useMemo(() => {
     const fromAdmin = heroSlides
@@ -88,6 +89,22 @@ export function HomepageClient({
     }, 5000);
     return () => clearInterval(timer);
   }, [slides.length]);
+
+  useEffect(() => {
+    setActiveSlide(0);
+    setLoadedSlideIndexes([0]);
+  }, [slides.length]);
+
+  useEffect(() => {
+    if (slides.length === 0) return;
+    const nextIndex = (activeSlide + 1) % slides.length;
+    setLoadedSlideIndexes((prev) => {
+      const set = new Set(prev);
+      set.add(activeSlide);
+      set.add(nextIndex);
+      return Array.from(set);
+    });
+  }, [activeSlide, slides.length]);
 
   useEffect(() => {
     const onScroll = () => {
@@ -153,19 +170,23 @@ export function HomepageClient({
               i === activeSlide ? "opacity-100" : "opacity-0"
             }`}
           >
-            <picture>
-              <source media="(max-width: 768px)" srcSet={slide.mobileImage} />
-              <source media="(min-width: 769px)" srcSet={slide.desktopImage} />
-              <img
-                src={slide.desktopImage}
-                alt="Mheen Hero"
-                className="h-full w-full object-cover"
-                loading={i === 0 ? "eager" : "lazy"}
-                decoding="async"
-                fetchPriority={i === 0 ? "high" : "auto"}
-                sizes="100vw"
-              />
-            </picture>
+            {loadedSlideIndexes.includes(i) ? (
+              <picture>
+                <source media="(max-width: 768px)" srcSet={slide.mobileImage} />
+                <source media="(min-width: 769px)" srcSet={slide.desktopImage} />
+                <img
+                  src={slide.desktopImage}
+                  alt="Mheen Hero"
+                  className="h-full w-full object-cover"
+                  loading={i === 0 ? "eager" : "lazy"}
+                  decoding="async"
+                  fetchPriority={i === 0 ? "high" : "auto"}
+                  sizes="100vw"
+                />
+              </picture>
+            ) : (
+              <div className="h-full w-full bg-primary/20" />
+            )}
           </div>
         ))}
         <div className="absolute inset-0 bg-primary/25" />
@@ -230,7 +251,10 @@ export function HomepageClient({
                   key={`dot-${i}`}
                   type="button"
                   aria-label={`slide-${i + 1}`}
-                  onClick={() => setActiveSlide(i)}
+                  onClick={() => {
+                    setLoadedSlideIndexes((prev) => (prev.includes(i) ? prev : [...prev, i]));
+                    setActiveSlide(i);
+                  }}
                   className={`h-2.5 rounded-full transition-all ${
                     i === activeSlide ? "w-7 bg-white" : "w-2.5 bg-white/55"
                   }`}

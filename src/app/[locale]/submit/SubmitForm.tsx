@@ -130,6 +130,9 @@ export function SubmitForm({ onError }: SubmitFormProps) {
           onUploadError={setUploadError}
           uploadLabel={t("upload")}
           uploadingLabel={t("uploading")}
+          imageMaxWidth={1200}
+          imageWebpQuality={0.72}
+          imageTargetMaxKB={300}
         />
         {uploadError && (
           <p className="mt-2 text-sm text-red-600">{uploadError}</p>
