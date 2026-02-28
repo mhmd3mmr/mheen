@@ -76,8 +76,28 @@ export default async function HomePage({ params }: Props) {
     console.warn("HomePage: D1 not available, using fallback data.", err);
   }
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Mheen Memory Archive",
+    url: "https://miheen.com",
+    inLanguage: locale === "ar" ? "ar" : "en",
+    about: [
+      "Mheen",
+      "Homs countryside",
+      "Syria",
+      "Historical archive",
+      "Community memory",
+    ],
+  };
+
   return (
     <div className="flex flex-1 flex-col">
+      <script
+        type="application/ld+json"
+        // JSON-LD helps search engines understand site entity and topic.
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <HomepageClient
         locale={locale}
         totalMartyrs={totalMartyrs}

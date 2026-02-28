@@ -14,8 +14,63 @@ const qomra = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Mheen Memory Archive",
-  description: "Historical documentation and memory archive",
+  metadataBase: new URL("https://miheen.com"),
+  title: {
+    default: "Mheen Memory Archive | أرشيف ذاكرة مهين",
+    template: "%s | Mheen Memory Archive",
+  },
+  description:
+    "Mheen Memory Archive documents the history, people, martyrs, detainees, and stories of Mheen in Homs countryside, Syria. أرشيف يوثق مهين وريف حمص وسوريا.",
+  keywords: [
+    "Mheen",
+    "Maheen",
+    "Miheen",
+    "Mahin",
+    "مهين",
+    "ريف حمص",
+    "حمص",
+    "Homs",
+    "Syria",
+    "سوريا",
+    "سورية",
+    "Mheen Archive",
+    "Mheen Memory Archive",
+    "أرشيف مهين",
+    "أرشيف ذاكرة مهين",
+  ],
+  alternates: {
+    canonical: "https://miheen.com",
+    languages: {
+      ar: "https://miheen.com/ar",
+      en: "https://miheen.com/en",
+    },
+  },
+  openGraph: {
+    type: "website",
+    url: "https://miheen.com",
+    siteName: "Mheen Memory Archive",
+    title: "Mheen Memory Archive | أرشيف ذاكرة مهين",
+    description:
+      "Historical documentation and community memory archive for Mheen, Homs countryside, Syria.",
+    images: [
+      {
+        url: "/images/mheen-oasis-city.png",
+        width: 1200,
+        height: 630,
+        alt: "Mheen - Homs countryside, Syria",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Mheen Memory Archive | أرشيف ذاكرة مهين",
+    description:
+      "Historical documentation and community memory archive for Mheen, Homs countryside, Syria.",
+    images: ["/images/mheen-oasis-city.png"],
+  },
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION,
+  },
 };
 
 /**
