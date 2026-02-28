@@ -71,6 +71,13 @@ export const metadata: Metadata = {
   verification: {
     google: process.env.GOOGLE_SITE_VERIFICATION,
   },
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: ["/icon.svg"],
+    apple: ["/icon.svg"],
+  },
 };
 
 /**
