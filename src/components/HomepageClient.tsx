@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import {
   Shield,
   BookOpen,
@@ -51,6 +52,9 @@ const fadeUp = {
   }),
 };
 
+const HERO_BLUR_DATA_URL =
+  "data:image/webp;base64,UklGRjYAAABXRUJQVlA4ICoAAACwAQCdASoQABAAPm02mUmkIyKhIggAgA2JaW7hdAAP7v2mAA==";
+
 export function HomepageClient({
   locale,
   latestStories,
@@ -62,6 +66,7 @@ export function HomepageClient({
   const ArrowIcon = isAr ? ArrowLeft : ArrowRight;
   const [activeSlide, setActiveSlide] = useState(0);
   const [hideScrollCue, setHideScrollCue] = useState(false);
+  const [loadedSlides, setLoadedSlides] = useState<Record<string, boolean>>({});
 
   const slides = useMemo(() => {
     const fromAdmin = heroSlides
@@ -141,15 +146,6 @@ export function HomepageClient({
     <div className="min-h-screen">
       {/* ─── Hero: Balanced welcome height ─── */}
       <section className="relative flex min-h-screen items-end overflow-hidden px-4 py-10 sm:py-12 md:py-12">
-        {slides[0] && (
-          <link
-            rel="preload"
-            as="image"
-            href={slides[0].desktopImage}
-            imageSrcSet={`${slides[0].mobileImage} 1200w, ${slides[0].desktopImage} 1920w`}
-            imageSizes="100vw"
-          />
-        )}
         {slides.map((slide, i) => (
           <div
             key={slide.id}
@@ -157,23 +153,25 @@ export function HomepageClient({
               i === activeSlide ? "opacity-100" : "opacity-0"
             }`}
           >
-            {i === 0 || i === activeSlide ? (
-              <picture>
-                <source media="(max-width: 768px)" srcSet={slide.mobileImage} />
-                <source media="(min-width: 769px)" srcSet={slide.desktopImage} />
-                <img
-                  src={slide.desktopImage}
-                  alt="Mheen Hero"
-                  className="h-full w-full object-cover"
-                  loading={i === 0 ? "eager" : "lazy"}
-                  decoding="async"
-                  fetchPriority={i === 0 ? "high" : "auto"}
-                  sizes="100vw"
-                />
-              </picture>
-            ) : (
-              <div className="h-full w-full bg-primary/20" />
-            )}
+            <div className="relative h-full w-full [image-rendering:-webkit-optimize-contrast] [image-rendering:high-quality]">
+              <Image
+                src={slide.desktopImage}
+                alt="Mheen Hero"
+                fill
+                className={`object-cover transition-opacity duration-500 ease-in-out ${
+                  loadedSlides[slide.id] ? "opacity-100" : "opacity-0"
+                }`}
+                sizes="100vw"
+                quality={100}
+                priority
+                loading="eager"
+                placeholder="blur"
+                blurDataURL={HERO_BLUR_DATA_URL}
+                onLoadingComplete={() =>
+                  setLoadedSlides((prev) => ({ ...prev, [slide.id]: true }))
+                }
+              />
+            </div>
           </div>
         ))}
         <div className="absolute inset-0 bg-primary/25" />

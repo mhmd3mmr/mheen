@@ -111,8 +111,27 @@ export default async function HomePage({ params }: Props) {
     ],
   };
 
+  const heroPreload = heroSlides
+    .slice(0, 3)
+    .map((s) => ({
+      id: s.id,
+      desktop: s.desktop_url || s.image_url || s.mobile_url || "",
+      mobile: s.mobile_url || s.desktop_url || s.image_url || "",
+    }))
+    .filter((s) => s.desktop);
+
   return (
     <div className="flex flex-1 flex-col">
+      {heroPreload.map((slide) => (
+        <link
+          key={`hero-preload-${slide.id}`}
+          rel="preload"
+          as="image"
+          href={slide.desktop}
+          imageSrcSet={`${slide.mobile} 1200w, ${slide.desktop} 1920w`}
+          imageSizes="100vw"
+        />
+      ))}
       <script
         type="application/ld+json"
         // JSON-LD helps search engines understand site entity and topic.

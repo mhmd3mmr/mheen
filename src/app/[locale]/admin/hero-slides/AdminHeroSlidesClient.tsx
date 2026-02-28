@@ -53,16 +53,17 @@ export default function AdminHeroSlidesClient() {
 
   async function processHeroImage(file: File) {
     const desktopBlob = await imageCompression(file, {
-      maxWidthOrHeight: 1920,
-      initialQuality: 0.6,
-      maxSizeMB: 0.9,
+      // Keep desktop hero source crisp for large/retina displays.
+      maxWidthOrHeight: 3840,
+      initialQuality: 0.95,
+      maxSizeMB: 8,
       useWebWorker: true,
       fileType: "image/webp",
     });
     const mobileBlob = await imageCompression(file, {
-      maxWidthOrHeight: 1200,
-      initialQuality: 0.6,
-      maxSizeMB: 0.095,
+      maxWidthOrHeight: 1920,
+      initialQuality: 0.95,
+      maxSizeMB: 2,
       useWebWorker: true,
       fileType: "image/webp",
     });
@@ -79,13 +80,13 @@ export default function AdminHeroSlidesClient() {
 
     const desktopSaved = file.size > 0 ? (((file.size - desktopFile.size) / file.size) * 100).toFixed(1) : "0.0";
     const mobileSaved = file.size > 0 ? (((file.size - mobileFile.size) / file.size) * 100).toFixed(1) : "0.0";
-    const mobileOverTarget = mobileFile.size > 100 * 1024;
+    const mobileOverTarget = mobileFile.size > 500 * 1024;
     console.log(
       `[hero] original ${(file.size / 1024).toFixed(1)}KB | desktop ${(desktopFile.size / 1024).toFixed(1)}KB (-${desktopSaved}%) | mobile ${(mobileFile.size / 1024).toFixed(1)}KB (-${mobileSaved}%)`
     );
     if (mobileOverTarget) {
       console.warn(
-        `[hero] mobile image is ${(mobileFile.size / 1024).toFixed(1)}KB, above 100KB target`
+        `[hero] mobile image is ${(mobileFile.size / 1024).toFixed(1)}KB, above 500KB quality target`
       );
     }
 

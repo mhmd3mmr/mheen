@@ -129,6 +129,8 @@ export default function SubmitCommunityPhotoPage() {
             <FileUpload
               accept="image/*"
               folder="community"
+              imageMaxWidth={1920}
+              imageWebpQuality={0.8}
               onUploadSuccess={(url) => {
                 setImageUrl(url);
                 setUploadError("");
