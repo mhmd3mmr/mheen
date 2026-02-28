@@ -8,6 +8,15 @@ type Props = {
   params: Promise<{ locale: string }>;
 };
 
+type HeroSlide = {
+  id: string;
+  image_url: string;
+  title_ar: string | null;
+  title_en: string | null;
+  is_active: number;
+  sort_order: number;
+};
+
 export default async function HomePage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
@@ -16,10 +25,26 @@ export default async function HomePage({ params }: Props) {
   let totalDetainees = 0;
   let totalStories = 0;
   let latestStories: any[] = [];
+  let heroSlides: HeroSlide[] = [];
 
   try {
     const db = await getDB();
-    const [martyrsRes, detaineesRes, storiesCountRes, latestRes] =
+    await db
+      .prepare(
+        `CREATE TABLE IF NOT EXISTS hero_slides (
+          id TEXT NOT NULL PRIMARY KEY,
+          image_url TEXT NOT NULL,
+          title_ar TEXT,
+          title_en TEXT,
+          is_active INTEGER NOT NULL DEFAULT 1,
+          sort_order INTEGER NOT NULL DEFAULT 0,
+          created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+          updated_at INTEGER NOT NULL DEFAULT (unixepoch())
+        )`
+      )
+      .run();
+
+    const [martyrsRes, detaineesRes, storiesCountRes, latestRes, heroSlidesRes] =
       await Promise.all([
         db
           .prepare("SELECT COUNT(*) as count FROM martyrs WHERE status = 'approved'")
@@ -35,12 +60,18 @@ export default async function HomePage({ params }: Props) {
             "SELECT id, author_name, content, image_url, created_at FROM stories WHERE status = 'approved' ORDER BY id DESC LIMIT 3"
           )
           .all(),
+        db
+          .prepare(
+            "SELECT id, image_url, title_ar, title_en, is_active, sort_order FROM hero_slides WHERE is_active = 1 ORDER BY sort_order ASC, created_at DESC"
+          )
+          .all(),
       ]);
 
     totalMartyrs = martyrsRes?.count ?? 0;
     totalDetainees = detaineesRes?.count ?? 0;
     totalStories = storiesCountRes?.count ?? 0;
     latestStories = (latestRes?.results as any[]) ?? [];
+    heroSlides = (heroSlidesRes?.results as HeroSlide[]) ?? [];
   } catch (err) {
     console.warn("HomePage: D1 not available, using fallback data.", err);
   }
@@ -53,6 +84,7 @@ export default async function HomePage({ params }: Props) {
         totalDetainees={totalDetainees}
         totalStories={totalStories}
         latestStories={latestStories}
+        heroSlides={heroSlides}
       />
     </div>
   );

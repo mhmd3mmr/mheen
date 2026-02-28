@@ -2,7 +2,7 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { signOut, useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Globe, LogOut, Plus } from "lucide-react";
@@ -27,21 +27,53 @@ export function Navbar() {
   const pathname = usePathname();
   const path = stripLocale(pathname);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const { data: session, status } = useSession();
   const isAdmin =
     session?.user?.role === "admin" || session?.user?.role === "contributor";
   const isAr = locale === "ar";
   const otherLocale = isAr ? "en" : "ar";
+  const isHome = path === "/";
+  const transparentAtTop = isHome && !isScrolled && !mobileOpen;
+  const activeTextClass = transparentAtTop ? "text-white" : "text-white";
+  const mutedTextClass = transparentAtTop
+    ? "text-white/85 hover:text-white"
+    : "text-white/55 hover:text-white/90";
+  const softIconClass = transparentAtTop
+    ? "text-white/85 hover:bg-white/10 hover:text-white"
+    : "text-white/40 hover:bg-white/10 hover:text-white";
+
+  useEffect(() => {
+    const onScroll = () => setIsScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-primary/95 text-white backdrop-blur-md">
+    <>
+      <header
+        className={`fixed inset-x-0 top-0 z-50 w-full backdrop-blur-md transition-colors duration-300 ${
+          transparentAtTop
+            ? "border-b border-transparent bg-gradient-to-b from-black/35 via-black/10 to-transparent text-white"
+            : "border-b border-white/10 bg-primary/95 text-white shadow-sm"
+        }`}
+      >
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-6 px-4 sm:px-6">
         {/* ── Logo ── */}
         <Link href="/" className="group flex shrink-0 items-baseline gap-2">
-          <span className="font-qomra text-2xl font-bold tracking-tight text-white transition-opacity group-hover:opacity-90">
+          <span
+            className={`font-qomra text-2xl font-bold tracking-tight transition-opacity group-hover:opacity-90 ${
+              transparentAtTop ? "text-white" : "text-white"
+            }`}
+          >
             {isAr ? "مهين" : "Mheen"}
           </span>
-          <span className="hidden text-[11px] text-white/35 lg:inline">
+          <span
+            className={`hidden text-[11px] lg:inline ${
+              transparentAtTop ? "text-white/70" : "text-white/35"
+            }`}
+          >
             {t("archiveLabel")}
           </span>
         </Link>
@@ -58,15 +90,17 @@ export function Navbar() {
                 href={href}
                 className={`relative rounded-lg px-3 py-2 text-[13px] font-medium transition-colors lg:px-3.5 ${
                   isActive
-                    ? "text-white"
-                    : "text-white/55 hover:text-white/90"
+                    ? activeTextClass
+                    : mutedTextClass
                 }`}
               >
                 {t(key)}
                 {isActive && (
                   <motion.span
                     layoutId="nav-indicator"
-                    className="absolute inset-x-2 -bottom-[1.05rem] h-[2px] rounded-full bg-accent"
+                    className={`absolute inset-x-2 -bottom-[1.05rem] h-[2px] rounded-full ${
+                      transparentAtTop ? "bg-white" : "bg-accent"
+                    }`}
                     transition={{ type: "spring", stiffness: 380, damping: 30 }}
                   />
                 )}
@@ -80,7 +114,7 @@ export function Navbar() {
           {isAdmin && (
             <Link
               href="/admin"
-              className="rounded-lg px-2.5 py-2 text-[13px] font-medium text-white/55 transition-colors hover:text-white/90"
+              className={`rounded-lg px-2.5 py-2 text-[13px] font-medium transition-colors ${mutedTextClass}`}
             >
               {t("dashboard")}
             </Link>
@@ -90,7 +124,7 @@ export function Navbar() {
             <button
               type="button"
               onClick={() => signOut({ callbackUrl: `/${locale}` })}
-              className="rounded-lg p-2 text-white/40 transition-colors hover:bg-white/10 hover:text-white"
+              className={`rounded-lg p-2 transition-colors ${softIconClass}`}
               aria-label={t("logout")}
             >
               <LogOut className="h-4 w-4" />
@@ -100,17 +134,25 @@ export function Navbar() {
           {status !== "loading" && !session && (
             <Link
               href="/login"
-              className="rounded-lg px-2.5 py-2 text-[13px] text-white/55 transition-colors hover:text-white/90"
+              className={`rounded-lg px-2.5 py-2 text-[13px] transition-colors ${mutedTextClass}`}
             >
               {t("login")}
             </Link>
           )}
 
-          <div className="ms-0.5 border-s border-white/15 ps-1.5">
+          <div
+            className={`ms-0.5 border-s ps-1.5 ${
+              transparentAtTop ? "border-emerald-100/35" : "border-white/15"
+            }`}
+          >
             <Link
               href={path}
               locale={otherLocale}
-              className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[13px] text-white/55 transition-colors hover:bg-white/10 hover:text-white"
+              className={`flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[13px] transition-colors ${
+                transparentAtTop
+                  ? "text-white/90 hover:bg-white/10 hover:text-white"
+                  : "text-white/55 hover:bg-white/10 hover:text-white"
+              }`}
             >
               <Globe className="h-3.5 w-3.5" />
               {isAr ? "EN" : "عربي"}
@@ -131,7 +173,11 @@ export function Navbar() {
           <Link
             href={path}
             locale={otherLocale}
-            className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-medium text-white/65 transition-colors hover:bg-white/10 hover:text-white"
+            className={`flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-medium transition-colors ${
+              transparentAtTop
+                ? "text-white/90 hover:bg-white/10 hover:text-white"
+                : "text-white/65 hover:bg-white/10 hover:text-white"
+            }`}
           >
             <Globe className="h-4 w-4" />
             {isAr ? "EN" : "عربي"}
@@ -139,7 +185,11 @@ export function Navbar() {
           <button
             type="button"
             onClick={() => setMobileOpen((o) => !o)}
-            className="rounded-lg p-2 text-white/80 transition-colors hover:bg-white/10"
+            className={`rounded-lg p-2 transition-colors ${
+              transparentAtTop
+                ? "text-white/90 hover:bg-white/10 hover:text-white"
+                : "text-white/80 hover:bg-white/10"
+            }`}
             aria-expanded={mobileOpen}
             aria-controls="mobile-menu"
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
@@ -158,7 +208,11 @@ export function Navbar() {
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-            className="overflow-hidden border-t border-white/10 bg-primary md:hidden"
+            className={`overflow-hidden border-t md:hidden ${
+              transparentAtTop
+                ? "border-primary/10 bg-white/95 text-primary"
+                : "border-white/10 bg-primary text-white"
+            }`}
           >
             <nav className="mx-auto flex max-w-7xl flex-col px-4 pb-5 pt-3" aria-label="Mobile">
               {NAV_ITEMS.map(({ key, href }) => {
@@ -172,8 +226,12 @@ export function Navbar() {
                     onClick={() => setMobileOpen(false)}
                     className={`rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
                       isActive
-                        ? "bg-white/10 text-accent"
-                        : "text-white/70 hover:bg-white/5 hover:text-white"
+                        ? transparentAtTop
+                          ? "bg-primary/10 text-primary"
+                          : "bg-white/10 text-accent"
+                        : transparentAtTop
+                          ? "text-primary/80 hover:bg-primary/5 hover:text-primary"
+                          : "text-white/70 hover:bg-white/5 hover:text-white"
                     }`}
                   >
                     {t(key)}
@@ -185,13 +243,21 @@ export function Navbar() {
                 <Link
                   href="/admin"
                   onClick={() => setMobileOpen(false)}
-                  className="rounded-lg px-4 py-3 text-sm font-medium text-white/70 hover:bg-white/5 hover:text-white"
+                  className={`rounded-lg px-4 py-3 text-sm font-medium ${
+                    transparentAtTop
+                      ? "text-primary/80 hover:bg-primary/5 hover:text-primary"
+                      : "text-white/70 hover:bg-white/5 hover:text-white"
+                  }`}
                 >
                   {t("dashboard")}
                 </Link>
               )}
 
-              <div className="my-3 border-t border-white/10" />
+              <div
+                className={`my-3 border-t ${
+                  transparentAtTop ? "border-primary/10" : "border-white/10"
+                }`}
+              />
 
               <Link
                 href="/submit"
@@ -210,7 +276,11 @@ export function Navbar() {
                       setMobileOpen(false);
                       signOut({ callbackUrl: `/${locale}` });
                     }}
-                    className="flex w-full items-center gap-2 rounded-lg px-4 py-3 text-start text-sm text-white/50 hover:bg-white/5"
+                    className={`flex w-full items-center gap-2 rounded-lg px-4 py-3 text-start text-sm ${
+                      transparentAtTop
+                        ? "text-primary/70 hover:bg-primary/5"
+                        : "text-white/50 hover:bg-white/5"
+                    }`}
                   >
                     <LogOut className="h-4 w-4" />
                     {t("logout")}
@@ -219,7 +289,11 @@ export function Navbar() {
                   <Link
                     href="/login"
                     onClick={() => setMobileOpen(false)}
-                    className="block rounded-lg px-4 py-3 text-sm text-white/50 hover:bg-white/5"
+                    className={`block rounded-lg px-4 py-3 text-sm ${
+                      transparentAtTop
+                        ? "text-primary/70 hover:bg-primary/5"
+                        : "text-white/50 hover:bg-white/5"
+                    }`}
                   >
                     {t("login")}
                   </Link>
@@ -229,6 +303,8 @@ export function Navbar() {
           </motion.div>
         )}
       </AnimatePresence>
-    </header>
+      </header>
+      {!isHome && <div className="h-16" />}
+    </>
   );
 }

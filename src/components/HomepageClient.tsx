@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { motion } from "framer-motion";
@@ -29,6 +30,14 @@ type Props = {
   totalDetainees: number;
   totalStories: number;
   latestStories: StoryRow[];
+  heroSlides: {
+    id: string;
+    image_url: string;
+    title_ar: string | null;
+    title_en: string | null;
+    is_active: number;
+    sort_order: number;
+  }[];
 };
 
 const fadeUp = {
@@ -43,11 +52,48 @@ const fadeUp = {
 export function HomepageClient({
   locale,
   latestStories,
+  heroSlides,
 }: Props) {
   const t = useTranslations("Hero");
   const h = useTranslations("Home");
   const isAr = locale === "ar";
   const ArrowIcon = isAr ? ArrowLeft : ArrowRight;
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [hideScrollCue, setHideScrollCue] = useState(false);
+
+  const slides = useMemo(() => {
+    const fromAdmin = heroSlides
+      .filter((s) => s.is_active === 1 && s.image_url)
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map((s) => ({
+        id: s.id,
+        image: s.image_url,
+        caption: isAr ? s.title_ar || "" : s.title_en || "",
+      }));
+
+    if (fromAdmin.length > 0) return fromAdmin;
+    return [
+      { id: "fallback-1", image: "/images/mheen-hero.jpg", caption: "" },
+      { id: "fallback-2", image: "/images/mheen-oasis.jpg", caption: "" },
+    ];
+  }, [heroSlides, isAr]);
+
+  useEffect(() => {
+    if (slides.length <= 1) return;
+    const timer = setInterval(() => {
+      setActiveSlide((prev) => (prev + 1) % slides.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [slides.length]);
+
+  useEffect(() => {
+    const onScroll = () => {
+      if (window.scrollY > 8) setHideScrollCue(true);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const pillars = [
     {
@@ -87,23 +133,28 @@ export function HomepageClient({
   return (
     <div className="min-h-screen">
       {/* ─── Hero: Balanced welcome height ─── */}
-      <section className="relative flex min-h-[58vh] items-center justify-center overflow-hidden px-4 py-10 sm:min-h-[62vh] sm:py-12 md:min-h-[64vh] md:py-12">
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: "url('/images/mheen-hero.jpg')",
-            backgroundColor: "var(--color-primary)",
-          }}
-        />
-        <div className="absolute inset-0 bg-black/50" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30" />
+      <section className="relative flex min-h-screen items-end overflow-hidden px-4 py-10 sm:py-12 md:py-12">
+        {slides.map((slide, i) => (
+          <div
+            key={slide.id}
+            className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 ${
+              i === activeSlide ? "opacity-100" : "opacity-0"
+            }`}
+            style={{
+              backgroundImage: `url('${slide.image}')`,
+              backgroundColor: "var(--color-primary)",
+            }}
+          />
+        ))}
+        <div className="absolute inset-0 bg-primary/25" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/35" />
 
-        <div className="relative z-10 mx-auto max-w-4xl px-6 pb-10 pt-4 text-center sm:pb-12 md:pb-14">
+        <div className="relative z-10 mx-auto w-full max-w-7xl px-6 pb-14 pt-4 text-start sm:pb-16 md:pb-20">
           <motion.p
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className={`mb-4 text-sm font-medium uppercase text-white/70 ${isAr ? "tracking-normal" : "tracking-[0.2em]"}`}
+            className={`mb-4 text-sm font-medium uppercase text-white/70 ${isAr ? "tracking-normal" : "tracking-[0.2em]"} max-w-xl`}
           >
             {t("eyebrow")}
           </motion.p>
@@ -112,7 +163,7 @@ export function HomepageClient({
             initial={{ opacity: 0, scale: 0.95, y: 24 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-            className={`font-qomra text-6xl font-bold text-white sm:text-7xl md:text-8xl lg:text-9xl ${isAr ? "tracking-normal" : "tracking-[0.35em]"}`}
+            className={`max-w-3xl font-qomra text-5xl font-bold text-white sm:text-6xl md:text-7xl lg:text-8xl ${isAr ? "tracking-normal" : "tracking-[0.22em]"}`}
           >
             {t("mainTitle")}
           </motion.h1>
@@ -121,16 +172,19 @@ export function HomepageClient({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.25 }}
-            className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/85 md:text-xl"
+            className="mt-6 max-w-2xl text-lg leading-relaxed text-white/90 md:text-xl"
           >
             {t("subtitle")}
           </motion.p>
+          {slides[activeSlide]?.caption ? (
+            <p className="mt-3 max-w-xl text-sm text-white/75">{slides[activeSlide].caption}</p>
+          ) : null}
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="mt-10 flex flex-wrap items-center justify-center gap-3 sm:mt-12 sm:gap-4"
+            className="mt-10 flex flex-wrap items-center gap-3 sm:mt-12 sm:gap-4"
           >
             <Link
               href="/about-mheen"
@@ -146,7 +200,41 @@ export function HomepageClient({
               {t("ctaArchive")}
             </Link>
           </motion.div>
+
+          {slides.length > 1 ? (
+            <div className="mt-6 flex items-center gap-2">
+              {slides.map((_, i) => (
+                <button
+                  key={`dot-${i}`}
+                  type="button"
+                  aria-label={`slide-${i + 1}`}
+                  onClick={() => setActiveSlide(i)}
+                  className={`h-2.5 rounded-full transition-all ${
+                    i === activeSlide ? "w-7 bg-white" : "w-2.5 bg-white/55"
+                  }`}
+                />
+              ))}
+            </div>
+          ) : null}
         </div>
+
+        {/* Scroll-down indicator (no text) */}
+        {!hideScrollCue && (
+          <button
+            type="button"
+            aria-label="Scroll down"
+            onClick={() => window.scrollTo({ top: window.innerHeight * 0.92, behavior: "smooth" })}
+            className="absolute bottom-5 left-1/2 z-20 -translate-x-1/2 rounded-full p-1 text-white/85 transition-colors hover:text-white"
+          >
+            <div className="relative flex h-8 w-5 items-start justify-center rounded-full border border-white/60">
+              <motion.span
+                animate={{ y: [4, 18, 4], opacity: [0.95, 0.35, 0.95] }}
+                transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
+                className="mt-1 h-1 w-1 rounded-full bg-white"
+              />
+            </div>
+          </button>
+        )}
       </section>
 
       {/* ─── Oasis Showcase ─── */}

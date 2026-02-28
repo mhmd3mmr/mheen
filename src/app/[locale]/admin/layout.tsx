@@ -13,6 +13,7 @@ import {
   ShieldOff,
   UserCog,
   Images,
+  ImagePlus,
 } from "lucide-react";
 
 type Props = {
@@ -26,6 +27,7 @@ const SIDEBAR_ITEMS = [
   { key: "detainees", href: "/admin/detainees", icon: UserMinus, adminOnly: false },
   { key: "stories", href: "/admin/stories", icon: BookOpen, adminOnly: false },
   { key: "communityPhotos", href: "/admin/community-photos", icon: Images, adminOnly: false },
+  { key: "heroSlides", href: "/admin/hero-slides", icon: ImagePlus, adminOnly: true },
   { key: "users", href: "/admin/users", icon: UserCog, adminOnly: true },
 ] as const;
 

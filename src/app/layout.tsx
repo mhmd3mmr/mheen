@@ -3,11 +3,11 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { LocaleDirection } from "@/components/LocaleDirection";
 
-/** Qomra: custom Arabic font (Light 300, SemiBold 600). Exposes --font-qomra. */
+/** Qomra: use the thicker 600 cut as base site font. */
 const qomra = localFont({
   src: [
-    { path: "./fonts/Qomra-300.otf", weight: "300" },
-    { path: "./fonts/Qomra-600.otf", weight: "600" },
+    { path: "./fonts/Qomra-600.otf", weight: "400" },
+    { path: "./fonts/Qomra-600.otf", weight: "700" },
   ],
   variable: "--font-qomra",
   display: "swap",
