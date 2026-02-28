@@ -32,7 +32,9 @@ type Props = {
   latestStories: StoryRow[];
   heroSlides: {
     id: string;
-    image_url: string;
+    image_url: string | null;
+    desktop_url: string | null;
+    mobile_url: string | null;
     title_ar: string | null;
     title_en: string | null;
     is_active: number;
@@ -63,18 +65,19 @@ export function HomepageClient({
 
   const slides = useMemo(() => {
     const fromAdmin = heroSlides
-      .filter((s) => s.is_active === 1 && s.image_url)
+      .filter((s) => s.is_active === 1 && (s.desktop_url || s.image_url || s.mobile_url))
       .sort((a, b) => a.sort_order - b.sort_order)
       .map((s) => ({
         id: s.id,
-        image: s.image_url,
+        desktopImage: s.desktop_url || s.image_url || s.mobile_url || "",
+        mobileImage: s.mobile_url || s.desktop_url || s.image_url || "",
         caption: isAr ? s.title_ar || "" : s.title_en || "",
       }));
 
     if (fromAdmin.length > 0) return fromAdmin;
     return [
-      { id: "fallback-1", image: "/images/mheen-hero.jpg", caption: "" },
-      { id: "fallback-2", image: "/images/mheen-oasis.jpg", caption: "" },
+      { id: "fallback-1", desktopImage: "/images/mheen-hero.jpg", mobileImage: "/images/mheen-hero.jpg", caption: "" },
+      { id: "fallback-2", desktopImage: "/images/mheen-oasis.jpg", mobileImage: "/images/mheen-oasis.jpg", caption: "" },
     ];
   }, [heroSlides, isAr]);
 
@@ -134,17 +137,36 @@ export function HomepageClient({
     <div className="min-h-screen">
       {/* ─── Hero: Balanced welcome height ─── */}
       <section className="relative flex min-h-screen items-end overflow-hidden px-4 py-10 sm:py-12 md:py-12">
+        {slides[0] && (
+          <link
+            rel="preload"
+            as="image"
+            href={slides[0].desktopImage}
+            imageSrcSet={`${slides[0].mobileImage} 1200w, ${slides[0].desktopImage} 1920w`}
+            imageSizes="100vw"
+          />
+        )}
         {slides.map((slide, i) => (
           <div
             key={slide.id}
-            className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 ${
+            className={`absolute inset-0 transition-opacity duration-1000 ${
               i === activeSlide ? "opacity-100" : "opacity-0"
             }`}
-            style={{
-              backgroundImage: `url('${slide.image}')`,
-              backgroundColor: "var(--color-primary)",
-            }}
-          />
+          >
+            <picture>
+              <source media="(max-width: 768px)" srcSet={slide.mobileImage} />
+              <source media="(min-width: 769px)" srcSet={slide.desktopImage} />
+              <img
+                src={slide.desktopImage}
+                alt="Mheen Hero"
+                className="h-full w-full object-cover"
+                loading={i === 0 ? "eager" : "lazy"}
+                decoding="async"
+                fetchPriority={i === 0 ? "high" : "auto"}
+                sizes="100vw"
+              />
+            </picture>
+          </div>
         ))}
         <div className="absolute inset-0 bg-primary/25" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/35" />

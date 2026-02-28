@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { FileUpload } from "@/components/FileUpload";
+import imageCompression from "browser-image-compression";
 import { Trash2, Save, Plus } from "lucide-react";
 
 type HeroSlide = {
   id: string;
-  image_url: string;
+  image_url: string | null;
+  desktop_url: string | null;
+  mobile_url: string | null;
   title_ar: string | null;
   title_en: string | null;
   is_active: number;
@@ -16,7 +18,10 @@ type HeroSlide = {
 export default function AdminHeroSlidesClient() {
   const [slides, setSlides] = useState<HeroSlide[]>([]);
   const [loading, setLoading] = useState(true);
-  const [newImageUrl, setNewImageUrl] = useState("");
+  const [newDesktopFile, setNewDesktopFile] = useState<File | null>(null);
+  const [newMobileFile, setNewMobileFile] = useState<File | null>(null);
+  const [newDesktopPreview, setNewDesktopPreview] = useState("");
+  const [newMobilePreview, setNewMobilePreview] = useState("");
   const [newTitleAr, setNewTitleAr] = useState("");
   const [newTitleEn, setNewTitleEn] = useState("");
   const [newSortOrder, setNewSortOrder] = useState(0);
@@ -46,28 +51,76 @@ export default function AdminHeroSlidesClient() {
     [slides]
   );
 
+  async function processHeroImage(file: File) {
+    const desktopBlob = await imageCompression(file, {
+      maxWidthOrHeight: 1920,
+      initialQuality: 0.8,
+      maxSizeMB: 0.9,
+      useWebWorker: true,
+      fileType: "image/webp",
+    });
+    const mobileBlob = await imageCompression(file, {
+      maxWidthOrHeight: 1200,
+      initialQuality: 0.75,
+      maxSizeMB: 0.29,
+      useWebWorker: true,
+      fileType: "image/webp",
+    });
+
+    const baseName = file.name.replace(/\.[^.]+$/, "") || "hero";
+    const desktopFile = new File([desktopBlob], `${baseName}-desktop.webp`, {
+      type: "image/webp",
+      lastModified: Date.now(),
+    });
+    const mobileFile = new File([mobileBlob], `${baseName}-mobile.webp`, {
+      type: "image/webp",
+      lastModified: Date.now(),
+    });
+
+    const desktopSaved = file.size > 0 ? (((file.size - desktopFile.size) / file.size) * 100).toFixed(1) : "0.0";
+    const mobileSaved = file.size > 0 ? (((file.size - mobileFile.size) / file.size) * 100).toFixed(1) : "0.0";
+    const mobileOverTarget = mobileFile.size > 300 * 1024;
+    console.log(
+      `[hero] original ${(file.size / 1024).toFixed(1)}KB | desktop ${(desktopFile.size / 1024).toFixed(1)}KB (-${desktopSaved}%) | mobile ${(mobileFile.size / 1024).toFixed(1)}KB (-${mobileSaved}%)`
+    );
+    if (mobileOverTarget) {
+      console.warn(
+        `[hero] mobile image is ${(mobileFile.size / 1024).toFixed(1)}KB, above 300KB target`
+      );
+    }
+
+    setNewDesktopFile(desktopFile);
+    setNewMobileFile(mobileFile);
+    setNewDesktopPreview(URL.createObjectURL(desktopFile));
+    setNewMobilePreview(URL.createObjectURL(mobileFile));
+  }
+
   async function addSlide() {
-    if (!newImageUrl.trim()) {
+    if (!newDesktopFile || !newMobileFile) {
       setToast("أضف صورة أولاً / Add image first");
       return;
     }
+    const formData = new FormData();
+    formData.set("desktop_file", newDesktopFile);
+    formData.set("mobile_file", newMobileFile);
+    formData.set("title_ar", newTitleAr.trim());
+    formData.set("title_en", newTitleEn.trim());
+    formData.set("sort_order", String(newSortOrder));
+    formData.set("is_active", String(newActive));
+
     const res = await fetch("/api/admin/hero-slides", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        image_url: newImageUrl.trim(),
-        title_ar: newTitleAr.trim(),
-        title_en: newTitleEn.trim(),
-        sort_order: newSortOrder,
-        is_active: newActive,
-      }),
+      body: formData,
     });
     const data = (await res.json()) as { success?: boolean; error?: string };
     if (!res.ok || !data.success) {
       setToast(data.error ?? "Failed to add slide");
       return;
     }
-    setNewImageUrl("");
+    setNewDesktopFile(null);
+    setNewMobileFile(null);
+    setNewDesktopPreview("");
+    setNewMobilePreview("");
     setNewTitleAr("");
     setNewTitleEn("");
     setNewSortOrder(0);
@@ -83,7 +136,9 @@ export default function AdminHeroSlidesClient() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         id: slide.id,
-        image_url: slide.image_url,
+        image_url: slide.desktop_url ?? slide.image_url ?? "",
+        desktop_url: slide.desktop_url ?? slide.image_url ?? "",
+        mobile_url: slide.mobile_url ?? slide.image_url ?? "",
         title_ar: slide.title_ar ?? "",
         title_en: slide.title_en ?? "",
         sort_order: slide.sort_order,
@@ -139,23 +194,44 @@ export default function AdminHeroSlidesClient() {
         <p className="text-xs text-foreground/60">
           الرقم هو ترتيب الظهور في الهيرو (0 تظهر أولاً، ثم 1، ثم 2...)
         </p>
-        <FileUpload
-          accept="image/*"
-          folder="hero"
-          onUploadSuccess={(url) => setNewImageUrl(url)}
-          onUploadingChange={setUploading}
-          onUploadError={(msg) => setToast(msg)}
-          uploadLabel="رفع صورة الهيرو"
-          uploadingLabel="جارٍ الرفع..."
-        />
-        {newImageUrl && (
-          <img
-            src={newImageUrl}
-            alt=""
-            loading="lazy"
-            decoding="async"
-            className="h-28 w-full rounded-lg object-cover sm:w-72"
+        <label className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-primary/25 bg-primary/5 py-10 hover:border-primary/40">
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            disabled={uploading}
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              setUploading(true);
+              try {
+                await processHeroImage(file);
+              } catch (err) {
+                console.error(err);
+                setToast("فشل معالجة الصورة / Image processing failed");
+              } finally {
+                setUploading(false);
+                e.target.value = "";
+              }
+            }}
           />
+          <span className="text-sm text-primary">{uploading ? "جارٍ تجهيز النسخ..." : "رفع صورة الهيرو"}</span>
+        </label>
+        {(newDesktopPreview || newMobilePreview) && (
+          <div className="grid gap-3 sm:grid-cols-2">
+            {newDesktopPreview && (
+              <div>
+                <p className="mb-1 text-xs text-foreground/60">Desktop preview (1920w)</p>
+                <img src={newDesktopPreview} alt="" className="h-28 w-full rounded-lg object-cover" />
+              </div>
+            )}
+            {newMobilePreview && (
+              <div>
+                <p className="mb-1 text-xs text-foreground/60">Mobile preview (1200w)</p>
+                <img src={newMobilePreview} alt="" className="h-28 w-full rounded-lg object-cover" />
+              </div>
+            )}
+          </div>
         )}
         <div className="grid gap-3 sm:grid-cols-2">
           <input
@@ -209,7 +285,7 @@ export default function AdminHeroSlidesClient() {
             <div key={slide.id} className="rounded-xl border border-primary/10 bg-background p-4">
               <div className="grid gap-3 md:grid-cols-[220px_1fr]">
                 <img
-                  src={slide.image_url}
+                  src={slide.desktop_url || slide.image_url || slide.mobile_url || ""}
                   alt=""
                   loading={index === 0 ? "eager" : "lazy"}
                   decoding="async"

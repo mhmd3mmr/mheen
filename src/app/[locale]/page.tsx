@@ -10,7 +10,9 @@ type Props = {
 
 type HeroSlide = {
   id: string;
-  image_url: string;
+  image_url: string | null;
+  desktop_url: string | null;
+  mobile_url: string | null;
   title_ar: string | null;
   title_en: string | null;
   is_active: number;
@@ -33,7 +35,9 @@ export default async function HomePage({ params }: Props) {
       .prepare(
         `CREATE TABLE IF NOT EXISTS hero_slides (
           id TEXT NOT NULL PRIMARY KEY,
-          image_url TEXT NOT NULL,
+          image_url TEXT,
+          desktop_url TEXT,
+          mobile_url TEXT,
           title_ar TEXT,
           title_en TEXT,
           is_active INTEGER NOT NULL DEFAULT 1,
@@ -43,6 +47,22 @@ export default async function HomePage({ params }: Props) {
         )`
       )
       .run();
+    try {
+      await db.prepare(`ALTER TABLE hero_slides ADD COLUMN desktop_url TEXT`).run();
+    } catch {}
+    try {
+      await db.prepare(`ALTER TABLE hero_slides ADD COLUMN mobile_url TEXT`).run();
+    } catch {}
+    try {
+      await db
+        .prepare(
+          `UPDATE hero_slides
+           SET desktop_url = COALESCE(desktop_url, image_url),
+               mobile_url = COALESCE(mobile_url, image_url)
+           WHERE desktop_url IS NULL OR mobile_url IS NULL`
+        )
+        .run();
+    } catch {}
 
     const [martyrsRes, detaineesRes, storiesCountRes, latestRes, heroSlidesRes] =
       await Promise.all([
@@ -62,7 +82,7 @@ export default async function HomePage({ params }: Props) {
           .all(),
         db
           .prepare(
-            "SELECT id, image_url, title_ar, title_en, is_active, sort_order FROM hero_slides WHERE is_active = 1 ORDER BY sort_order ASC, created_at DESC"
+            "SELECT id, image_url, desktop_url, mobile_url, title_ar, title_en, is_active, sort_order FROM hero_slides WHERE is_active = 1 ORDER BY sort_order ASC, created_at DESC"
           )
           .all(),
       ]);
