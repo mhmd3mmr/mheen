@@ -159,15 +159,19 @@ export function HomepageClient({
                 alt="Mheen Hero"
                 fill
                 className={`object-cover transition-opacity duration-500 ease-in-out ${
-                  loadedSlides[slide.id] ? "opacity-100" : "opacity-0"
+                  loadedSlides[slide.id] ? "opacity-100" : "opacity-80"
                 }`}
                 sizes="100vw"
                 quality={100}
                 priority
                 loading="eager"
+                unoptimized
                 placeholder="blur"
                 blurDataURL={HERO_BLUR_DATA_URL}
                 onLoadingComplete={() =>
+                  setLoadedSlides((prev) => ({ ...prev, [slide.id]: true }))
+                }
+                onError={() =>
                   setLoadedSlides((prev) => ({ ...prev, [slide.id]: true }))
                 }
               />
