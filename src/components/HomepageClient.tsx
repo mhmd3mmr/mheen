@@ -264,7 +264,7 @@ export function HomepageClient({
                   <MapPin className="h-6 w-6 text-primary" />
                 </div>
                 <span className="text-sm font-semibold text-primary">
-                  {isAr ? "20 كم عن طريق M5" : "20 km from M5"}
+                  {isAr ? "20 كم عن طريق دمشق حمص الدولي M5" : "20 km from M5"}
                 </span>
               </div>
               <p className="text-lg leading-relaxed text-foreground/75">
@@ -287,8 +287,9 @@ export function HomepageClient({
               <div
                 className="aspect-[4/3] w-full bg-cover bg-center"
                 style={{
-                  backgroundImage: "url('/images/mheen-oasis.jpg')",
+                  backgroundImage: "url('/images/mheen-oasis-city.png')",
                   backgroundColor: "var(--color-primary)",
+                  backgroundPosition: "center 42%",
                 }}
               />
             </motion.div>
