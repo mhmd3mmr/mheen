@@ -54,7 +54,7 @@ export const metadata: Metadata = {
       "بلدة مهين واحة البادية السورية في ريف حمص. Mheen town, the oasis of the Syrian Badia in Homs countryside.",
     images: [
       {
-        url: "/images/mheen-oasis-city.png",
+        url: "/images/mheen-oasis-city.webp",
         width: 1200,
         height: 630,
         alt: "Mheen - Homs countryside, Syria",
@@ -66,7 +66,7 @@ export const metadata: Metadata = {
     title: "بلدة مهين | Mheen Town",
     description:
       "بلدة مهين واحة البادية السورية في ريف حمص. Mheen town, the oasis of the Syrian Badia in Homs countryside.",
-    images: ["/images/mheen-oasis-city.png"],
+    images: ["/images/mheen-oasis-city.webp"],
   },
   verification: {
     google: process.env.GOOGLE_SITE_VERIFICATION,

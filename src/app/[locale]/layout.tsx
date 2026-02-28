@@ -45,7 +45,7 @@ export async function generateMetadata({
       siteName: isAr ? "بلدة مهين" : "Mheen Town",
       images: [
         {
-          url: "https://miheen.com/images/mheen-oasis-city.png",
+          url: "https://miheen.com/images/mheen-oasis-city.webp",
           width: 1200,
           height: 630,
           alt: isAr ? "بلدة مهين - ريف حمص" : "Mheen town - Homs countryside",
@@ -56,7 +56,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title,
       description,
-      images: ["https://miheen.com/images/mheen-oasis-city.png"],
+      images: ["https://miheen.com/images/mheen-oasis-city.webp"],
     },
   };
 }

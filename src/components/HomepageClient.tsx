@@ -97,11 +97,9 @@ export function HomepageClient({
 
   useEffect(() => {
     if (slides.length === 0) return;
-    const nextIndex = (activeSlide + 1) % slides.length;
     setLoadedSlideIndexes((prev) => {
       const set = new Set(prev);
       set.add(activeSlide);
-      set.add(nextIndex);
       return Array.from(set);
     });
   }, [activeSlide, slides.length]);
@@ -333,7 +331,7 @@ export function HomepageClient({
               <div
                 className="aspect-[4/3] w-full bg-cover bg-center"
                 style={{
-                  backgroundImage: "url('/images/mheen-oasis-city.png')",
+                  backgroundImage: "url('/images/mheen-oasis-city.webp')",
                   backgroundColor: "var(--color-primary)",
                   backgroundPosition: "center 42%",
                 }}
