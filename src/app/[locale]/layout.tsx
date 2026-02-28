@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -10,6 +11,55 @@ type Props = {
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
 };
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const isAr = locale === "ar";
+
+  const title = isAr ? "بلدة مهين" : "Mheen Town";
+  const description = isAr
+    ? "بلدة مهين واحة البادية السورية في ريف حمص."
+    : "Mheen town, the oasis of the Syrian Badia in Homs countryside.";
+  const pageUrl = `https://miheen.com/${locale}`;
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: pageUrl,
+      languages: {
+        ar: "https://miheen.com/ar",
+        en: "https://miheen.com/en",
+      },
+    },
+    openGraph: {
+      type: "website",
+      url: pageUrl,
+      title,
+      description,
+      locale: isAr ? "ar_SY" : "en_US",
+      siteName: isAr ? "بلدة مهين" : "Mheen Town",
+      images: [
+        {
+          url: "https://miheen.com/images/mheen-oasis-city.png",
+          width: 1200,
+          height: 630,
+          alt: isAr ? "بلدة مهين - ريف حمص" : "Mheen town - Homs countryside",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ["https://miheen.com/images/mheen-oasis-city.png"],
+    },
+  };
+}
 
 /**
  * Locale layout: provides messages, Navbar, Footer, and SessionProvider.
