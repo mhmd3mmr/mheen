@@ -62,7 +62,6 @@ export function HomepageClient({
   const ArrowIcon = isAr ? ArrowLeft : ArrowRight;
   const [activeSlide, setActiveSlide] = useState(0);
   const [hideScrollCue, setHideScrollCue] = useState(false);
-  const [loadedSlideIndexes, setLoadedSlideIndexes] = useState<number[]>([0]);
 
   const slides = useMemo(() => {
     const fromAdmin = heroSlides
@@ -92,17 +91,7 @@ export function HomepageClient({
 
   useEffect(() => {
     setActiveSlide(0);
-    setLoadedSlideIndexes([0]);
   }, [slides.length]);
-
-  useEffect(() => {
-    if (slides.length === 0) return;
-    setLoadedSlideIndexes((prev) => {
-      const set = new Set(prev);
-      set.add(activeSlide);
-      return Array.from(set);
-    });
-  }, [activeSlide, slides.length]);
 
   useEffect(() => {
     const onScroll = () => {
@@ -168,7 +157,7 @@ export function HomepageClient({
               i === activeSlide ? "opacity-100" : "opacity-0"
             }`}
           >
-            {loadedSlideIndexes.includes(i) ? (
+            {i === 0 || i === activeSlide ? (
               <picture>
                 <source media="(max-width: 768px)" srcSet={slide.mobileImage} />
                 <source media="(min-width: 769px)" srcSet={slide.desktopImage} />
@@ -249,10 +238,7 @@ export function HomepageClient({
                   key={`dot-${i}`}
                   type="button"
                   aria-label={`slide-${i + 1}`}
-                  onClick={() => {
-                    setLoadedSlideIndexes((prev) => (prev.includes(i) ? prev : [...prev, i]));
-                    setActiveSlide(i);
-                  }}
+                  onClick={() => setActiveSlide(i)}
                   className={`h-2.5 rounded-full transition-all ${
                     i === activeSlide ? "w-7 bg-white" : "w-2.5 bg-white/55"
                   }`}

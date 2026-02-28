@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { Loader2, Upload } from "lucide-react";
+import imageCompression from "browser-image-compression";
 
 type FileUploadProps = {
   onUploadSuccess?: (url: string) => void;
@@ -36,66 +37,21 @@ export function FileUpload({
     onUploadingChange?.(v);
   };
 
-  async function canvasToWebPBlob(
-    canvas: HTMLCanvasElement,
-    quality: number
-  ): Promise<Blob | null> {
-    return new Promise<Blob | null>((resolve) => {
-      canvas.toBlob((blob) => resolve(blob), "image/webp", quality);
-    });
-  }
-
   async function convertImageToWebP(file: File): Promise<File> {
     if (!file.type.startsWith("image/") || file.type === "image/webp" || file.type === "image/svg+xml") {
       return file;
     }
-
-    const objectUrl = URL.createObjectURL(file);
     try {
-      const image = await new Promise<HTMLImageElement>((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => resolve(img);
-        img.onerror = () => reject(new Error("Image decode failed"));
-        img.src = objectUrl;
+      const maxSizeMB =
+        imageTargetMaxKB && imageTargetMaxKB > 0 ? imageTargetMaxKB / 1024 : undefined;
+
+      const webpBlob = await imageCompression(file, {
+        maxWidthOrHeight: imageMaxWidth,
+        initialQuality: imageWebpQuality,
+        maxSizeMB,
+        useWebWorker: true,
+        fileType: "image/webp",
       });
-
-      const canvas = document.createElement("canvas");
-      const originalWidth = image.naturalWidth || image.width;
-      const originalHeight = image.naturalHeight || image.height;
-      const maxSide = Math.max(originalWidth, originalHeight);
-      const scale = maxSide > imageMaxWidth ? imageMaxWidth / maxSide : 1;
-      canvas.width = Math.max(1, Math.round(originalWidth * scale));
-      canvas.height = Math.max(1, Math.round(originalHeight * scale));
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return file;
-      ctx.drawImage(image, 0, 0);
-
-      let quality = imageWebpQuality;
-      let webpBlob = await canvasToWebPBlob(canvas, quality);
-      if (!webpBlob) return file;
-
-      const targetBytes =
-        imageTargetMaxKB && imageTargetMaxKB > 0 ? imageTargetMaxKB * 1024 : 0;
-      // If a strict target is provided, tighten quality first, then downscale.
-      if (targetBytes > 0) {
-        while (webpBlob.size > targetBytes && quality > 0.45) {
-          quality = Math.max(0.45, quality - 0.07);
-          const retryBlob = await canvasToWebPBlob(canvas, quality);
-          if (!retryBlob) break;
-          webpBlob = retryBlob;
-        }
-
-        while (webpBlob.size > targetBytes && canvas.width > 700 && canvas.height > 700) {
-          canvas.width = Math.round(canvas.width * 0.88);
-          canvas.height = Math.round(canvas.height * 0.88);
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-          const retryBlob = await canvasToWebPBlob(canvas, quality);
-          if (!retryBlob) break;
-          webpBlob = retryBlob;
-        }
-      }
-
       const baseName = file.name.replace(/\.[^.]+$/, "") || "upload";
       const webpFile = new File([webpBlob], `${baseName}.webp`, {
         type: "image/webp",
@@ -105,15 +61,13 @@ export function FileUpload({
       const savedBytes = file.size - webpFile.size;
       const savedPercent = file.size > 0 ? ((savedBytes / file.size) * 100).toFixed(1) : "0.0";
       console.log(
-        `[upload:webp] ${file.name} -> ${webpFile.name} | ${(file.size / 1024).toFixed(1)}KB -> ${(webpFile.size / 1024).toFixed(1)}KB | saved ${savedPercent}% | quality ${quality.toFixed(2)}`
+        `[upload:webp] ${file.name} -> ${webpFile.name} | ${(file.size / 1024).toFixed(1)}KB -> ${(webpFile.size / 1024).toFixed(1)}KB | saved ${savedPercent}% | q=${imageWebpQuality}`
       );
 
       return webpFile;
     } catch (err) {
       console.warn("[upload:webp] conversion failed, using original file", err);
       return file;
-    } finally {
-      URL.revokeObjectURL(objectUrl);
     }
   }
 

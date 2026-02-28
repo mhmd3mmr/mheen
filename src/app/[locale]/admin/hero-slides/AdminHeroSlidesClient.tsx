@@ -54,7 +54,7 @@ export default function AdminHeroSlidesClient() {
   async function processHeroImage(file: File) {
     const desktopBlob = await imageCompression(file, {
       maxWidthOrHeight: 1920,
-      initialQuality: 0.8,
+      initialQuality: 0.6,
       maxSizeMB: 0.9,
       useWebWorker: true,
       fileType: "image/webp",
