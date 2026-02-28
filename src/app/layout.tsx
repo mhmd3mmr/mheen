@@ -16,11 +16,11 @@ const qomra = localFont({
 export const metadata: Metadata = {
   metadataBase: new URL("https://miheen.com"),
   title: {
-    default: "Mheen Memory Archive | أرشيف ذاكرة مهين",
-    template: "%s | Mheen Memory Archive",
+    default: "بلدة مهين | Mheen Town",
+    template: "%s | بلدة مهين",
   },
   description:
-    "Mheen Memory Archive documents the history, people, martyrs, detainees, and stories of Mheen in Homs countryside, Syria. أرشيف يوثق مهين وريف حمص وسوريا.",
+    "بلدة مهين واحة البادية السورية في ريف حمص. Mheen town, the oasis of the Syrian Badia in Homs countryside.",
   keywords: [
     "Mheen",
     "Maheen",
@@ -48,10 +48,10 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     url: "https://miheen.com",
-    siteName: "Mheen Memory Archive",
-    title: "Mheen Memory Archive | أرشيف ذاكرة مهين",
+    siteName: "بلدة مهين | Mheen Town",
+    title: "بلدة مهين | Mheen Town",
     description:
-      "Historical documentation and community memory archive for Mheen, Homs countryside, Syria.",
+      "بلدة مهين واحة البادية السورية في ريف حمص. Mheen town, the oasis of the Syrian Badia in Homs countryside.",
     images: [
       {
         url: "/images/mheen-oasis-city.png",
@@ -63,9 +63,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Mheen Memory Archive | أرشيف ذاكرة مهين",
+    title: "بلدة مهين | Mheen Town",
     description:
-      "Historical documentation and community memory archive for Mheen, Homs countryside, Syria.",
+      "بلدة مهين واحة البادية السورية في ريف حمص. Mheen town, the oasis of the Syrian Badia in Homs countryside.",
     images: ["/images/mheen-oasis-city.png"],
   },
   verification: {
