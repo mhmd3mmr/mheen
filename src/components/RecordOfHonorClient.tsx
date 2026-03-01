@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { motion } from "framer-motion";
@@ -270,6 +270,20 @@ function RecordCard({
     .filter(Boolean);
 
   const allTags = [...autoTags, ...manualTags];
+  const [shareOpen, setShareOpen] = useState(false);
+  const shareRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!shareOpen) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (shareRef.current && !shareRef.current.contains(e.target as Node)) {
+        setShareOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [shareOpen]);
+
   async function handleGeneralShare() {
     try {
       if (navigator.share) {
@@ -321,7 +335,63 @@ function RecordCard({
       </div>
 
       <div className="space-y-2 px-4 py-3">
-        <h3 className="font-qomra text-lg font-semibold text-foreground">{name}</h3>
+        <div className="flex items-center justify-between gap-2">
+          <h3 className="font-qomra text-lg font-semibold text-foreground min-w-0 flex-1 truncate">{name}</h3>
+          <div className="relative shrink-0" ref={shareRef}>
+            <button
+              type="button"
+              onClick={() => setShareOpen((o) => !o)}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-primary/15 bg-background px-2.5 py-1.5 text-xs font-medium text-foreground/80 shadow-sm hover:bg-primary/5"
+              aria-label={t("shareGeneral")}
+              aria-expanded={shareOpen}
+              aria-haspopup="true"
+            >
+              <Share2 className="h-4 w-4" />
+              <span>{t("shareGeneral")}</span>
+            </button>
+            {shareOpen && (
+              <div
+                className="absolute end-0 top-full z-20 mt-1 min-w-[10rem] rounded-lg border border-primary/15 bg-background py-1 shadow-lg"
+                role="menu"
+              >
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex w-full items-center gap-2 px-3 py-2 text-start text-sm text-foreground/80 hover:bg-primary/5"
+                  role="menuitem"
+                  onClick={() => setShareOpen(false)}
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  {t("shareWhatsapp")}
+                </a>
+                <a
+                  href={facebookUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex w-full items-center gap-2 px-3 py-2 text-start text-sm text-foreground/80 hover:bg-primary/5"
+                  role="menuitem"
+                  onClick={() => setShareOpen(false)}
+                >
+                  <Facebook className="h-4 w-4" />
+                  {t("shareFacebook")}
+                </a>
+                <button
+                  type="button"
+                  className="flex w-full items-center gap-2 px-3 py-2 text-start text-sm text-foreground/80 hover:bg-primary/5"
+                  role="menuitem"
+                  onClick={() => {
+                    setShareOpen(false);
+                    handleGeneralShare();
+                  }}
+                >
+                  <Share2 className="h-4 w-4" />
+                  {t("shareGeneral")}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
 
         {isMartyr ? (
           <>
@@ -361,41 +431,6 @@ function RecordCard({
             ))}
           </div>
         )}
-
-        <div className="mt-3 border-t border-primary/10 pt-2">
-          <p className="mb-1 text-xs font-medium text-foreground/60">{t("shareStory")}</p>
-          <div className="flex items-center gap-2">
-            <a
-              href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 rounded-md border border-primary/15 px-2 py-1 text-xs text-foreground/70 hover:bg-primary/5"
-              aria-label={t("shareWhatsapp")}
-            >
-              <MessageCircle className="h-3.5 w-3.5" />
-              {t("shareWhatsapp")}
-            </a>
-            <a
-              href={facebookUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 rounded-md border border-primary/15 px-2 py-1 text-xs text-foreground/70 hover:bg-primary/5"
-              aria-label={t("shareFacebook")}
-            >
-              <Facebook className="h-3.5 w-3.5" />
-              {t("shareFacebook")}
-            </a>
-            <button
-              type="button"
-              onClick={handleGeneralShare}
-              className="inline-flex items-center gap-1 rounded-md border border-primary/15 px-2 py-1 text-xs text-foreground/70 hover:bg-primary/5"
-              aria-label={t("shareGeneral")}
-            >
-              <Share2 className="h-3.5 w-3.5" />
-              {t("shareGeneral")}
-            </button>
-          </div>
-        </div>
       </div>
     </motion.article>
   );
