@@ -55,7 +55,9 @@ export async function POST(request: Request) {
         await tryDeleteImage(row?.image_url);
       }
       revalidatePath("/[locale]/admin/martyrs", "page");
+      revalidatePath("/[locale]/admin/record-of-honor", "page");
       revalidatePath("/[locale]/martyrs", "page");
+      revalidatePath("/[locale]/record-of-honor", "page");
     } else {
       if (op === "approve") {
         await db.prepare(`UPDATE detainees SET status = 'approved' WHERE id = ?`).bind(id).run();
@@ -68,7 +70,9 @@ export async function POST(request: Request) {
         await tryDeleteImage(row?.image_url);
       }
       revalidatePath("/[locale]/admin/detainees", "page");
+      revalidatePath("/[locale]/admin/record-of-honor", "page");
       revalidatePath("/[locale]/detainees", "page");
+      revalidatePath("/[locale]/record-of-honor", "page");
     }
 
     return NextResponse.redirect(redirectTo, { status: 303 });

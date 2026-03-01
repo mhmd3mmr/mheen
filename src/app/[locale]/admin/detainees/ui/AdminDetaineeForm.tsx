@@ -4,7 +4,6 @@ import { useState, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { FileUpload } from "@/components/FileUpload";
-import { addDetainee } from "@/app/actions/adminActions";
 
 export function AdminDetaineeForm() {
   const tAdmin = useTranslations("Admin");
@@ -27,16 +26,18 @@ export function AdminDetaineeForm() {
     try {
       const formData = new FormData(e.currentTarget);
       if (imageUrl) formData.set("image_url", imageUrl);
-      const result = await addDetainee(formData);
+      formData.set("desired_status", "approved");
+      const response = await fetch("/api/detainees", { method: "POST", body: formData });
+      const result = (await response.json()) as { success?: boolean; error?: string };
 
-      if (result.success) {
+      if (response.ok && result.success) {
         setSuccessMsg("تمت الإضافة بنجاح / Added successfully");
         formRef.current?.reset();
         setImageUrl("");
         router.refresh();
         setTimeout(() => setSuccessMsg(""), 4000);
       } else {
-        setErrorMsg(result.error);
+        setErrorMsg(result.error ?? "Failed to add detainee");
       }
     } catch {
       setErrorMsg("حدث خطأ غير متوقع / Unexpected error");
@@ -83,19 +84,12 @@ export function AdminDetaineeForm() {
       </div>
       <div className="space-y-1 md:col-span-2 lg:col-span-3">
         <label className="text-xs font-medium text-foreground/80">
-          الحالة (عربي / إنجليزي)
+          الوسوم (Tags)
         </label>
-        <textarea
-          name="status_ar"
-          rows={2}
+        <input
+          name="tags"
+          placeholder="مفقود, تحت التعذيب"
           className="w-full rounded-lg border border-primary/20 bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-          placeholder="وصف الحالة بالعربية..."
-        />
-        <textarea
-          name="status_en"
-          rows={2}
-          className="mt-2 w-full rounded-lg border border-primary/20 bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-          placeholder="Status in English..."
         />
       </div>
 
@@ -110,6 +104,10 @@ export function AdminDetaineeForm() {
           onUploadError={setUploadError}
           uploadLabel="اختر صورة / Choose photo"
           uploadingLabel="جارٍ الرفع..."
+          folder="records"
+          imageMaxWidth={800}
+          imageWebpQuality={0.8}
+          imageAspectRatio={3 / 4}
         />
         {uploadError && (
           <p className="mt-1 text-xs text-red-600">{uploadError}</p>

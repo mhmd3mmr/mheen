@@ -14,6 +14,7 @@ async function ensureDetaineesTable() {
         arrest_date TEXT,
         status_ar TEXT,
         status_en TEXT,
+        tags TEXT,
         image_url TEXT,
         status TEXT NOT NULL DEFAULT 'approved',
         submitted_by TEXT
@@ -35,6 +36,9 @@ async function ensureDetaineesTable() {
     await db.prepare(`ALTER TABLE detainees ADD COLUMN image_url TEXT`).run();
   } catch {}
   try {
+    await db.prepare(`ALTER TABLE detainees ADD COLUMN tags TEXT`).run();
+  } catch {}
+  try {
     await db
       .prepare(`ALTER TABLE detainees ADD COLUMN status TEXT NOT NULL DEFAULT 'approved'`)
       .run();
@@ -54,8 +58,10 @@ export async function POST(request: Request) {
     const arrestDate = String(formData.get("arrest_date") ?? "").trim() || null;
     const statusAr = String(formData.get("status_ar") ?? "").trim() || null;
     const statusEn = String(formData.get("status_en") ?? "").trim() || null;
+    const tags = String(formData.get("tags") ?? "").trim() || null;
     const imageUrl = String(formData.get("image_url") ?? "").trim() || null;
     const submittedBy = String(formData.get("submitted_by") ?? "").trim() || null;
+    const requestedStatus = String(formData.get("desired_status") ?? "").trim();
 
     if (!nameAr) {
       return NextResponse.json(
@@ -66,13 +72,33 @@ export async function POST(request: Request) {
 
     const db = await ensureDetaineesTable();
     const id = crypto.randomUUID();
+    let status = "pending";
+
+    if (requestedStatus === "approved") {
+      // Admin-only shortcut used by admin panel additions.
+      const { auth } = await import("@/auth");
+      const session = await auth();
+      const role = (session?.user as { role?: string } | null)?.role;
+      if (role === "admin") status = "approved";
+    }
 
     await db
       .prepare(
-        `INSERT INTO detainees (id, name_ar, name_en, arrest_date, status_ar, status_en, image_url, status, submitted_by)
-         VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?)`
+        `INSERT INTO detainees (id, name_ar, name_en, arrest_date, status_ar, status_en, tags, image_url, status, submitted_by)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
       )
-      .bind(id, nameAr, nameEn || nameAr, arrestDate, statusAr, statusEn, imageUrl, submittedBy)
+      .bind(
+        id,
+        nameAr,
+        nameEn || nameAr,
+        arrestDate,
+        statusAr,
+        statusEn,
+        tags,
+        imageUrl,
+        status,
+        submittedBy
+      )
       .run();
 
     return NextResponse.json({ success: true });

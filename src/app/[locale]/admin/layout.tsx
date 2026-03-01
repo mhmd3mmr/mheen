@@ -8,7 +8,6 @@ import { FadeUp } from "@/components/FadeUp";
 import {
   LayoutDashboard,
   Users,
-  UserMinus,
   BookOpen,
   ShieldOff,
   UserCog,
@@ -23,8 +22,7 @@ type Props = {
 
 const SIDEBAR_ITEMS = [
   { key: "dashboard", href: "/admin", icon: LayoutDashboard, adminOnly: false },
-  { key: "martyrs", href: "/admin/martyrs", icon: Users, adminOnly: false },
-  { key: "detainees", href: "/admin/detainees", icon: UserMinus, adminOnly: false },
+  { key: "honorRecords", href: "/admin/record-of-honor", icon: Users, adminOnly: false },
   { key: "stories", href: "/admin/stories", icon: BookOpen, adminOnly: false },
   { key: "communityPhotos", href: "/admin/community-photos", icon: Images, adminOnly: false },
   { key: "heroSlides", href: "/admin/hero-slides", icon: ImagePlus, adminOnly: true },

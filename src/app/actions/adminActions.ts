@@ -41,8 +41,9 @@ export type MartyrRow = {
   name_en: string;
   birth_date: string | null;
   death_date: string | null;
-  bio_ar: string | null;
-  bio_en: string | null;
+  martyrdom_method: string | null;
+  martyrdom_details: string | null;
+  tags: string | null;
   image_url: string | null;
   status: string;
   submitted_by: string | null;
@@ -54,7 +55,7 @@ export async function getMartyrs(): Promise<MartyrRow[]> {
     const db = await getDB();
     const { results } = await db
       .prepare(
-        `SELECT id, name_ar, name_en, birth_date, death_date, bio_ar, bio_en, image_url, status, submitted_by
+        `SELECT id, name_ar, name_en, birth_date, death_date, martyrdom_method, martyrdom_details, tags, image_url, status, submitted_by
          FROM martyrs
          ORDER BY status ASC, death_date DESC, name_en ASC`
       )
@@ -72,7 +73,7 @@ export async function getPendingMartyrs(): Promise<MartyrRow[]> {
     const db = await getDB();
     const { results } = await db
       .prepare(
-        `SELECT id, name_ar, name_en, birth_date, death_date, bio_ar, bio_en, image_url, status, submitted_by
+        `SELECT id, name_ar, name_en, birth_date, death_date, martyrdom_method, martyrdom_details, tags, image_url, status, submitted_by
          FROM martyrs WHERE status = 'pending'
          ORDER BY name_en ASC`
       )
@@ -90,6 +91,7 @@ export async function approveMartyr(formData: FormData) {
   if (!id) throw new Error("Martyr id is required");
   await db.prepare(`UPDATE martyrs SET status = 'approved' WHERE id = ?`).bind(id).run();
   revalidatePath("/[locale]/admin/martyrs", "page");
+  revalidatePath("/[locale]/admin/record-of-honor", "page");
   revalidatePath("/[locale]/martyrs", "page");
 }
 
@@ -105,8 +107,6 @@ export async function addMartyr(
     const nameEn = String(formData.get("name_en") ?? "").trim();
     const birthDate = String(formData.get("birth_date") ?? "").trim() || null;
     const deathDate = String(formData.get("death_date") ?? "").trim() || null;
-    const bioAr = String(formData.get("bio_ar") ?? "").trim() || null;
-    const bioEn = String(formData.get("bio_en") ?? "").trim() || null;
     const imageUrl = String(formData.get("image_url") ?? "").trim() || null;
 
     if (!nameAr || !nameEn) {
@@ -116,13 +116,14 @@ export async function addMartyr(
     await db
       .prepare(
         `INSERT INTO martyrs
-         (id, name_ar, name_en, birth_date, death_date, bio_ar, bio_en, image_url, status)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'approved')`
+         (id, name_ar, name_en, birth_date, death_date, image_url, status)
+         VALUES (?, ?, ?, ?, ?, ?, 'approved')`
       )
-      .bind(id, nameAr, nameEn, birthDate, deathDate, bioAr, bioEn, imageUrl)
+      .bind(id, nameAr, nameEn, birthDate, deathDate, imageUrl)
       .run();
 
     revalidatePath("/[locale]/admin/martyrs", "page");
+    revalidatePath("/[locale]/admin/record-of-honor", "page");
     revalidatePath("/[locale]/martyrs", "page");
     return { success: true };
   } catch (err) {
@@ -145,6 +146,7 @@ export async function deleteMartyr(formData: FormData) {
   await db.prepare(`DELETE FROM martyrs WHERE id = ?`).bind(id).run();
   await tryDeleteImageFromR2(row?.image_url, "deleteMartyr");
   revalidatePath("/[locale]/admin/martyrs", "page");
+  revalidatePath("/[locale]/admin/record-of-honor", "page");
   revalidatePath("/[locale]/martyrs", "page");
 }
 
@@ -159,6 +161,7 @@ export type DetaineeRow = {
   arrest_date: string | null;
   status_ar: string | null;
   status_en: string | null;
+  tags: string | null;
   image_url: string | null;
   status: string;
   submitted_by: string | null;
@@ -170,7 +173,7 @@ export async function getDetainees(): Promise<DetaineeRow[]> {
     const db = await getDB();
     const { results } = await db
       .prepare(
-        `SELECT id, name_ar, name_en, arrest_date, status_ar, status_en, image_url, status, submitted_by
+        `SELECT id, name_ar, name_en, arrest_date, status_ar, status_en, tags, image_url, status, submitted_by
          FROM detainees
          ORDER BY status ASC, arrest_date DESC, name_en ASC`
       )
@@ -188,7 +191,7 @@ export async function getPendingDetainees(): Promise<DetaineeRow[]> {
     const db = await getDB();
     const { results } = await db
       .prepare(
-        `SELECT id, name_ar, name_en, arrest_date, status_ar, status_en, image_url, status, submitted_by
+        `SELECT id, name_ar, name_en, arrest_date, status_ar, status_en, tags, image_url, status, submitted_by
          FROM detainees WHERE status = 'pending'
          ORDER BY name_en ASC`
       )
@@ -206,6 +209,7 @@ export async function approveDetainee(formData: FormData) {
   if (!id) throw new Error("Detainee id is required");
   await db.prepare(`UPDATE detainees SET status = 'approved' WHERE id = ?`).bind(id).run();
   revalidatePath("/[locale]/admin/detainees", "page");
+  revalidatePath("/[locale]/admin/record-of-honor", "page");
   revalidatePath("/[locale]/detainees", "page");
 }
 
@@ -238,6 +242,7 @@ export async function addDetainee(
       .run();
 
     revalidatePath("/[locale]/admin/detainees", "page");
+    revalidatePath("/[locale]/admin/record-of-honor", "page");
     revalidatePath("/[locale]/detainees", "page");
     return { success: true };
   } catch (err) {
@@ -260,6 +265,7 @@ export async function deleteDetainee(formData: FormData) {
   await db.prepare(`DELETE FROM detainees WHERE id = ?`).bind(id).run();
   await tryDeleteImageFromR2(row?.image_url, "deleteDetainee");
   revalidatePath("/[locale]/admin/detainees", "page");
+  revalidatePath("/[locale]/admin/record-of-honor", "page");
   revalidatePath("/[locale]/detainees", "page");
 }
 
@@ -270,7 +276,15 @@ export async function deleteDetainee(formData: FormData) {
 export type StoryRow = {
   id: string;
   author_name: string;
+  author_ar: string | null;
+  author_en: string | null;
+  title_ar: string | null;
+  title_en: string | null;
+  category: string | null;
   content: string;
+  content_ar: string | null;
+  content_en: string | null;
+  tags: string | null;
   image_url: string | null;
   status: string;
   created_at: number;
@@ -280,9 +294,34 @@ export async function getAllStories(): Promise<StoryRow[]> {
   await assertAdmin();
   try {
     const db = await getDB();
+    try {
+      await db.prepare(`ALTER TABLE stories ADD COLUMN title_ar TEXT`).run();
+    } catch {}
+    try {
+      await db.prepare(`ALTER TABLE stories ADD COLUMN title_en TEXT`).run();
+    } catch {}
+    try {
+      await db.prepare(`ALTER TABLE stories ADD COLUMN category TEXT`).run();
+    } catch {}
+    try {
+      await db.prepare(`ALTER TABLE stories ADD COLUMN author_ar TEXT`).run();
+    } catch {}
+    try {
+      await db.prepare(`ALTER TABLE stories ADD COLUMN author_en TEXT`).run();
+    } catch {}
+    try {
+      await db.prepare(`ALTER TABLE stories ADD COLUMN content_ar TEXT`).run();
+    } catch {}
+    try {
+      await db.prepare(`ALTER TABLE stories ADD COLUMN content_en TEXT`).run();
+    } catch {}
+    try {
+      await db.prepare(`ALTER TABLE stories ADD COLUMN tags TEXT`).run();
+    } catch {}
     const { results } = await db
       .prepare(
-        `SELECT id, author_name, content, image_url, status, created_at
+        `SELECT id, author_name, author_ar, author_en, title_ar, title_en, category,
+                content, content_ar, content_en, tags, image_url, status, created_at
          FROM stories
          ORDER BY created_at DESC`
       )
@@ -300,7 +339,8 @@ export async function getPendingStories(): Promise<StoryRow[]> {
     const db = await getDB();
     const { results } = await db
       .prepare(
-        `SELECT id, author_name, content, image_url, status, created_at
+        `SELECT id, author_name, author_ar, author_en, title_ar, title_en, category,
+                content, content_ar, content_en, tags, image_url, status, created_at
          FROM stories
          WHERE status = 'pending'
          ORDER BY created_at DESC`

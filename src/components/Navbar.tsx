@@ -11,8 +11,7 @@ const NAV_ITEMS = [
   { key: "home", href: "/" },
   { key: "aboutMheen", href: "/about-mheen" },
   { key: "community", href: "/community" },
-  { key: "ourMartyrs", href: "/martyrs" },
-  { key: "detainees", href: "/detainees" },
+  { key: "recordOfHonor", href: "/record-of-honor" },
   { key: "stories", href: "/stories" },
 ] as const;
 

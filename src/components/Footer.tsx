@@ -7,8 +7,7 @@ import { Plus, Dot } from "lucide-react";
 const QUICK_LINKS = [
   { key: "home" as const, href: "/" as const },
   { key: "about" as const, href: "/about-mheen" as const },
-  { key: "martyrs" as const, href: "/martyrs" as const },
-  { key: "detainees" as const, href: "/detainees" as const },
+  { key: "recordOfHonor" as const, href: "/record-of-honor" as const },
   { key: "stories" as const, href: "/stories" as const },
   { key: "submit" as const, href: "/submit" as const },
 ];

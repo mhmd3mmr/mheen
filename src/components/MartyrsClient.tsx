@@ -12,8 +12,6 @@ type Martyr = {
   name_en: string;
   birth_date: string | null;
   death_date: string | null;
-  bio_ar: string | null;
-  bio_en: string | null;
   image_url: string | null;
 };
 
@@ -239,10 +237,6 @@ export function MartyrsClient({ initialMartyrs, locale }: Props) {
                     </div>
                   </div>
                   <div>
-                    <label className="mb-1 block text-xs font-medium text-foreground/70">{t("bioAr")}</label>
-                    <textarea name="bio_ar" rows={2} className="w-full rounded-lg border border-primary/15 bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-                  </div>
-                  <div>
                     <label className="mb-1 block text-xs font-medium text-foreground/70">{t("photo")}</label>
                     <FileUpload
                       accept="image/*"
@@ -378,11 +372,6 @@ function MartyrCard({
               {bornLabel}: {m.birth_date}
             </span>
           </div>
-        )}
-        {(m.bio_ar || m.bio_en) && (
-          <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-foreground/70">
-            {isAr ? (m.bio_ar || m.bio_en) : (m.bio_en || m.bio_ar)}
-          </p>
         )}
       </div>
     </motion.article>

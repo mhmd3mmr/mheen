@@ -5,11 +5,10 @@ export const runtime = 'edge';
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { SubmitForm } from "./SubmitForm";
-import { SubmitMartyrForm } from "./SubmitMartyrForm";
-import { SubmitDetaineeForm } from "./SubmitDetaineeForm";
-import { BookOpen, Heart, ShieldAlert } from "lucide-react";
+import { SubmitHonorForm } from "./SubmitHonorForm";
+import { BookOpen, ShieldAlert } from "lucide-react";
 
-const TABS = ["story", "martyr", "detainee"] as const;
+const TABS = ["story", "honor"] as const;
 type Tab = (typeof TABS)[number];
 
 export default function SubmitPage() {
@@ -19,8 +18,7 @@ export default function SubmitPage() {
 
   const tabConfig = {
     story: { label: t("tabStory"), icon: BookOpen },
-    martyr: { label: t("tabMartyr"), icon: Heart },
-    detainee: { label: t("tabDetainee"), icon: ShieldAlert },
+    honor: { label: t("tabHonorRecord"), icon: ShieldAlert },
   };
 
   function handleTabChange(tab: Tab) {
@@ -61,8 +59,7 @@ export default function SubmitPage() {
         {/* Forms */}
         <div className="mt-6">
           {activeTab === "story" && <SubmitForm onError={setErrorMessage} />}
-          {activeTab === "martyr" && <SubmitMartyrForm onError={setErrorMessage} />}
-          {activeTab === "detainee" && <SubmitDetaineeForm onError={setErrorMessage} />}
+          {activeTab === "honor" && <SubmitHonorForm onError={setErrorMessage} />}
         </div>
 
         {errorMessage && (

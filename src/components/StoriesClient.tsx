@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { motion } from "framer-motion";
 import {
@@ -11,12 +12,22 @@ import {
   Calendar,
   X,
   PenLine,
+  Share2,
+  Clock3,
 } from "lucide-react";
 
 type StoryRow = {
   id: string;
-  author_name: string;
-  content: string;
+  author_name?: string | null;
+  author_ar?: string | null;
+  author_en?: string | null;
+  title_ar?: string | null;
+  title_en?: string | null;
+  category?: "history" | "memories" | "figures" | "other" | null;
+  content?: string | null;
+  content_ar?: string | null;
+  content_en?: string | null;
+  tags?: string | null;
   image_url: string | null;
   created_at: number;
 };
@@ -24,7 +35,11 @@ type StoryRow = {
 type Props = {
   initialStories: StoryRow[];
   locale: string;
+  initialHasMore: boolean;
 };
+
+const BLUR_DATA_URL =
+  "data:image/webp;base64,UklGRjYAAABXRUJQVlA4ICoAAACwAQCdASoQABAAPm02mUmkIyKhIggAgA2JaW7hdAAP7v2mAA==";
 
 const AR_MONTHS = [
   "يناير",
@@ -81,13 +96,78 @@ function isImage(url: string | null) {
   return (
     url.startsWith("data:image") ||
     url.includes("/api/upload?key=") ||
-    /\.(jpe?g|png|gif|webp)(\?|$)/i.test(url)
+    /\.(jpe?g|png|gif|webp|avif)(\?|$)/i.test(url)
   );
 }
 
-function StoryCard({ story, locale, index }: { story: StoryRow; locale: string; index: number }) {
+function normalizeImageSrc(url: string) {
+  try {
+    const parsed = new URL(url);
+    if (
+      (parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1") &&
+      parsed.pathname.startsWith("/api/upload")
+    ) {
+      return `${parsed.pathname}${parsed.search}`;
+    }
+    return url;
+  } catch {
+    return url;
+  }
+}
+
+function StoryCard({
+  story,
+  locale,
+  index,
+  onReadMore,
+}: {
+  story: StoryRow;
+  locale: string;
+  index: number;
+  onReadMore: () => void;
+}) {
   const t = useTranslations("pages.stories");
   const dateStr = formatStoryDate(story.created_at, locale);
+  const isAr = locale === "ar";
+  const title = isAr ? story.title_ar || story.title_en || "" : story.title_en || story.title_ar || "";
+  const author = isAr
+    ? story.author_ar || story.author_en || story.author_name || ""
+    : story.author_en || story.author_ar || story.author_name || "";
+  const excerpt = isAr
+    ? story.content_ar || story.content_en || story.content || ""
+    : story.content_en || story.content_ar || story.content || "";
+  const fallbackTitle = t("untitledStory");
+  const storyTitle = title || fallbackTitle;
+  const words = excerpt.trim().split(/\s+/).filter(Boolean).length;
+  const minutes = Math.max(1, Math.ceil(words / 200));
+  const minutesLabel = isAr ? toArabicDigits(String(minutes)) : String(minutes);
+  const readingTime = t("readingTime", { minutes: minutesLabel });
+  const categoryMap = {
+    history: t("categoryHistory"),
+    memories: t("categoryMemories"),
+    figures: t("categoryFigures"),
+    other: t("categoryOther"),
+  } as const;
+  const categoryLabel = categoryMap[(story.category ?? "other") as keyof typeof categoryMap];
+
+  async function handleShare() {
+    const shareUrl = `https://miheen.com/${locale}/stories#story-${story.id}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: storyTitle,
+          text: excerpt.slice(0, 140),
+          url: shareUrl,
+        });
+        return;
+      }
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+      }
+    } catch {
+      // Ignore cancelled shares and clipboard permission errors.
+    }
+  }
 
   return (
     <motion.article
@@ -95,15 +175,23 @@ function StoryCard({ story, locale, index }: { story: StoryRow; locale: string; 
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.4, delay: index * 0.08 }}
-      className="group flex flex-col overflow-hidden rounded-xl bg-background shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+      id={`story-${story.id}`}
+      className="group flex h-[460px] flex-col overflow-hidden rounded-xl bg-background shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
     >
       {/* Image Area */}
-      <div className="relative h-56 w-full overflow-hidden bg-primary/5">
+      <div className="relative aspect-[3/4] w-full overflow-hidden bg-primary/5">
         {story.image_url && isImage(story.image_url) ? (
-          <img
-            src={story.image_url}
+          <Image
+            src={normalizeImageSrc(story.image_url)}
             alt=""
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            quality={85}
+            priority={index < 6}
+            placeholder="blur"
+            blurDataURL={BLUR_DATA_URL}
+            style={{ objectFit: "cover" }}
+            className="transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
@@ -113,6 +201,9 @@ function StoryCard({ story, locale, index }: { story: StoryRow; locale: string; 
 
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+        <div className="absolute top-2 start-2 rounded-full bg-black/45 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur-sm">
+          {categoryLabel}
+        </div>
 
         {/* Text over image */}
         <div className="absolute inset-x-0 bottom-0 p-5">
@@ -121,45 +212,89 @@ function StoryCard({ story, locale, index }: { story: StoryRow; locale: string; 
               <User className="h-4 w-4 text-white" />
             </div>
             <h3 className="text-base font-bold text-white">
-              {story.author_name}
+              {author}
             </h3>
           </div>
           <div className="mt-2 flex items-center gap-1.5 text-xs text-gray-300">
             <Calendar className="h-3 w-3" />
-            {dateStr}
+            <span>{dateStr}</span>
+            <span>{readingTime}</span>
           </div>
         </div>
       </div>
 
       {/* Text Area */}
       <div className="flex flex-1 flex-col p-6">
-        <p className="flex-1 whitespace-pre-wrap text-sm leading-relaxed text-foreground/70 line-clamp-4">
-          {story.content}
+        <h3 className="line-clamp-1 text-lg font-bold text-foreground">{storyTitle}</h3>
+        <p className="mt-2 flex-1 whitespace-pre-wrap text-sm leading-relaxed text-foreground/70 line-clamp-2">
+          {excerpt}
         </p>
-        <Link
-          href={`/stories`}
-          className="mt-5 block w-full rounded-lg bg-primary px-4 py-2.5 text-center text-sm font-medium text-white transition-colors hover:bg-primary/90"
-        >
-          {t("readMore")}
-        </Link>
+        <div className="mt-4 flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onReadMore}
+            className="inline-flex rounded-lg bg-primary px-4 py-2.5 text-center text-sm font-medium text-white transition-colors hover:bg-primary/90"
+          >
+            {t("readMore")}
+          </button>
+          <button
+            type="button"
+            onClick={handleShare}
+            aria-label={t("share")}
+            className="ms-auto inline-flex h-9 w-9 items-center justify-center rounded-lg border border-primary/15 text-foreground/70 transition-colors hover:bg-primary/5"
+          >
+            <Share2 className="h-4 w-4" />
+          </button>
+        </div>
       </div>
     </motion.article>
   );
 }
 
-export default function StoriesClient({ initialStories, locale }: Props) {
+export default function StoriesClient({ initialStories, locale, initialHasMore }: Props) {
   const t = useTranslations("pages.stories");
+  const [selectedStory, setSelectedStory] = useState<StoryRow | null>(null);
+  const [stories, setStories] = useState(initialStories);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(initialHasMore);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   const filtered = useMemo(() => {
-    if (!searchQuery) return initialStories;
+    if (!searchQuery) return stories;
     const q = searchQuery.toLowerCase();
-    return initialStories.filter(
+    return stories.filter(
       (s) =>
-        s.author_name.toLowerCase().includes(q) ||
-        s.content.toLowerCase().includes(q)
+        (s.author_ar || s.author_name || "").toLowerCase().includes(q) ||
+        (s.author_en || "").toLowerCase().includes(q) ||
+        (s.title_ar || "").toLowerCase().includes(q) ||
+        (s.title_en || "").toLowerCase().includes(q) ||
+        (s.content_ar || s.content || "").toLowerCase().includes(q) ||
+        (s.content_en || "").toLowerCase().includes(q)
     );
-  }, [initialStories, searchQuery]);
+  }, [stories, searchQuery]);
+
+  async function handleLoadMore() {
+    if (isLoadingMore || !hasMore) return;
+    setIsLoadingMore(true);
+    try {
+      const nextPage = currentPage + 1;
+      const res = await fetch(`/api/stories?page=${nextPage}`);
+      const data = (await res.json()) as { stories?: StoryRow[]; hasMore?: boolean };
+      const nextStories = data.stories ?? [];
+      setStories((prev) => {
+        const seen = new Set(prev.map((s) => s.id));
+        const appended = nextStories.filter((s) => !seen.has(s.id));
+        return [...prev, ...appended];
+      });
+      setCurrentPage(nextPage);
+      setHasMore(!!data.hasMore);
+    } catch {
+      setHasMore(false);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }
 
   return (
     <div className="overflow-x-hidden">
@@ -202,7 +337,7 @@ export default function StoriesClient({ initialStories, locale }: Props) {
             >
               <BookOpen className="h-5 w-5 text-accent" />
               <span className="text-2xl font-bold text-white">
-                {initialStories.length}
+                {stories.length}
               </span>
               <span className="text-sm text-white/70">{t("total")}</span>
             </motion.div>
@@ -253,16 +388,31 @@ export default function StoriesClient({ initialStories, locale }: Props) {
       {/* Stories Grid */}
       <section className="mx-auto mt-10 max-w-6xl px-4 pb-16 md:pb-20">
         {filtered.length > 0 ? (
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((story, i) => (
-              <StoryCard
-                key={story.id}
-                story={story}
-                locale={locale}
-                index={i}
-              />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+              {filtered.map((story, i) => (
+                <StoryCard
+                  key={story.id}
+                  story={story}
+                  locale={locale}
+                  index={i}
+                  onReadMore={() => setSelectedStory(story)}
+                />
+              ))}
+            </div>
+            {hasMore && (
+              <div className="mt-8 flex justify-center">
+                <button
+                  type="button"
+                  onClick={handleLoadMore}
+                  disabled={isLoadingMore}
+                  className="rounded-lg border border-primary/20 bg-background px-4 py-2 text-sm text-foreground/80 hover:bg-primary/5 disabled:opacity-60"
+                >
+                  {isLoadingMore ? t("loadingMore") : t("loadMore")}
+                </button>
+              </div>
+            )}
+          </>
         ) : (
           <motion.div
             initial={{ opacity: 0 }}
@@ -276,6 +426,114 @@ export default function StoriesClient({ initialStories, locale }: Props) {
           </motion.div>
         )}
       </section>
+      {selectedStory && (
+        <StoryModal
+          story={selectedStory}
+          locale={locale}
+          onClose={() => setSelectedStory(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+function StoryModal({
+  story,
+  locale,
+  onClose,
+}: {
+  story: StoryRow;
+  locale: string;
+  onClose: () => void;
+}) {
+  const t = useTranslations("pages.stories");
+  const isAr = locale === "ar";
+  const title = isAr ? story.title_ar || story.title_en || "" : story.title_en || story.title_ar || "";
+  const author = isAr
+    ? story.author_ar || story.author_en || story.author_name || ""
+    : story.author_en || story.author_ar || story.author_name || "";
+  const fullContent = isAr
+    ? story.content_ar || story.content_en || story.content || ""
+    : story.content_en || story.content_ar || story.content || "";
+  const dateStr = formatStoryDate(story.created_at, locale);
+  const words = fullContent.trim().split(/\s+/).filter(Boolean).length;
+  const minutes = Math.max(1, Math.ceil(words / 200));
+  const minutesLabel = isAr ? toArabicDigits(String(minutes)) : String(minutes);
+  const readingTime = t("readingTime", { minutes: minutesLabel });
+  const categoryMap = {
+    history: t("categoryHistory"),
+    memories: t("categoryMemories"),
+    figures: t("categoryFigures"),
+    other: t("categoryOther"),
+  } as const;
+  const categoryLabel = categoryMap[(story.category ?? "other") as keyof typeof categoryMap];
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/60 p-3 backdrop-blur-sm md:p-6" role="dialog" aria-modal="true">
+      <div className="mx-auto h-full max-w-5xl overflow-hidden rounded-2xl bg-background shadow-2xl">
+        <div className="grid h-full grid-cols-1 md:grid-cols-2">
+          <div className="relative aspect-[3/4] md:aspect-auto md:h-full">
+            {story.image_url && isImage(story.image_url) ? (
+              <Image
+                src={normalizeImageSrc(story.image_url)}
+                alt={title || t("untitledStory")}
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                quality={85}
+                style={{ objectFit: "cover" }}
+                placeholder="blur"
+                blurDataURL={BLUR_DATA_URL}
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-primary/5">
+                <BookOpen className="h-16 w-16 text-primary/20" />
+              </div>
+            )}
+            <span className="absolute top-3 start-3 rounded-full bg-black/45 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur-sm">
+              {categoryLabel}
+            </span>
+            <button
+              type="button"
+              onClick={onClose}
+              className="absolute top-3 end-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-black/55 text-white transition-colors hover:bg-black/75"
+              aria-label={t("close")}
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+          <div className="flex h-full flex-col overflow-hidden">
+            <div className="border-b border-primary/10 px-5 py-4 md:px-6">
+              <h2 className="line-clamp-2 text-xl font-bold text-foreground">{title || t("untitledStory")}</h2>
+              <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-foreground/60">
+                <span className="inline-flex items-center gap-1">
+                  <User className="h-3.5 w-3.5" />
+                  {author}
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <Calendar className="h-3.5 w-3.5" />
+                  {dateStr}
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <Clock3 className="h-3.5 w-3.5" />
+                  {readingTime.replace(/^•\s*/, "")}
+                </span>
+              </div>
+            </div>
+            <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4 md:px-6 md:py-5">
+              <p className="whitespace-pre-wrap text-sm leading-7 text-foreground/80">{fullContent}</p>
+            </div>
+            <div className="border-t border-primary/10 px-5 py-3 md:px-6">
+              <button
+                type="button"
+                onClick={onClose}
+                className="rounded-lg border border-primary/20 px-4 py-2 text-sm text-foreground/80 hover:bg-primary/5"
+              >
+                {t("close")}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

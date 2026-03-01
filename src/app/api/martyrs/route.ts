@@ -13,8 +13,9 @@ async function ensureMartyrsTable() {
         name_en TEXT NOT NULL,
         birth_date TEXT,
         death_date TEXT,
-        bio_ar TEXT,
-        bio_en TEXT,
+        martyrdom_method TEXT,
+        martyrdom_details TEXT,
+        tags TEXT,
         image_url TEXT,
         status TEXT NOT NULL DEFAULT 'approved',
         submitted_by TEXT
@@ -30,13 +31,16 @@ async function ensureMartyrsTable() {
     await db.prepare(`ALTER TABLE martyrs ADD COLUMN death_date TEXT`).run();
   } catch {}
   try {
-    await db.prepare(`ALTER TABLE martyrs ADD COLUMN bio_ar TEXT`).run();
-  } catch {}
-  try {
-    await db.prepare(`ALTER TABLE martyrs ADD COLUMN bio_en TEXT`).run();
-  } catch {}
-  try {
     await db.prepare(`ALTER TABLE martyrs ADD COLUMN image_url TEXT`).run();
+  } catch {}
+  try {
+    await db.prepare(`ALTER TABLE martyrs ADD COLUMN martyrdom_method TEXT`).run();
+  } catch {}
+  try {
+    await db.prepare(`ALTER TABLE martyrs ADD COLUMN martyrdom_details TEXT`).run();
+  } catch {}
+  try {
+    await db.prepare(`ALTER TABLE martyrs ADD COLUMN tags TEXT`).run();
   } catch {}
   try {
     await db
@@ -57,10 +61,12 @@ export async function POST(request: Request) {
     const nameEn = String(formData.get("name_en") ?? "").trim();
     const birthDate = String(formData.get("birth_date") ?? "").trim() || null;
     const deathDate = String(formData.get("death_date") ?? "").trim() || null;
-    const bioAr = String(formData.get("bio_ar") ?? "").trim() || null;
-    const bioEn = String(formData.get("bio_en") ?? "").trim() || null;
+    const martyrdomMethod = String(formData.get("martyrdom_method") ?? "").trim() || null;
+    const martyrdomDetails = String(formData.get("martyrdom_details") ?? "").trim() || null;
+    const tags = String(formData.get("tags") ?? "").trim() || null;
     const imageUrl = String(formData.get("image_url") ?? "").trim() || null;
     const submittedBy = String(formData.get("submitted_by") ?? "").trim() || null;
+    const requestedStatus = String(formData.get("desired_status") ?? "").trim();
 
     if (!nameAr) {
       return NextResponse.json(
@@ -68,14 +74,48 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+    if (!martyrdomMethod) {
+      return NextResponse.json(
+        { success: false, error: "Martyrdom method is required" },
+        { status: 400 }
+      );
+    }
+    if (
+      !["combatant", "detained_then_martyred", "civilian_bombing", "other"].includes(
+        martyrdomMethod
+      )
+    ) {
+      return NextResponse.json(
+        { success: false, error: "Invalid martyrdom method" },
+        { status: 400 }
+      );
+    }
+    if (martyrdomMethod === "other" && !martyrdomDetails) {
+      return NextResponse.json(
+        { success: false, error: "Martyrdom details are required for 'other'" },
+        { status: 400 }
+      );
+    }
 
     const db = await ensureMartyrsTable();
     const id = crypto.randomUUID();
+    let status = "pending";
+
+    if (requestedStatus === "approved") {
+      // Admin-only shortcut used by admin panel additions.
+      const { auth } = await import("@/auth");
+      const session = await auth();
+      const role = (session?.user as { role?: string } | null)?.role;
+      if (role === "admin") status = "approved";
+    }
 
     await db
       .prepare(
-        `INSERT INTO martyrs (id, name_ar, name_en, birth_date, death_date, bio_ar, bio_en, image_url, status, submitted_by)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)`
+        `INSERT INTO martyrs (
+           id, name_ar, name_en, birth_date, death_date,
+           martyrdom_method, martyrdom_details, tags, image_url, status, submitted_by
+         )
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
       )
       .bind(
         id,
@@ -83,9 +123,11 @@ export async function POST(request: Request) {
         nameEn || nameAr,
         birthDate,
         deathDate,
-        bioAr,
-        bioEn,
+        martyrdomMethod,
+        martyrdomDetails,
+        tags,
         imageUrl,
+        status,
         submittedBy
       )
       .run();

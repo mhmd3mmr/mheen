@@ -59,8 +59,9 @@ CREATE TABLE IF NOT EXISTS "martyrs" (
   "name_en" TEXT NOT NULL,
   "birth_date" TEXT,
   "death_date" TEXT,
-  "bio_ar" TEXT,
-  "bio_en" TEXT,
+  "martyrdom_method" TEXT,
+  "martyrdom_details" TEXT,
+  "tags" TEXT,
   "image_url" TEXT,
   "status" TEXT NOT NULL DEFAULT 'approved',
   "submitted_by" TEXT
@@ -73,6 +74,7 @@ CREATE TABLE IF NOT EXISTS "detainees" (
   "arrest_date" TEXT,
   "status_ar" TEXT,
   "status_en" TEXT,
+  "tags" TEXT,
   "image_url" TEXT,
   "status" TEXT NOT NULL DEFAULT 'approved',
   "submitted_by" TEXT
@@ -81,7 +83,15 @@ CREATE TABLE IF NOT EXISTS "detainees" (
 CREATE TABLE IF NOT EXISTS "stories" (
   "id" TEXT NOT NULL PRIMARY KEY,
   "author_name" TEXT NOT NULL,
+  "author_ar" TEXT,
+  "author_en" TEXT,
+  "title_ar" TEXT,
+  "title_en" TEXT,
+  "category" TEXT,
   "content" TEXT NOT NULL,
+  "content_ar" TEXT,
+  "content_en" TEXT,
+  "tags" TEXT,
   "image_url" TEXT,
   "status" TEXT NOT NULL DEFAULT 'pending',
   "created_at" INTEGER NOT NULL DEFAULT (unixepoch())

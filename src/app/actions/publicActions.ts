@@ -12,8 +12,6 @@ export type MartyrPublic = {
   name_en: string;
   birth_date: string | null;
   death_date: string | null;
-  bio_ar: string | null;
-  bio_en: string | null;
   image_url: string | null;
 };
 
@@ -22,7 +20,7 @@ export async function getPublicMartyrs(): Promise<MartyrPublic[]> {
     const db = await getDB();
     const { results } = await db
       .prepare(
-        `SELECT id, name_ar, name_en, birth_date, death_date, bio_ar, bio_en, image_url
+        `SELECT id, name_ar, name_en, birth_date, death_date, image_url
          FROM martyrs WHERE status = 'approved' ORDER BY death_date DESC, name_en ASC`
       )
       .all();
@@ -40,8 +38,6 @@ export async function submitMartyr(
   const nameEn = String(formData.get("name_en") ?? "").trim();
   const birthDate = String(formData.get("birth_date") ?? "").trim() || null;
   const deathDate = String(formData.get("death_date") ?? "").trim() || null;
-  const bioAr = String(formData.get("bio_ar") ?? "").trim() || null;
-  const bioEn = String(formData.get("bio_en") ?? "").trim() || null;
   const imageUrl = String(formData.get("image_url") ?? "").trim() || null;
   const submittedBy = String(formData.get("submitted_by") ?? "").trim() || null;
 
@@ -54,10 +50,10 @@ export async function submitMartyr(
     const id = crypto.randomUUID();
     await db
       .prepare(
-        `INSERT INTO martyrs (id, name_ar, name_en, birth_date, death_date, bio_ar, bio_en, image_url, status, submitted_by)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)`
+        `INSERT INTO martyrs (id, name_ar, name_en, birth_date, death_date, image_url, status, submitted_by)
+         VALUES (?, ?, ?, ?, ?, ?, 'pending', ?)`
       )
-      .bind(id, nameAr, nameEn || nameAr, birthDate, deathDate, bioAr, bioEn, imageUrl, submittedBy)
+      .bind(id, nameAr, nameEn || nameAr, birthDate, deathDate, imageUrl, submittedBy)
       .run();
     return { success: true };
   } catch (err) {

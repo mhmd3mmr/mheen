@@ -88,18 +88,6 @@ export function SubmitForm({ onError }: SubmitFormProps) {
       onSubmit={handleSubmit}
     >
       <div>
-        <label htmlFor="name" className="mb-2 block text-sm font-medium text-foreground">
-          {t("name")}
-        </label>
-        <input
-          id="name"
-          name="author_name"
-          type="text"
-          required
-          className="w-full rounded-lg border border-primary/20 bg-background px-4 py-3 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-        />
-      </div>
-      <div>
         <label htmlFor="email" className="mb-2 block text-sm font-medium text-foreground">
           {t("email")}
         </label>
@@ -110,15 +98,118 @@ export function SubmitForm({ onError }: SubmitFormProps) {
           className="w-full rounded-lg border border-primary/20 bg-background px-4 py-3 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
       </div>
+      <div className="rounded-xl border border-primary/10 bg-background/40 p-4">
+        <h3 className="mb-4 text-sm font-semibold text-foreground/80">{t("arabicDetails")}</h3>
+        <div className="space-y-4">
+          <div>
+            <label htmlFor="author_ar" className="mb-2 block text-sm font-medium text-foreground">
+              {t("nameAr")}
+            </label>
+            <input
+              id="author_ar"
+              name="author_ar"
+              type="text"
+              required
+              className="w-full rounded-lg border border-primary/20 bg-background px-4 py-3 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            />
+          </div>
+          <div>
+            <label htmlFor="title_ar" className="mb-2 block text-sm font-medium text-foreground">
+              {t("storyTitleAr")}
+            </label>
+            <input
+              id="title_ar"
+              name="title_ar"
+              type="text"
+              required
+              className="w-full rounded-lg border border-primary/20 bg-background px-4 py-3 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            />
+          </div>
+          <div>
+            <label htmlFor="content_ar" className="mb-2 block text-sm font-medium text-foreground">
+              {t("storyAr")}
+            </label>
+            <textarea
+              id="content_ar"
+              name="content_ar"
+              rows={5}
+              required
+              className="w-full rounded-lg border border-primary/20 bg-background px-4 py-3 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-primary/10 bg-background/40 p-4">
+        <h3 className="mb-4 text-sm font-semibold text-foreground/80">{t("englishDetails")}</h3>
+        <div className="space-y-4">
+          <div>
+            <label htmlFor="author_en" className="mb-2 block text-sm font-medium text-foreground">
+              {t("nameEn")}
+            </label>
+            <input
+              id="author_en"
+              name="author_en"
+              type="text"
+              required
+              className="w-full rounded-lg border border-primary/20 bg-background px-4 py-3 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            />
+          </div>
+          <div>
+            <label htmlFor="title_en" className="mb-2 block text-sm font-medium text-foreground">
+              {t("storyTitleEn")}
+            </label>
+            <input
+              id="title_en"
+              name="title_en"
+              type="text"
+              required
+              className="w-full rounded-lg border border-primary/20 bg-background px-4 py-3 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            />
+          </div>
+          <div>
+            <label htmlFor="content_en" className="mb-2 block text-sm font-medium text-foreground">
+              {t("storyEn")}
+            </label>
+            <textarea
+              id="content_en"
+              name="content_en"
+              rows={5}
+              required
+              className="w-full rounded-lg border border-primary/20 bg-background px-4 py-3 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            />
+          </div>
+        </div>
+      </div>
       <div>
-        <label htmlFor="story" className="mb-2 block text-sm font-medium text-foreground">
-          {t("story")}
+        <label htmlFor="story_category" className="mb-2 block text-sm font-medium text-foreground">
+          {t("storyCategoryLabel")}
         </label>
-        <textarea
-          id="story"
-          name="content"
-          rows={6}
+        <select
+          id="story_category"
+          name="category"
           required
+          defaultValue=""
+          className="w-full rounded-lg border border-primary/20 bg-background px-4 py-3 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+        >
+          <option value="" disabled>
+            {t("storyCategoryPlaceholder")}
+          </option>
+          <option value="history">{t("storyCategoryHistory")}</option>
+          <option value="memories">{t("storyCategoryMemories")}</option>
+          <option value="figures">{t("storyCategoryFigures")}</option>
+          <option value="other">{t("storyCategoryOther")}</option>
+        </select>
+      </div>
+      <div>
+        <label htmlFor="story_tags" className="mb-2 block text-sm font-medium text-foreground">
+          {t("storyTagsLabel")}
+        </label>
+        <input
+          id="story_tags"
+          name="tags"
+          type="text"
+          placeholder={t("storyTagsPlaceholder")}
           className="w-full rounded-lg border border-primary/20 bg-background px-4 py-3 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
       </div>
@@ -130,9 +221,10 @@ export function SubmitForm({ onError }: SubmitFormProps) {
           onUploadError={setUploadError}
           uploadLabel={t("upload")}
           uploadingLabel={t("uploading")}
-          imageMaxWidth={1200}
-          imageWebpQuality={0.5}
-          imageTargetMaxKB={200}
+          folder="stories"
+          imageMaxWidth={800}
+          imageWebpQuality={0.8}
+          imageAspectRatio={3 / 4}
         />
         {uploadError && (
           <p className="mt-2 text-sm text-red-600">{uploadError}</p>
