@@ -21,21 +21,14 @@ const nextConfig: NextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "lh3.googleusercontent.com",
-      },
-      {
-        protocol: "https",
-        hostname: "avatars.githubusercontent.com",
-      },
+      { protocol: "https", hostname: "miheen.com" },
+      { protocol: "https", hostname: "mheen.pages.dev" },
+      { protocol: "http", hostname: "localhost" },
+      { protocol: "http", hostname: "127.0.0.1" },
+      { protocol: "https", hostname: "lh3.googleusercontent.com" },
+      { protocol: "https", hostname: "avatars.githubusercontent.com" },
       ...(r2PublicHost
-        ? [
-            {
-              protocol: "https" as const,
-              hostname: r2PublicHost,
-            },
-          ]
+        ? [{ protocol: "https" as const, hostname: r2PublicHost }]
         : []),
     ],
   },
