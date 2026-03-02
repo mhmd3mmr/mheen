@@ -156,8 +156,8 @@ export function HomepageClient({
                 }`}
                 sizes="100vw"
                 quality={100}
-                priority
-                loading="eager"
+                priority={i === 0}
+                loading={i === 0 ? "eager" : "lazy"}
                 unoptimized
                 placeholder="blur"
                 blurDataURL={HERO_BLUR_DATA_URL}
