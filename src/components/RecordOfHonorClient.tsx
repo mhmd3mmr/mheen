@@ -4,7 +4,16 @@ import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Search, Calendar, ShieldAlert, MessageCircle, Facebook } from "lucide-react";
+import {
+  Search,
+  Calendar,
+  ShieldAlert,
+  Share2,
+  MessageCircle,
+  Facebook,
+  Link2,
+} from "lucide-react";
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 
 type RecordType = "martyr" | "detainee";
 type FilterType = "all" | RecordType;
@@ -230,6 +239,7 @@ function RecordCard({
   detaineeLabel: string;
 }) {
   const t = useTranslations("pages.recordOfHonor");
+  const [copied, setCopied] = useState(false);
   const name = isAr ? row.name_ar : row.name_en;
   const statusText = isAr
     ? row.status_ar || row.status_en || ""
@@ -271,6 +281,22 @@ function RecordCard({
 
   const allTags = [...autoTags, ...manualTags];
 
+  async function handleNativeShare() {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: name, url: shareUrl });
+      } catch {
+        // user cancelled
+      }
+    } else if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  }
+
+  const dateValue = isMartyr ? row.death_date : row.arrest_date;
+
   return (
     <motion.article
       initial={{ opacity: 0, y: 18 }}
@@ -304,32 +330,66 @@ function RecordCard({
       </div>
 
       <div className="space-y-2 px-4 py-3">
-        <h3 className="font-qomra text-lg font-semibold text-foreground truncate">{name}</h3>
+        <div className="flex w-full items-center justify-between gap-2">
+          <h3 className="min-w-0 flex-1 truncate font-qomra text-lg font-semibold text-foreground">
+            {name}
+          </h3>
 
-        {isMartyr ? (
-          <>
-            {row.death_date && (
-              <p className="flex items-center gap-2 text-xs text-foreground/65">
-                <Calendar className="h-3.5 w-3.5" />
-                <span>{row.death_date}</span>
-              </p>
-            )}
-          </>
-        ) : (
-          <>
-            {row.arrest_date && (
-              <p className="flex items-center gap-2 text-xs text-foreground/65">
-                <Calendar className="h-3.5 w-3.5" />
-                <span>{row.arrest_date}</span>
-              </p>
-            )}
-            {statusText && (
-              <p className="flex items-center gap-2 text-xs text-foreground/70">
-                <ShieldAlert className="h-3.5 w-3.5" />
-                <span className="line-clamp-2">{statusText}</span>
-              </p>
-            )}
-          </>
+          <DropdownMenu.Root>
+            <DropdownMenu.Trigger asChild>
+              <button
+                type="button"
+                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-primary/15 text-foreground/60 transition-colors hover:bg-primary/5 hover:text-foreground"
+                aria-label={t("shareGeneral")}
+              >
+                <Share2 className="h-4 w-4" />
+              </button>
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Portal>
+              <DropdownMenu.Content
+                sideOffset={6}
+                align="end"
+                className="z-50 min-w-[11rem] rounded-xl border border-primary/15 bg-background p-1.5 shadow-xl animate-in fade-in-0 zoom-in-95"
+              >
+                <DropdownMenu.Item
+                  className="flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-foreground/80 outline-none transition-colors hover:bg-primary/5 focus:bg-primary/5"
+                  onSelect={() => window.open(whatsappUrl, "_blank")}
+                >
+                  <MessageCircle className="h-4 w-4 text-green-600" />
+                  {t("shareWhatsapp")}
+                </DropdownMenu.Item>
+                <DropdownMenu.Item
+                  className="flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-foreground/80 outline-none transition-colors hover:bg-primary/5 focus:bg-primary/5"
+                  onSelect={() => window.open(facebookUrl, "_blank")}
+                >
+                  <Facebook className="h-4 w-4 text-blue-600" />
+                  {t("shareFacebook")}
+                </DropdownMenu.Item>
+                <DropdownMenu.Separator className="my-1 h-px bg-primary/10" />
+                <DropdownMenu.Item
+                  className="flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-foreground/80 outline-none transition-colors hover:bg-primary/5 focus:bg-primary/5"
+                  onSelect={handleNativeShare}
+                >
+                  <Link2 className="h-4 w-4" />
+                  {copied ? t("shareCopied") : t("shareGeneral")}
+                </DropdownMenu.Item>
+              </DropdownMenu.Content>
+            </DropdownMenu.Portal>
+          </DropdownMenu.Root>
+        </div>
+
+        {dateValue && (
+          <p className="flex items-center gap-2 text-xs text-foreground/65">
+            <Calendar className="h-3.5 w-3.5" />
+            <span>{dateValue}</span>
+          </p>
+        )}
+
+        {!isMartyr && statusText && (
+          <p className="flex items-center gap-2 text-xs text-foreground/70">
+            <ShieldAlert className="h-3.5 w-3.5" />
+            <span className="line-clamp-2">{statusText}</span>
+          </p>
         )}
 
         {allTags.length > 0 && (
@@ -344,32 +404,6 @@ function RecordCard({
             ))}
           </div>
         )}
-
-        <div className="mt-3 border-t border-primary/10 pt-2">
-          <p className="mb-1 text-xs font-medium text-foreground/60">{t("shareStory")}</p>
-          <div className="flex items-center gap-2">
-            <a
-              href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 rounded-md border border-primary/15 px-2 py-1 text-xs text-foreground/70 hover:bg-primary/5"
-              aria-label={t("shareWhatsapp")}
-            >
-              <MessageCircle className="h-3.5 w-3.5" />
-              {t("shareWhatsapp")}
-            </a>
-            <a
-              href={facebookUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 rounded-md border border-primary/15 px-2 py-1 text-xs text-foreground/70 hover:bg-primary/5"
-              aria-label={t("shareFacebook")}
-            >
-              <Facebook className="h-3.5 w-3.5" />
-              {t("shareFacebook")}
-            </a>
-          </div>
-        </div>
       </div>
     </motion.article>
   );

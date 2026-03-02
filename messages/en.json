@@ -448,7 +448,8 @@
       "shareStory": "Share Story",
       "shareWhatsapp": "WhatsApp",
       "shareFacebook": "Facebook",
-      "shareGeneral": "Share"
+      "shareGeneral": "Share",
+      "shareCopied": "Link copied!"
     }
   }
 }
