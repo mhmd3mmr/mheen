@@ -95,7 +95,7 @@ export async function POST(request: Request) {
       .run();
 
     revalidatePath("/[locale]/admin/community-photos", "page");
-    revalidatePath("/[locale]/community", "page");
+    revalidatePath("/[locale]/about-mheen", "page");
     return NextResponse.json({ success: true });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to approve photo";

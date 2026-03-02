@@ -1,8 +1,7 @@
 {
   "nav": {
     "home": "Home",
-    "aboutMheen": "About Mheen",
-    "community": "Community & Identity",
+    "community": "About Mheen",
     "ourMartyrs": "Martyrs",
     "detainees": "Detainees",
     "recordOfHonor": "Eternal Register",
@@ -12,7 +11,8 @@
     "logout": "Logout",
     "dashboard": "Dashboard",
     "accessDenied": "Access Denied",
-    "archiveLabel": "Memory Archive"
+    "archiveLabel": "Memory Archive",
+    "revolution": "Revolution"
   },
   "Hero": {
     "title": "Mheen… A Memory That Lives On",
@@ -61,7 +61,8 @@
     "ctaButton": "Add Information or Story",
     "quickLinks": "Quick Links",
     "home": "Home",
-    "about": "About Mheen",
+    "community": "About Mheen",
+    "revolution": "Revolution",
     "martyrs": "Our Martyrs",
     "detainees": "Detainees & Missing",
     "recordOfHonor": "Eternal Register",
@@ -82,6 +83,8 @@
       "detainees": "Manage Detainees",
       "stories": "Review Stories",
       "communityPhotos": "Manage Community Photos",
+      "protestVideos": "Protest Videos",
+      "protestBanners": "Protest Banners",
       "heroSlides": "Hero Slides",
       "users": "Manage Users"
     },
@@ -114,9 +117,9 @@
     }
   },
   "pages": {
-    "about": {
-      "title": "About Mheen",
-      "subtitle": "The Oasis of the Syrian Badia — A Node of History and Resilience",
+    "revolution": {
+      "title": "Revolution",
+      "subtitle": "From the peaceful spark... to the archive of eternity.",
       "statsLocation": "Location",
       "statsLocationVal": "Southeastern Homs countryside, surrounded by Sadad and Al-Qaryatayn",
       "statsPopulation": "Population",
@@ -132,6 +135,23 @@
       "etymAramaicDesc": "Derived from 'Living Waters' (Mia chi), linked to its springs and groundwater.",
       "etymPersianTitle": "Persian",
       "etymPersianDesc": "Matches the word 'Mah' meaning 'Moon-like', symbolizing radiance.",
+      "revolutionIntro": "Since the Syrian Revolution began, Mheen shifted from a quiet oasis into a town tested by the hardest chapters of endurance: civil protest, community relief, and painful waves of displacement.",
+      "revolutionTitle": "Mheen in the Revolution",
+      "revolutionNode1Title": "The Beginning of Peaceful Protest",
+      "revolutionNode1Desc": "Mheen witnessed its first peaceful demonstrations with a clear civic voice, as residents stepped out to call for freedom and dignity in moments that shaped the town's early revolutionary memory.",
+      "revolutionNode2Title": "Humanitarian Response",
+      "revolutionNode2Desc": "Families and local initiatives came together to shelter affected people and provide relief, from food and housing to solidarity networks that eased the burden of a harsh period.",
+      "revolutionNode3Title": "Strategic Warehouses Battle",
+      "revolutionNode3Desc": "Mheen became a highly sensitive military node as battles intensified around its strategic depots, placing the town at the center of prolonged and devastating confrontation.",
+      "revolutionNode4Title": "Displacement & Diaspora",
+      "revolutionNode4Desc": "War forced many from Mheen into displacement and exile, scattering stories across camps and distant cities while preserving identity and the hope of return.",
+      "costOfFreedomTitle": "The Cost of Freedom",
+      "costOfFreedomDesc": "Mheen paid a heavy price on the path to dignity: martyrs who gave their lives, and detainees and missing people whose names remain an open wound in the memory of every family.",
+      "costOfFreedomButton": "Explore the Record of Honor",
+      "videoGalleryTitle": "Voice of the Squares",
+      "videoGalleryDesc": "Video clips from the protest squares of Mheen, documenting moments of resilience and solidarity among the town's people.",
+      "bannersTitle": "Memory of the Banners",
+      "bannersDesc": "Protest banners expressed the town's demands and solidarity, forming a visual voice carrying messages of freedom and dignity.",
       "timelineTitle": "Mheen at the Heart of Transformations (2011–2026)",
       "tl1Year": "2013",
       "tl1Title": "The Weapons Depots Battle",
@@ -380,8 +400,13 @@
     },
     "community": {
       "eyebrow": "Community & Identity",
-      "title": "Community & Identity",
+      "title": "About Mheen",
       "subtitle": "The scent of the land, the authenticity of the Badia, and the tales of the ancestors that shaped Mheen's soul.",
+      "introTitle": "About the Town of Mheen",
+      "introP1": "The town of Mheen is located in the Homs Governorate, in the heart of the Syrian Badia (desert), at an elevation of over 900 meters above sea level. Situated about 85 kilometers from the city of Homs, the town forms a green oasis that defies the harshness of the desert geography. Its name carries Aramaic roots (Mia chi), meaning \"Living Waters,\" thanks to its fresh springs and deep connection to the groundwater that has irrigated its orchards across generations.",
+      "introP2": "Before the war engulfed the country, Mheen was home to a population of approximately 20,000. The town was known for its cohesive and hospitable community. Its people relied primarily on agriculture, especially fig, grape, and olive orchards, as well as livestock and cattle rearing, while a portion of its youth chose the path of working abroad.",
+      "introP3": "With the outbreak of the Syrian Revolution, Mheen did not remain isolated from its surroundings; instead, it joined the path demanding freedom, making immense sacrifices through the blood of its youth, including martyrs and detainees. However, its geographical location and proximity to strategic ammunition depots, considered among the largest weapons facilities of the fallen regime, placed it directly in the eye of the storm.",
+      "introP4": "Between 2011 and 2015, the town turned into a grinding battleground. It faced multiple military campaigns and invasions, endured looting, and saw its homes burned twice, forcing its people into forced displacement and causing them to leave their lands on several occasions. Today, following the victory of the Syrian Revolution, the people of Mheen have begun returning to it. Despite the harshness of the displacement and diaspora years, \"Mheen\" remains in the Syrian memory as a living document, a witness to the cost of dignity, and an indelible legacy of resilience.",
       "peopleTitle": "The People of Mheen: Bedouin Generosity and Rural Authenticity",
       "peopleText": "The people of Mheen are known for their kindness and hospitality. In them, the authenticity of the Syrian Badia appears with its chivalry and simplicity, blended with a deep bond to land and agriculture. Families have preserved cohesive tribal and rural traditions; open guest gatherings, the bitter Arabic coffee cup, and collective support in harvest seasons and celebrations are not merely daily habits, but a deeply rooted identity passed down generation after generation, making the town one large family united by familiarity and affection.",
       "harvestSectionTitle": "Agriculture & Seasons of Bounty",

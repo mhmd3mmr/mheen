@@ -552,7 +552,7 @@ export async function approveCommunityPhoto(formData: FormData) {
     .run();
 
   revalidatePath("/[locale]/admin/community-photos", "page");
-  revalidatePath("/[locale]/community", "page");
+  revalidatePath("/[locale]/about-mheen", "page");
 }
 
 export async function updateCommunityPhoto(
@@ -582,7 +582,7 @@ export async function updateCommunityPhoto(
       .run();
 
     revalidatePath("/[locale]/admin/community-photos", "page");
-    revalidatePath("/[locale]/community", "page");
+    revalidatePath("/[locale]/about-mheen", "page");
     return { success: true };
   } catch (err) {
     console.error("updateCommunityPhoto error:", err);
@@ -605,6 +605,6 @@ export async function deleteCommunityPhoto(formData: FormData) {
   await tryDeleteImageFromR2(row?.image_url, "deleteCommunityPhoto");
 
   revalidatePath("/[locale]/admin/community-photos", "page");
-  revalidatePath("/[locale]/community", "page");
+  revalidatePath("/[locale]/about-mheen", "page");
 }
 

@@ -11,9 +11,9 @@ import {
   Instagram,
   Eye,
   User,
-  Code,
 } from "lucide-react";
 import { FadeUp } from "@/components/FadeUp";
+import { PageHeader } from "@/components/PageHeader";
 import { CreatorImage } from "@/components/CreatorImage";
 
 type Props = { params: Promise<{ locale: string }> };
@@ -31,36 +31,7 @@ export default async function AboutProjectPage({ params }: Props) {
 
   return (
     <div className="min-h-[60vh] overflow-x-hidden pb-24">
-      {/* Hero Header */}
-      <section className="relative overflow-hidden bg-primary px-4 pb-24 pt-16 md:-mx-8 md:-mt-8 md:px-8 md:pb-28 md:pt-24">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/80 via-primary to-primary" />
-        <div
-          className="absolute inset-0 opacity-[0.04]"
-          style={{
-            backgroundImage:
-              "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")",
-          }}
-        />
-        <div className="absolute -top-40 left-1/2 h-80 w-[600px] -translate-x-1/2 rounded-full bg-accent/10 blur-3xl" />
-
-        <div className="relative mx-auto max-w-3xl text-center">
-          <FadeUp>
-            <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 backdrop-blur-sm">
-              <Code className="h-7 w-7 text-accent" />
-            </div>
-          </FadeUp>
-          <FadeUp delay={0.05}>
-            <h1 className="font-qomra text-4xl font-bold text-white md:text-5xl">
-              {t("title")}
-            </h1>
-          </FadeUp>
-          <FadeUp delay={0.1}>
-            <p className="mx-auto mt-4 max-w-2xl text-base text-white/60 md:text-lg">
-              {t("subtitle")}
-            </p>
-          </FadeUp>
-        </div>
-      </section>
+      <PageHeader title={t("title")} subtitle={t("subtitle")} />
 
       {/* Main content area */}
       <div className="relative z-10 mx-auto w-full max-w-5xl space-y-20 px-4 sm:px-6 lg:px-8">

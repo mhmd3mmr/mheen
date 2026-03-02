@@ -3,11 +3,11 @@
 export const runtime = 'edge';
 
 import { motion } from "framer-motion";
-import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useEffect, useRef, useState } from "react";
+import { PageHeader } from "@/components/PageHeader";
 import {
   Leaf,
   Wheat,
@@ -16,7 +16,6 @@ import {
   BriefcaseBusiness,
   TrainFront,
   Images,
-  Sprout,
   Coffee,
   Languages,
   Mountain,
@@ -213,45 +212,29 @@ export default function CommunityPage() {
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-stone-50 text-foreground">
-      {/* Hero */}
-      <section className="relative overflow-hidden md:-mx-8 md:-mt-8">
-        <div className="relative flex h-[40vh] min-h-[300px] max-h-[450px] w-full items-center justify-center overflow-hidden">
-          <Image
-            src="/images/mheen-oasis-city.webp"
-            alt={t("title")}
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover"
-          />
-          <div className="absolute inset-0 z-10 bg-black/40" />
-          <div
-            className="absolute inset-0 z-10 opacity-10"
-            style={{
-              backgroundImage:
-                "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.65) 1px, transparent 0)",
-              backgroundSize: "22px 22px",
-            }}
-          />
+      <PageHeader
+        title={t("title")}
+        subtitle={t("subtitle")}
+        backgroundImage="/images/mheen-oasis-city.webp"
+      />
 
-          <div className="relative z-20 mx-auto w-full max-w-6xl px-6 py-12 text-center sm:px-8">
-            <Reveal>
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/35 bg-black/20 px-4 py-1.5 text-sm text-white backdrop-blur">
-                <Sprout className="h-4 w-4" />
-                {t("eyebrow")}
-              </span>
-            </Reveal>
-            <Reveal delay={0.08}>
-              <h1 className="mt-5 text-center font-qomra text-4xl font-bold text-white md:text-6xl">
-                {t("title")}
-              </h1>
-            </Reveal>
-            <Reveal delay={0.16}>
-              <p className="mx-auto mt-5 max-w-3xl text-center text-lg leading-relaxed text-white/90 md:text-xl">
-                {t("subtitle")}
-              </p>
-            </Reveal>
-          </div>
+      {/* About Mheen intro narrative */}
+      <section className="relative bg-stone-50 py-16 md:py-24">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6">
+          <Reveal>
+            <article className="overflow-hidden rounded-3xl border border-primary/10 bg-gradient-to-b from-white to-stone-50 p-7 shadow-sm md:p-10">
+              <div className="mb-6 inline-flex items-center rounded-full bg-primary/10 px-4 py-1.5 text-xs font-semibold text-primary">
+                {t("introTitle")}
+              </div>
+
+              <div className="space-y-6 text-base leading-8 text-foreground/80 md:text-lg">
+                <p>{t("introP1")}</p>
+                <p>{t("introP2")}</p>
+                <p>{t("introP3")}</p>
+                <p>{t("introP4")}</p>
+              </div>
+            </article>
+          </Reveal>
         </div>
       </section>
 
@@ -280,7 +263,7 @@ export default function CommunityPage() {
       </section>
 
       {/* Historical roots & name origin (from About Mheen) */}
-      <section className="bg-background py-20">
+      <section className="bg-background py-16 md:py-24">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <Reveal>
             <div className="mb-12 flex items-center gap-3">
@@ -334,92 +317,8 @@ export default function CommunityPage() {
         </div>
       </section>
 
-      {/* Harvest & Land – unified editorial layout */}
-      <section className="mx-auto mt-16 max-w-6xl px-4 sm:px-6">
-        <Reveal>
-          <div className="mb-8 flex items-center gap-3 text-start">
-            <div className="rounded-xl bg-emerald-100 p-2.5 text-emerald-700">
-              <Leaf className="h-5 w-5" />
-            </div>
-            <h2 className="font-qomra text-3xl font-bold text-primary">
-              {t("harvestSectionTitle")}
-            </h2>
-          </div>
-        </Reveal>
-
-        <Reveal delay={0.06}>
-          <article className="rounded-3xl border border-emerald-100 bg-emerald-50/30 p-6 shadow-sm backdrop-blur md:p-8 lg:p-12">
-            <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12">
-              {/* Narrative timeline */}
-              <div className="lg:col-span-7">
-                <div className="ms-2 border-s-2 border-emerald-100 ps-6 space-y-10">
-                  {/* Block 1 – Olives & figs */}
-                  <div className="relative">
-                    <div className="absolute -start-3 top-2 h-3 w-3 rounded-full bg-emerald-500 ring-4 ring-emerald-50" />
-                    <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-amber-100 px-3 py-1 text-sm text-amber-800">
-                      <Leaf className="h-4 w-4" />
-                      {t("harvestTag")}
-                    </div>
-                    <h3 className="font-qomra text-2xl font-semibold text-stone-900">
-                      {harvestBlocks[0]?.title}
-                    </h3>
-                    <p className="mt-3 text-base leading-8 text-stone-800">
-                      {harvestBlocks[0]?.text}
-                    </p>
-                  </div>
-
-                  {/* Block 2 – Water & wheat */}
-                  <div className="relative">
-                    <div className="absolute -start-3 top-2 h-3 w-3 rounded-full bg-emerald-500 ring-4 ring-emerald-50" />
-                    <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-sm text-emerald-800">
-                      <Wheat className="h-4 w-4" />
-                      {t("harvestTag")}
-                    </div>
-                    <h3 className="font-qomra text-2xl font-semibold text-stone-900">
-                      {harvestBlocks[1]?.title}
-                    </h3>
-                    <p className="mt-3 text-base leading-8 text-stone-800">
-                      {harvestBlocks[1]?.text}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Visual collage */}
-              <div className="lg:col-span-5">
-                <div className="relative h-full min-h-[260px]">
-                  <div className="relative w-full max-w-md lg:ms-auto">
-                    <div className="overflow-hidden rounded-2xl border border-emerald-100 bg-emerald-900/5 shadow-lg">
-                      <img
-                        src={harvestBlocks[0]?.image}
-                        alt={harvestBlocks[0]?.title}
-                        className="aspect-[4/3] w-full object-cover transition-transform duration-500 hover:scale-105"
-                        loading="lazy"
-                      />
-                    </div>
-                  </div>
-
-                  {harvestBlocks[1] && (
-                    <div className="absolute -bottom-8 -end-4 w-3/5 max-w-xs">
-                      <div className="overflow-hidden rounded-2xl border-8 border-emerald-50 bg-emerald-900/5 shadow-xl">
-                        <img
-                          src={harvestBlocks[1].image}
-                          alt={harvestBlocks[1].title}
-                          className="aspect-[4/3] w-full object-cover transition-transform duration-500 hover:scale-105"
-                          loading="lazy"
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </article>
-        </Reveal>
-      </section>
-
       {/* Geography & roots bento section (from About Mheen) */}
-      <section className="mx-auto max-w-6xl px-4 py-24 sm:px-6">
+      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-24">
         <Reveal>
           <h2 className="font-qomra text-3xl font-bold text-primary md:text-4xl">
             {tStory("bentoTitle")}
@@ -481,8 +380,117 @@ export default function CommunityPage() {
         </div>
       </section>
 
+      {/* Train Station Callout */}
+      <section className="relative mx-0 overflow-hidden">
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage:
+              "url('https://images.unsplash.com/photo-1474487548417-781cb71495f3?auto=format&fit=crop&w=1800&q=80')",
+            filter: "grayscale(0.35) sepia(0.3)",
+          }}
+        />
+        <div className="absolute inset-0 bg-stone-900/70" />
+        <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-24">
+          <Reveal>
+            <div className="max-w-3xl text-start">
+              <span className="inline-flex items-center gap-2 rounded-full border border-amber-200/30 bg-amber-100/10 px-4 py-1.5 text-sm text-amber-100">
+                <TrainFront className="h-4 w-4" />
+                {t("trainTag")}
+              </span>
+              <h2 className="mt-5 font-qomra text-4xl font-bold text-amber-50">
+                {t("trainTitle")}
+              </h2>
+              <p className="mt-4 text-lg leading-8 text-stone-100/90">
+                {t("trainText")}
+              </p>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* Harvest & Land – unified editorial layout */}
+      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-24">
+        <Reveal>
+          <div className="mb-8 flex items-center gap-3 text-start">
+            <div className="rounded-xl bg-emerald-100 p-2.5 text-emerald-700">
+              <Leaf className="h-5 w-5" />
+            </div>
+            <h2 className="font-qomra text-3xl font-bold text-primary">
+              {t("harvestSectionTitle")}
+            </h2>
+          </div>
+        </Reveal>
+
+        <Reveal delay={0.06}>
+          <article className="rounded-3xl border border-emerald-100 bg-emerald-50/30 p-6 shadow-sm backdrop-blur md:p-8 lg:p-12">
+            <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12">
+              <div className="lg:col-span-7">
+                <div className="ms-2 space-y-10 border-s-2 border-emerald-100 ps-6">
+                  <div className="relative">
+                    <div className="absolute -start-3 top-2 h-3 w-3 rounded-full bg-emerald-500 ring-4 ring-emerald-50" />
+                    <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-amber-100 px-3 py-1 text-sm text-amber-800">
+                      <Leaf className="h-4 w-4" />
+                      {t("harvestTag")}
+                    </div>
+                    <h3 className="font-qomra text-2xl font-semibold text-stone-900">
+                      {harvestBlocks[0]?.title}
+                    </h3>
+                    <p className="mt-3 text-base leading-8 text-stone-800">
+                      {harvestBlocks[0]?.text}
+                    </p>
+                  </div>
+
+                  <div className="relative">
+                    <div className="absolute -start-3 top-2 h-3 w-3 rounded-full bg-emerald-500 ring-4 ring-emerald-50" />
+                    <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-sm text-emerald-800">
+                      <Wheat className="h-4 w-4" />
+                      {t("harvestTag")}
+                    </div>
+                    <h3 className="font-qomra text-2xl font-semibold text-stone-900">
+                      {harvestBlocks[1]?.title}
+                    </h3>
+                    <p className="mt-3 text-base leading-8 text-stone-800">
+                      {harvestBlocks[1]?.text}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="lg:col-span-5">
+                <div className="relative h-full min-h-[260px]">
+                  <div className="relative w-full max-w-md lg:ms-auto">
+                    <div className="overflow-hidden rounded-2xl border border-emerald-100 bg-emerald-900/5 shadow-lg">
+                      <img
+                        src={harvestBlocks[0]?.image}
+                        alt={harvestBlocks[0]?.title}
+                        className="aspect-[4/3] w-full object-cover transition-transform duration-500 hover:scale-105"
+                        loading="lazy"
+                      />
+                    </div>
+                  </div>
+
+                  {harvestBlocks[1] && (
+                    <div className="absolute -bottom-8 -end-4 w-3/5 max-w-xs">
+                      <div className="overflow-hidden rounded-2xl border-8 border-emerald-50 bg-emerald-900/5 shadow-xl">
+                        <img
+                          src={harvestBlocks[1].image}
+                          alt={harvestBlocks[1].title}
+                          className="aspect-[4/3] w-full object-cover transition-transform duration-500 hover:scale-105"
+                          loading="lazy"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </article>
+        </Reveal>
+      </section>
+
       {/* Daily Life & Diaspora */}
-      <section className="mx-auto mt-20 max-w-6xl px-4 sm:px-6">
+      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-24">
         <Reveal>
           <h2 className="text-start font-qomra text-3xl font-bold text-primary">
             {t("dailyTitle")}
@@ -508,37 +516,8 @@ export default function CommunityPage() {
         </div>
       </section>
 
-      {/* Train Station Callout */}
-      <section className="relative mx-0 mt-20 overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage:
-              "url('https://images.unsplash.com/photo-1474487548417-781cb71495f3?auto=format&fit=crop&w=1800&q=80')",
-            filter: "grayscale(0.35) sepia(0.3)",
-          }}
-        />
-        <div className="absolute inset-0 bg-stone-900/70" />
-        <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-20">
-          <Reveal>
-            <div className="max-w-3xl text-start">
-              <span className="inline-flex items-center gap-2 rounded-full border border-amber-200/30 bg-amber-100/10 px-4 py-1.5 text-sm text-amber-100">
-                <TrainFront className="h-4 w-4" />
-                {t("trainTag")}
-              </span>
-              <h2 className="mt-5 font-qomra text-4xl font-bold text-amber-50">
-                {t("trainTitle")}
-              </h2>
-              <p className="mt-4 text-lg leading-8 text-stone-100/90">
-                {t("trainText")}
-              </p>
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
       {/* Traveler's eye — demographic shift (from About Mheen) */}
-      <section className="bg-background py-28">
+      <section className="bg-background py-16 md:py-24">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <Reveal>
             <div className="mb-14 flex items-center gap-3">
@@ -591,7 +570,7 @@ export default function CommunityPage() {
       </section>
 
       {/* Social fabric — coexistence mosaic (from About Mheen) */}
-      <section className="bg-neutral-50 py-28">
+      <section className="bg-neutral-50 py-16 md:py-24">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <Reveal>
             <div className="mb-4 flex items-center gap-3">
@@ -636,7 +615,7 @@ export default function CommunityPage() {
       </section>
 
       {/* Memory Gallery */}
-      <section className="mx-auto mt-20 max-w-6xl px-4 pb-20 sm:px-6">
+      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-24">
         <Reveal>
           <div className="text-start">
             <div className="inline-flex items-center gap-2 rounded-full bg-amber-100 px-4 py-1.5 text-sm text-amber-800">

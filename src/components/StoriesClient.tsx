@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { motion } from "framer-motion";
+import { PageHeader } from "@/components/PageHeader";
 import {
   BookOpen,
   Search,
@@ -298,72 +299,37 @@ export default function StoriesClient({ initialStories, locale, initialHasMore }
 
   return (
     <div className="overflow-x-hidden">
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-primary px-4 pb-32 pt-16 md:-mx-8 md:-mt-8 md:px-8 md:pb-36 md:pt-24">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/80 via-primary to-primary" />
-        <div
-          className="absolute inset-0 opacity-[0.04]"
-          style={{
-            backgroundImage:
-              "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")",
-          }}
-        />
-        <div className="absolute -top-40 left-1/2 h-80 w-[600px] -translate-x-1/2 rounded-full bg-accent/10 blur-3xl" />
+      <PageHeader title={t("title")} subtitle={t("subtitle")} />
 
-        <div className="relative mx-auto max-w-5xl text-center">
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-            className="font-qomra text-4xl font-bold text-white md:text-5xl lg:text-6xl"
-          >
-            {t("title")}
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-            className="mx-auto mt-4 max-w-lg text-base text-white/70 md:text-lg"
-          >
-            {t("subtitle")}
-          </motion.p>
-
-          <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="inline-flex items-center gap-3 rounded-xl border border-white/10 bg-white/10 px-6 py-3 backdrop-blur-sm"
-            >
-              <BookOpen className="h-5 w-5 text-accent" />
-              <span className="text-2xl font-bold text-white">
-                {stories.length}
-              </span>
-              <span className="text-sm text-white/70">{t("total")}</span>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.25 }}
-            >
-              <Link
-                href="/submit"
-                className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-accent px-5 py-3 text-sm font-medium text-primary transition-colors hover:bg-accent/90"
-              >
-                <PenLine className="h-4 w-4" />
-                {t("addStory")}
-              </Link>
-            </motion.div>
+      {/* Search + Stats bar */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        className="mx-auto max-w-3xl px-4 py-8"
+      >
+        <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
+          <div className="flex items-center gap-3">
+            <BookOpen className="h-5 w-5 text-primary" />
+            <span className="text-2xl font-bold text-foreground">{stories.length}</span>
+            <span className="text-sm text-foreground/60">{t("total")}</span>
           </div>
+          <Link
+            href="/submit"
+            className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-primary/90"
+          >
+            <PenLine className="h-4 w-4" />
+            {t("addStory")}
+          </Link>
         </div>
-      </section>
+      </motion.div>
 
-      {/* Search Bar - floating */}
+      {/* Search Bar */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.3 }}
-        className="relative z-10 mx-auto -mt-8 max-w-2xl px-4"
+        className="mx-auto max-w-2xl px-4"
       >
         <div className="flex items-center gap-3 rounded-2xl border border-primary/10 bg-background p-3 shadow-lg">
           <Search className="ms-2 h-5 w-5 shrink-0 text-foreground/40" />

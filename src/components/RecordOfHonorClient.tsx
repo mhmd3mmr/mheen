@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { PageHeader } from "@/components/PageHeader";
 import {
   Search,
   Calendar,
@@ -113,20 +114,7 @@ export function RecordOfHonorClient({
 
   return (
     <div className="min-h-[60vh] overflow-x-hidden pb-20">
-      <section className="relative overflow-hidden bg-primary px-4 pb-24 pt-16 md:px-8 md:pt-24">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/80 via-primary to-primary" />
-        <div className="relative mx-auto max-w-6xl">
-          <motion.h1
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-center font-qomra text-4xl font-bold text-white md:text-5xl"
-          >
-            {t("title")}
-          </motion.h1>
-          <p className="mx-auto mt-4 max-w-2xl text-center text-white/75">{t("subtitle")}</p>
-        </div>
-      </section>
+      <PageHeader title={t("title")} subtitle={t("subtitle")} />
 
       <div className="relative z-10 mx-auto -mt-10 max-w-6xl px-4">
         <div className="rounded-2xl border border-primary/10 bg-background p-4 shadow-lg">

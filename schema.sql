@@ -109,3 +109,21 @@ CREATE TABLE IF NOT EXISTS "community_photos" (
   "created_at" INTEGER NOT NULL DEFAULT (unixepoch()),
   "updated_at" INTEGER NOT NULL DEFAULT (unixepoch())
 );
+
+CREATE TABLE IF NOT EXISTS "protest_videos" (
+  "id" TEXT NOT NULL PRIMARY KEY,
+  "youtube_url" TEXT NOT NULL,
+  "title_ar" TEXT NOT NULL,
+  "title_en" TEXT,
+  "date" TEXT,
+  "created_at" INTEGER NOT NULL DEFAULT (unixepoch())
+);
+
+CREATE TABLE IF NOT EXISTS "protest_banners" (
+  "id" TEXT NOT NULL PRIMARY KEY,
+  "image_url" TEXT NOT NULL,
+  "description_ar" TEXT NOT NULL,
+  "description_en" TEXT,
+  "date" TEXT,
+  "created_at" INTEGER NOT NULL DEFAULT (unixepoch())
+);

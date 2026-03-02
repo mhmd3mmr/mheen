@@ -13,6 +13,8 @@ import {
   UserCog,
   Images,
   ImagePlus,
+  Video,
+  Flag,
 } from "lucide-react";
 
 type Props = {
@@ -25,6 +27,8 @@ const SIDEBAR_ITEMS = [
   { key: "honorRecords", href: "/admin/record-of-honor", icon: Users, adminOnly: false },
   { key: "stories", href: "/admin/stories", icon: BookOpen, adminOnly: false },
   { key: "communityPhotos", href: "/admin/community-photos", icon: Images, adminOnly: false },
+  { key: "protestVideos", href: "/admin/protest-videos", icon: Video, adminOnly: true },
+  { key: "protestBanners", href: "/admin/protest-banners", icon: Flag, adminOnly: true },
   { key: "heroSlides", href: "/admin/hero-slides", icon: ImagePlus, adminOnly: true },
   { key: "users", href: "/admin/users", icon: UserCog, adminOnly: true },
 ] as const;

@@ -9,8 +9,8 @@ import { Menu, X, Globe, LogOut, Plus } from "lucide-react";
 
 const NAV_ITEMS = [
   { key: "home", href: "/" },
-  { key: "aboutMheen", href: "/about-mheen" },
-  { key: "community", href: "/community" },
+  { key: "revolution", href: "/revolution" },
+  { key: "community", href: "/about-mheen" },
   { key: "recordOfHonor", href: "/record-of-honor" },
   { key: "stories", href: "/stories" },
 ] as const;

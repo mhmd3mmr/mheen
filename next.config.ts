@@ -32,6 +32,15 @@ const nextConfig: NextConfig = {
         : []),
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: "/:locale(ar|en)/community",
+        destination: "/:locale/about-mheen",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 const config = async (): Promise<NextConfig> => {

@@ -4,10 +4,9 @@ const BASE_URL = "https://miheen.com";
 const LOCALES = ["ar", "en"] as const;
 const ROUTES = [
   "",
-  "/about-mheen",
-  "/about",
+  "/revolution",
   "/about-project",
-  "/community",
+  "/about-mheen",
   "/record-of-honor",
   "/stories",
   "/timeline",
