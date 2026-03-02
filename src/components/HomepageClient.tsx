@@ -12,18 +12,10 @@ import {
   Users,
   ArrowRight,
   ArrowLeft,
-  User,
   MapPin,
   Droplets,
 } from "lucide-react";
-
-type StoryRow = {
-  id: string;
-  author_name: string;
-  content: string;
-  image_url: string | null;
-  created_at: number;
-};
+import { StoryCard, StoryModal, type StoryRow } from "@/components/StoriesClient";
 
 type Props = {
   locale: string;
@@ -67,6 +59,7 @@ export function HomepageClient({
   const [activeSlide, setActiveSlide] = useState(0);
   const [hideScrollCue, setHideScrollCue] = useState(false);
   const [loadedSlides, setLoadedSlides] = useState<Record<string, boolean>>({});
+  const [selectedStory, setSelectedStory] = useState<StoryRow | null>(null);
 
   const slides = useMemo(() => {
     const fromAdmin = heroSlides
@@ -358,45 +351,14 @@ export function HomepageClient({
         ) : (
           <>
             <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-              {latestStories.map((story, i) => (
-                <motion.div
+              {latestStories.map((story: StoryRow, i: number) => (
+                <StoryCard
                   key={story.id}
-                  initial={{ opacity: 0, y: 24 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: i * 0.1 }}
-                >
-                  <Link href="/stories">
-                    <div className="group overflow-hidden rounded-2xl border border-primary/8 bg-background shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-                      <div className="aspect-video overflow-hidden bg-primary/5">
-                        {story.image_url ? (
-                          <img
-                            src={story.image_url}
-                            alt=""
-                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/5 to-primary/10">
-                            <BookOpen className="h-12 w-12 text-primary/20" />
-                          </div>
-                        )}
-                      </div>
-                      <div className="p-6">
-                        <div className="mb-3 flex items-center gap-2">
-                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
-                            <User className="h-4 w-4 text-primary" />
-                          </div>
-                          <span className="font-medium text-primary">
-                            {story.author_name || h("anonymous")}
-                          </span>
-                        </div>
-                        <p className="line-clamp-3 text-sm leading-relaxed text-foreground/70">
-                          {story.content}
-                        </p>
-                      </div>
-                    </div>
-                  </Link>
-                </motion.div>
+                  story={story}
+                  locale={locale}
+                  index={i}
+                  onReadMore={() => setSelectedStory(story)}
+                />
               ))}
             </div>
 
@@ -418,6 +380,14 @@ export function HomepageClient({
           </>
         )}
       </section>
+
+      {selectedStory && (
+        <StoryModal
+          story={selectedStory}
+          locale={locale}
+          onClose={() => setSelectedStory(null)}
+        />
+      )}
 
       {/* ─── 4 Pillars Bento Grid ─── */}
       <section className="bg-stone-100/70 py-20">

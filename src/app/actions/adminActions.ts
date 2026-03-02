@@ -50,8 +50,8 @@ export type MartyrRow = {
 };
 
 export async function getMartyrs(): Promise<MartyrRow[]> {
-  await assertAdmin();
   try {
+    await assertAdmin();
     const db = await getDB();
     const { results } = await db
       .prepare(
@@ -68,8 +68,8 @@ export async function getMartyrs(): Promise<MartyrRow[]> {
 }
 
 export async function getPendingMartyrs(): Promise<MartyrRow[]> {
-  await assertAdmin();
   try {
+    await assertAdmin();
     const db = await getDB();
     const { results } = await db
       .prepare(
@@ -168,8 +168,8 @@ export type DetaineeRow = {
 };
 
 export async function getDetainees(): Promise<DetaineeRow[]> {
-  await assertAdmin();
   try {
+    await assertAdmin();
     const db = await getDB();
     const { results } = await db
       .prepare(
@@ -186,8 +186,8 @@ export async function getDetainees(): Promise<DetaineeRow[]> {
 }
 
 export async function getPendingDetainees(): Promise<DetaineeRow[]> {
-  await assertAdmin();
   try {
+    await assertAdmin();
     const db = await getDB();
     const { results } = await db
       .prepare(
@@ -291,8 +291,8 @@ export type StoryRow = {
 };
 
 export async function getAllStories(): Promise<StoryRow[]> {
-  await assertAdmin();
   try {
+    await assertAdmin();
     const db = await getDB();
     try {
       await db.prepare(`ALTER TABLE stories ADD COLUMN title_ar TEXT`).run();
@@ -334,8 +334,8 @@ export async function getAllStories(): Promise<StoryRow[]> {
 }
 
 export async function getPendingStories(): Promise<StoryRow[]> {
-  await assertAdmin();
   try {
+    await assertAdmin();
     const db = await getDB();
     const { results } = await db
       .prepare(
@@ -434,8 +434,8 @@ export type UserRow = {
 };
 
 export async function getUsers(): Promise<UserRow[]> {
-  await assertAdmin();
   try {
+    await assertAdmin();
     const db = await getDB();
     const { results } = await db
       .prepare(
@@ -507,8 +507,8 @@ export type CommunityPhotoRow = {
 };
 
 export async function getAllCommunityPhotos(): Promise<CommunityPhotoRow[]> {
-  await assertAdmin();
   try {
+    await assertAdmin();
     const db = await getDB();
     try {
       await db.prepare(`ALTER TABLE community_photos ADD COLUMN title_ar TEXT`).run();

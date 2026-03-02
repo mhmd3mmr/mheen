@@ -77,7 +77,7 @@ export default async function HomePage({ params }: Props) {
           .first<{ count: number }>(),
         db
           .prepare(
-            "SELECT id, author_name, content, image_url, created_at FROM stories WHERE status = 'approved' ORDER BY id DESC LIMIT 3"
+            "SELECT id, author_name, author_ar, author_en, title_ar, title_en, category, content, content_ar, content_en, tags, image_url, created_at FROM stories WHERE status = 'approved' ORDER BY id DESC LIMIT 3"
           )
           .all(),
         db

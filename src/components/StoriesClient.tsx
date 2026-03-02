@@ -16,7 +16,7 @@ import {
   Clock3,
 } from "lucide-react";
 
-type StoryRow = {
+export type StoryRow = {
   id: string;
   author_name?: string | null;
   author_ar?: string | null;
@@ -115,7 +115,7 @@ function normalizeImageSrc(url: string) {
   }
 }
 
-function StoryCard({
+export function StoryCard({
   story,
   locale,
   index,
@@ -437,7 +437,7 @@ export default function StoriesClient({ initialStories, locale, initialHasMore }
   );
 }
 
-function StoryModal({
+export function StoryModal({
   story,
   locale,
   onClose,
