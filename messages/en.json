@@ -247,7 +247,18 @@
     },
     "gallery": {
       "title": "Photo Gallery",
-      "subtitle": "Images from Mheen"
+      "subtitle": "Images from Mheen",
+      "photosTab": "Photo Archive",
+      "videosTab": "Video Archive",
+      "loadMore": "Load More",
+      "share": "Share",
+      "shareWhatsapp": "WhatsApp",
+      "shareFacebook": "Facebook",
+      "shareX": "X",
+      "copyLink": "Copy Link",
+      "copied": "Link copied",
+      "copyFailed": "Failed to copy link",
+      "close": "Close"
     },
     "timeline": {
       "title": "Timeline",

@@ -247,7 +247,18 @@
     },
     "gallery": {
       "title": "معرض الصور",
-      "subtitle": "صور من بلدة مهين"
+      "subtitle": "صور من بلدة مهين",
+      "photosTab": "أرشيف الصور",
+      "videosTab": "صوت الساحات",
+      "loadMore": "عرض المزيد",
+      "share": "مشاركة",
+      "shareWhatsapp": "واتساب",
+      "shareFacebook": "فيسبوك",
+      "shareX": "X",
+      "copyLink": "نسخ الرابط",
+      "copied": "تم نسخ الرابط",
+      "copyFailed": "تعذر نسخ الرابط",
+      "close": "إغلاق"
     },
     "timeline": {
       "title": "الخط الزمني",

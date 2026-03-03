@@ -3,8 +3,20 @@ export const runtime = "edge";
 import { NextResponse } from "next/server";
 import { getDB } from "@/lib/db";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const hasPagination =
+      searchParams.has("limit") || searchParams.has("offset");
+    const limitRaw = Number(searchParams.get("limit") ?? 20);
+    const offsetRaw = Number(searchParams.get("offset") ?? 0);
+    const limit = Number.isFinite(limitRaw)
+      ? Math.min(Math.max(Math.trunc(limitRaw), 1), 100)
+      : 20;
+    const offset = Number.isFinite(offsetRaw)
+      ? Math.max(Math.trunc(offsetRaw), 0)
+      : 0;
+
     const db = await getDB();
     await db
       .prepare(
@@ -38,13 +50,34 @@ export async function GET() {
         .run();
     } catch {}
 
+    if (!hasPagination) {
+      const { results } = await db
+        .prepare(
+          `SELECT id, youtube_url, title_ar, title_en, date
+           FROM protest_videos ORDER BY sort_order ASC, created_at DESC`
+        )
+        .all();
+      return NextResponse.json({ videos: results ?? [] });
+    }
+
     const { results } = await db
       .prepare(
         `SELECT id, youtube_url, title_ar, title_en, date
-         FROM protest_videos ORDER BY sort_order ASC, created_at DESC`
+         FROM protest_videos
+         ORDER BY sort_order ASC, created_at DESC
+         LIMIT ? OFFSET ?`
       )
+      .bind(limit + 1, offset)
       .all();
-    return NextResponse.json({ videos: results ?? [] });
+
+    const rows = (results ?? []) as Array<Record<string, unknown>>;
+    const hasMore = rows.length > limit;
+    const videos = hasMore ? rows.slice(0, limit) : rows;
+
+    return NextResponse.json({
+      videos,
+      pagination: { limit, offset, hasMore },
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to load videos";
     return NextResponse.json({ videos: [], error: message }, { status: 500 });
