@@ -238,30 +238,6 @@ export default function CommunityPage() {
         </div>
       </section>
 
-      {/* People, Customs & Traditions */}
-      <section className="w-full bg-[#fdfbf7] py-16 md:py-24">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.6 }}
-            className="text-center"
-          >
-            <div className="mx-auto inline-flex rounded-full bg-amber-100 p-3 text-amber-700">
-              <Coffee className="h-5 w-5" />
-            </div>
-            <h2 className="mt-5 text-center font-qomra text-3xl font-bold text-primary md:text-4xl">
-              {t("peopleTitle")}
-            </h2>
-            <p className="mx-auto mt-6 max-w-4xl text-center text-lg font-medium leading-relaxed text-gray-700 md:text-xl">
-              {t("peopleText")}
-            </p>
-          </motion.div>
-        </div>
-      </section>
-
       {/* Historical roots & name origin (from About Mheen) */}
       <section className="bg-background py-16 md:py-24">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
@@ -406,6 +382,30 @@ export default function CommunityPage() {
               </p>
             </div>
           </Reveal>
+        </div>
+      </section>
+
+      {/* People, Customs & Traditions */}
+      <section className="w-full bg-[#fdfbf7] py-16 md:py-24">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.6 }}
+            className="text-center"
+          >
+            <div className="mx-auto inline-flex rounded-full bg-amber-100 p-3 text-amber-700">
+              <Coffee className="h-5 w-5" />
+            </div>
+            <h2 className="mt-5 text-center font-qomra text-3xl font-bold text-primary md:text-4xl">
+              {t("peopleTitle")}
+            </h2>
+            <p className="mx-auto mt-6 max-w-4xl text-center text-lg font-medium leading-relaxed text-gray-700 md:text-xl">
+              {t("peopleText")}
+            </p>
+          </motion.div>
         </div>
       </section>
 
