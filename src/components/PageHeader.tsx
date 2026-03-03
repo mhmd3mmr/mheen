@@ -39,7 +39,7 @@ export function PageHeader({ title, subtitle, backgroundImage }: PageHeaderProps
         </>
       )}
 
-      <div className="relative z-20 container mx-auto w-full px-4 md:px-6 lg:px-8">
+      <div className="relative z-20 mx-auto flex w-full max-w-6xl flex-col items-start px-4 text-start sm:px-6 lg:px-8">
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
