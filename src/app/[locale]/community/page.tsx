@@ -394,15 +394,15 @@ export default function CommunityPage() {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.6 }}
-            className="text-center"
+            className="flex flex-col items-start text-start"
           >
-            <div className="mx-auto inline-flex rounded-full bg-amber-100 p-3 text-amber-700">
+            <div className="inline-flex rounded-full bg-amber-100 p-3 text-amber-700">
               <Coffee className="h-5 w-5" />
             </div>
-            <h2 className="mt-5 text-center font-qomra text-3xl font-bold text-primary md:text-4xl">
+            <h2 className="mt-5 font-qomra text-3xl font-bold text-primary md:text-4xl">
               {t("peopleTitle")}
             </h2>
-            <p className="mx-auto mt-6 max-w-4xl text-center text-lg font-medium leading-relaxed text-gray-700 md:text-xl">
+            <p className="mt-6 max-w-3xl text-lg font-medium leading-relaxed text-gray-700 md:text-xl">
               {t("peopleText")}
             </p>
           </motion.div>

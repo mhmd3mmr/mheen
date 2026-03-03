@@ -14,7 +14,7 @@ const SVG_PATTERN =
 
 export function PageHeader({ title, subtitle, backgroundImage }: PageHeaderProps) {
   return (
-    <section className="relative flex h-[35vh] min-h-[250px] max-h-[400px] w-full flex-col items-center justify-center overflow-hidden text-center">
+    <section className="relative flex h-[35vh] min-h-[250px] max-h-[400px] w-full flex-col items-start justify-center overflow-hidden text-start">
       {backgroundImage ? (
         <>
           <Image
@@ -39,7 +39,7 @@ export function PageHeader({ title, subtitle, backgroundImage }: PageHeaderProps
         </>
       )}
 
-      <div className="relative z-20 px-4">
+      <div className="relative z-20 container mx-auto w-full px-4 md:px-6 lg:px-8">
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -53,7 +53,7 @@ export function PageHeader({ title, subtitle, backgroundImage }: PageHeaderProps
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-            className="mx-auto mt-4 max-w-2xl text-lg font-light text-emerald-50/90 md:text-xl"
+            className="mt-4 max-w-3xl text-lg font-light text-emerald-50/90 md:text-xl"
           >
             {subtitle}
           </motion.p>
