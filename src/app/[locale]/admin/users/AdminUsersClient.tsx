@@ -4,7 +4,6 @@ import { useState, useRef, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { Search, UserCog, Save } from "lucide-react";
-import { updateUserRole } from "@/app/actions/adminActions";
 import type { UserRow } from "@/app/actions/adminActions";
 
 type Props = {
@@ -64,12 +63,25 @@ export default function AdminUsersClient({ initialUsers }: Props) {
     formData.set("role", user.role);
 
     startTransition(async () => {
-      const result = await updateUserRole(formData);
-      setSavingId(null);
-      if (result.success) {
-        showToast(t("roleUpdated"), "success");
-      } else {
-        showToast(result.error, "error");
+      try {
+        const res = await fetch("/api/admin/users/role", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: formData.get("id"),
+            role: formData.get("role"),
+          }),
+        });
+        const result = (await res.json()) as { success?: boolean; error?: string };
+        if (res.ok && result.success) {
+          showToast(t("roleUpdated"), "success");
+        } else {
+          showToast(result.error ?? "Failed to update role", "error");
+        }
+      } catch {
+        showToast("Failed to update role", "error");
+      } finally {
+        setSavingId(null);
       }
     });
   }
