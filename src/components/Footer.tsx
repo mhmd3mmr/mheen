@@ -34,7 +34,7 @@ export function Footer() {
               {t("ctaDesc")}
             </p>
             <Link
-              href="/submit"
+              href="/contribute"
               className="mt-5 inline-flex items-center gap-2 rounded-lg border border-white/20 px-4 py-2.5 text-sm font-medium text-white transition-all hover:border-white/40 hover:bg-white/10"
             >
               <Plus className="h-4 w-4" />

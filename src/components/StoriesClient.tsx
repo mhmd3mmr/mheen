@@ -315,7 +315,7 @@ export default function StoriesClient({ initialStories, locale, initialHasMore }
             <span className="text-sm text-foreground/60">{t("total")}</span>
           </div>
           <Link
-            href="/submit"
+            href="/contribute"
             className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-primary/90"
           >
             <PenLine className="h-4 w-4" />
