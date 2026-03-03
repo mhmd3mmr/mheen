@@ -2,7 +2,7 @@
 
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Trash2, Pencil, X, Save, Plus, ImageIcon } from "lucide-react";
+import { Search, Trash2, Pencil, X, Save, Plus, ImageIcon, GripVertical } from "lucide-react";
 import { FileUpload } from "@/components/FileUpload";
 
 type BannerRow = {
@@ -11,6 +11,7 @@ type BannerRow = {
   description_ar: string;
   description_en: string | null;
   date: string | null;
+  sort_order?: number;
   created_at: number;
 };
 
@@ -30,6 +31,8 @@ export default function AdminProtestBannersClient({ initialBanners }: Props) {
   const [uploading, setUploading] = useState(false);
 
   const [saving, setSaving] = useState(false);
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [savingOrder, setSavingOrder] = useState(false);
   const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
   const [, startTransition] = useTransition();
   const toastTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -56,6 +59,38 @@ export default function AdminProtestBannersClient({ initialBanners }: Props) {
     setFormDescEn(b.description_en ?? "");
     setFormDate(b.date ?? "");
     setShowForm(true);
+  }
+
+  function moveById(list: BannerRow[], fromId: string, toId: string) {
+    const fromIndex = list.findIndex((item) => item.id === fromId);
+    const toIndex = list.findIndex((item) => item.id === toId);
+    if (fromIndex < 0 || toIndex < 0 || fromIndex === toIndex) return list;
+    const next = [...list];
+    const [moved] = next.splice(fromIndex, 1);
+    next.splice(toIndex, 0, moved);
+    return next;
+  }
+
+  async function persistOrder(nextList: BannerRow[]) {
+    setSavingOrder(true);
+    try {
+      const res = await fetch("/api/admin/protest-banners", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ordered_ids: nextList.map((item) => item.id) }),
+      });
+      const data = (await res.json()) as { success?: boolean; error?: string };
+      if (!res.ok || !data.success) {
+        showToast(data.error ?? "فشل حفظ الترتيب", "error");
+        return;
+      }
+      showToast("تم حفظ الترتيب", "success");
+      startTransition(() => router.refresh());
+    } catch {
+      showToast("فشل حفظ الترتيب", "error");
+    } finally {
+      setSavingOrder(false);
+    }
   }
 
   async function handleSubmit() {
@@ -215,6 +250,11 @@ export default function AdminProtestBannersClient({ initialBanners }: Props) {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {searchQuery && (
+          <div className="col-span-full rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+            لإعادة الترتيب بالسحب والإفلات، امسح البحث أولاً.
+          </div>
+        )}
         {filtered.length === 0 && (
           <div className="col-span-full rounded-2xl border border-dashed border-primary/20 py-12 text-center text-sm text-foreground/50">
             <ImageIcon className="mx-auto mb-2 h-8 w-8 text-foreground/30" />
@@ -222,7 +262,33 @@ export default function AdminProtestBannersClient({ initialBanners }: Props) {
           </div>
         )}
         {filtered.map((b) => (
-          <article key={b.id} className="rounded-2xl border border-primary/10 bg-background p-4 shadow-sm">
+          <article
+            key={b.id}
+            className="rounded-2xl border border-primary/10 bg-background p-4 shadow-sm"
+            draggable={!searchQuery && !savingOrder}
+            onDragStart={() => setDraggingId(b.id)}
+            onDragEnd={() => setDraggingId(null)}
+            onDragOver={(e) => {
+              if (!searchQuery) e.preventDefault();
+            }}
+            onDrop={() => {
+              if (!draggingId || searchQuery || draggingId === b.id) return;
+              const next = moveById(banners, draggingId, b.id);
+              setBanners(next);
+              setDraggingId(null);
+              void persistOrder(next);
+            }}
+          >
+            <div className="mb-2 flex justify-end">
+              <button
+                type="button"
+                disabled={!!searchQuery || savingOrder}
+                className="cursor-grab rounded-lg border border-primary/15 p-2 text-foreground/50 active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-40"
+                title="اسحب لإعادة الترتيب"
+              >
+                <GripVertical className="h-4 w-4" />
+              </button>
+            </div>
             <img
               src={b.image_url}
               alt={b.description_ar}

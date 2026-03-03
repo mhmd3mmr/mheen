@@ -116,6 +116,7 @@ CREATE TABLE IF NOT EXISTS "protest_videos" (
   "title_ar" TEXT NOT NULL,
   "title_en" TEXT,
   "date" TEXT,
+  "sort_order" INTEGER NOT NULL DEFAULT 0,
   "created_at" INTEGER NOT NULL DEFAULT (unixepoch())
 );
 
@@ -125,5 +126,6 @@ CREATE TABLE IF NOT EXISTS "protest_banners" (
   "description_ar" TEXT NOT NULL,
   "description_en" TEXT,
   "date" TEXT,
+  "sort_order" INTEGER NOT NULL DEFAULT 0,
   "created_at" INTEGER NOT NULL DEFAULT (unixepoch())
 );

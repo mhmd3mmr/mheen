@@ -23,10 +23,29 @@ async function ensureTable() {
         title_ar TEXT NOT NULL,
         title_en TEXT,
         date TEXT,
+        sort_order INTEGER NOT NULL DEFAULT 0,
         created_at INTEGER NOT NULL DEFAULT (unixepoch())
       )`
     )
     .run();
+  try {
+    await db.prepare(`ALTER TABLE protest_videos ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0`).run();
+  } catch {}
+  try {
+    await db
+      .prepare(
+        `WITH ranked AS (
+           SELECT id, ROW_NUMBER() OVER (ORDER BY created_at DESC) AS rn
+           FROM protest_videos
+         )
+         UPDATE protest_videos
+         SET sort_order = (
+           SELECT rn FROM ranked WHERE ranked.id = protest_videos.id
+         )
+         WHERE COALESCE(sort_order, 0) = 0`
+      )
+      .run();
+  } catch {}
   return db;
 }
 
@@ -36,8 +55,8 @@ export async function GET() {
     const db = await ensureTable();
     const { results } = await db
       .prepare(
-        `SELECT id, youtube_url, title_ar, title_en, date, created_at
-         FROM protest_videos ORDER BY created_at DESC`
+        `SELECT id, youtube_url, title_ar, title_en, date, sort_order, created_at
+         FROM protest_videos ORDER BY sort_order ASC, created_at DESC`
       )
       .all();
     return NextResponse.json({ videos: results ?? [] });
@@ -67,11 +86,16 @@ export async function POST(request: Request) {
 
     const db = await ensureTable();
     const id = crypto.randomUUID();
+    const nextOrderRow = await db
+      .prepare(`SELECT COALESCE(MAX(sort_order), 0) + 1 AS next_order FROM protest_videos`)
+      .first<{ next_order: number }>();
+    const nextOrder = Number(nextOrderRow?.next_order ?? 1);
+
     await db
       .prepare(
-        `INSERT INTO protest_videos (id, youtube_url, title_ar, title_en, date) VALUES (?, ?, ?, ?, ?)`
+        `INSERT INTO protest_videos (id, youtube_url, title_ar, title_en, date, sort_order) VALUES (?, ?, ?, ?, ?, ?)`
       )
-      .bind(id, youtubeUrl, titleAr, titleEn, date)
+      .bind(id, youtubeUrl, titleAr, titleEn, date, nextOrder)
       .run();
 
     revalidatePath("/[locale]/revolution", "page");
@@ -115,6 +139,34 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ success: true });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to update";
+    const status = message === "Unauthorized" ? 401 : 500;
+    return NextResponse.json({ error: message }, { status });
+  }
+}
+
+export async function PUT(request: Request) {
+  try {
+    await assertAdmin();
+    const body = (await request.json()) as { ordered_ids?: string[] };
+    const orderedIds = Array.isArray(body.ordered_ids)
+      ? body.ordered_ids.map((id) => String(id ?? "").trim()).filter(Boolean)
+      : [];
+    if (orderedIds.length === 0) {
+      return NextResponse.json({ error: "ordered_ids is required" }, { status: 400 });
+    }
+
+    const db = await ensureTable();
+    for (let i = 0; i < orderedIds.length; i += 1) {
+      await db
+        .prepare(`UPDATE protest_videos SET sort_order = ? WHERE id = ?`)
+        .bind(i + 1, orderedIds[i])
+        .run();
+    }
+
+    revalidatePath("/[locale]/revolution", "page");
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to reorder";
     const status = message === "Unauthorized" ? 401 : 500;
     return NextResponse.json({ error: message }, { status });
   }
