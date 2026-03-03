@@ -159,11 +159,11 @@ export function Navbar() {
           </div>
 
           <Link
-            href="/submit"
+            href="/contribute"
             className="ms-1.5 flex items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 text-[13px] font-semibold text-primary transition-all hover:brightness-110"
           >
             <Plus className="h-3.5 w-3.5" />
-            {t("submitStory")}
+            {t("contribute")}
           </Link>
         </div>
 
@@ -259,12 +259,12 @@ export function Navbar() {
               />
 
               <Link
-                href="/submit"
+                href="/contribute"
                 onClick={() => setMobileOpen(false)}
                 className="flex items-center justify-center gap-2 rounded-lg bg-accent px-4 py-3 text-sm font-semibold text-primary transition-all hover:brightness-110"
               >
                 <Plus className="h-4 w-4" />
-                {t("submitStory")}
+                {t("contribute")}
               </Link>
 
               <div className="mt-3">

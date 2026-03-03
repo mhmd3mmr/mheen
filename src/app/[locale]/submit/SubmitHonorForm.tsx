@@ -6,15 +6,15 @@ import { motion } from "framer-motion";
 import { FileUpload } from "@/components/FileUpload";
 import { CheckCircle2 } from "lucide-react";
 
-type Props = { onError?: (msg: string) => void };
+type Props = { onError?: (msg: string) => void; initialRecordType?: RecordType };
 type RecordType = "martyr" | "detainee";
 type MartyrdomMethod = "combatant" | "detained_then_martyred" | "civilian_bombing" | "other";
 
-export function SubmitHonorForm({ onError }: Props) {
+export function SubmitHonorForm({ onError, initialRecordType = "martyr" }: Props) {
   const t = useTranslations("pages.submit");
   const formRef = useRef<HTMLFormElement>(null);
 
-  const [recordType, setRecordType] = useState<RecordType>("martyr");
+  const [recordType, setRecordType] = useState<RecordType>(initialRecordType);
   const [martyrdomMethod, setMartyrdomMethod] = useState<MartyrdomMethod>("combatant");
   const [imageUrl, setImageUrl] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);

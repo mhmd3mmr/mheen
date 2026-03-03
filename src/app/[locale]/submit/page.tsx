@@ -3,6 +3,7 @@
 export const runtime = 'edge';
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { SubmitForm } from "./SubmitForm";
 import { SubmitHonorForm } from "./SubmitHonorForm";
@@ -13,7 +14,10 @@ type Tab = (typeof TABS)[number];
 
 export default function SubmitPage() {
   const t = useTranslations("pages.submit");
-  const [activeTab, setActiveTab] = useState<Tab>("story");
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const initialTab: Tab = tabParam === "honor" ? "honor" : "story";
+  const [activeTab, setActiveTab] = useState<Tab>(initialTab);
   const [errorMessage, setErrorMessage] = useState("");
 
   const tabConfig = {
@@ -59,7 +63,12 @@ export default function SubmitPage() {
         {/* Forms */}
         <div className="mt-6">
           {activeTab === "story" && <SubmitForm onError={setErrorMessage} />}
-          {activeTab === "honor" && <SubmitHonorForm onError={setErrorMessage} />}
+          {activeTab === "honor" && (
+            <SubmitHonorForm
+              onError={setErrorMessage}
+              initialRecordType={searchParams.get("type") === "detainee" ? "detainee" : "martyr"}
+            />
+          )}
         </div>
 
         {errorMessage && (

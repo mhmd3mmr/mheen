@@ -5,6 +5,7 @@ const LOCALES = ["ar", "en"] as const;
 const ROUTES = [
   "",
   "/revolution",
+  "/contribute",
   "/about-project",
   "/about-mheen",
   "/record-of-honor",
