@@ -436,9 +436,18 @@ export function StoryModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 p-3 backdrop-blur-sm md:p-6" role="dialog" aria-modal="true">
-      <div className="mx-auto h-full max-w-5xl overflow-hidden rounded-2xl bg-background shadow-2xl">
-        <div className="grid h-full grid-cols-1 md:grid-cols-2">
-          <div className="relative aspect-[3/4] md:aspect-auto md:h-full">
+      <div className="relative mx-auto max-h-[90vh] max-w-5xl overflow-y-auto rounded-2xl bg-background shadow-2xl">
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute end-3 top-3 z-50 inline-flex rounded-full bg-black/50 p-2 text-white transition-colors hover:bg-black/70"
+          aria-label={t("close")}
+        >
+          <X className="h-4 w-4" />
+        </button>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2">
+          <div className="relative h-48 w-full shrink-0 md:h-64 lg:h-full">
             {story.image_url && isImage(story.image_url) ? (
               <Image
                 src={normalizeImageSrc(story.image_url)}
@@ -458,17 +467,10 @@ export function StoryModal({
             <span className="absolute top-3 start-3 rounded-full bg-black/45 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur-sm">
               {categoryLabel}
             </span>
-            <button
-              type="button"
-              onClick={onClose}
-              className="absolute top-3 end-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-black/55 text-white transition-colors hover:bg-black/75"
-              aria-label={t("close")}
-            >
-              <X className="h-4 w-4" />
-            </button>
           </div>
-          <div className="flex h-full flex-col overflow-hidden">
-            <div className="border-b border-primary/10 px-5 py-4 md:px-6">
+
+          <div className="flex flex-col">
+            <div className="border-b border-primary/10 p-6">
               <h2 className="line-clamp-2 text-xl font-bold text-foreground">{title || t("untitledStory")}</h2>
               <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-foreground/60">
                 <span className="inline-flex items-center gap-1">
@@ -485,17 +487,9 @@ export function StoryModal({
                 </span>
               </div>
             </div>
-            <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4 md:px-6 md:py-5">
-              <p className="whitespace-pre-wrap text-sm leading-7 text-foreground/80">{fullContent}</p>
-            </div>
-            <div className="border-t border-primary/10 px-5 py-3 md:px-6">
-              <button
-                type="button"
-                onClick={onClose}
-                className="rounded-lg border border-primary/20 px-4 py-2 text-sm text-foreground/80 hover:bg-primary/5"
-              >
-                {t("close")}
-              </button>
+
+            <div className="p-6">
+              <p className="whitespace-pre-wrap text-base leading-relaxed text-foreground/80">{fullContent}</p>
             </div>
           </div>
         </div>
