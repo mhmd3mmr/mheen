@@ -107,8 +107,29 @@ async function getRecordsPageOne(): Promise<{ records: UnifiedRecordRow[]; hasMo
     }>();
 
   const records: UnifiedRecordRow[] = [
-    ...martyrs.results.map((m) => ({ recordType: "martyr" as const, ...m })),
-    ...detainees.results.map((d) => ({ recordType: "detainee" as const, ...d })),
+    ...(martyrs.results ?? []).map((m) => ({
+      recordType: "martyr" as const,
+      id: m.id,
+      name_ar: m.name_ar,
+      name_en: m.name_en,
+      image_url: m.image_url,
+      death_date: m.death_date,
+      birth_date: m.birth_date,
+      martyrdom_method: m.martyrdom_method,
+      martyrdom_details: m.martyrdom_details,
+      tags: m.tags,
+    })),
+    ...(detainees.results ?? []).map((d) => ({
+      recordType: "detainee" as const,
+      id: d.id,
+      name_ar: d.name_ar,
+      name_en: d.name_en,
+      image_url: d.image_url,
+      arrest_date: d.arrest_date,
+      status_ar: d.status_ar,
+      status_en: d.status_en,
+      tags: d.tags,
+    })),
   ];
 
   return { records, hasMore: false };
