@@ -10,6 +10,7 @@ const ROUTES = [
   "/about-project",
   "/about-mheen",
   "/record-of-honor",
+  "/detainees",
   "/stories",
   "/timeline",
   "/uprising",
@@ -91,43 +92,49 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
 
     for (const locale of LOCALES) {
+      // Stories deep links: /stories?id=...
       for (const s of stories.results ?? []) {
         entries.push({
-          url: `${BASE_URL}/${locale}/stories/${s.id}`,
+          url: `${BASE_URL}/${locale}/stories?id=${encodeURIComponent(s.id)}`,
           lastModified: fromUnix(s.created_at),
           changeFrequency: "weekly",
           priority: 0.7,
         });
       }
 
+      // Martyrs: /record-of-honor?id=...
       for (const r of martyrs.results ?? []) {
         entries.push({
-          url: `${BASE_URL}/${locale}/record-of-honor/${r.id}`,
+          url: `${BASE_URL}/${locale}/record-of-honor?id=${encodeURIComponent(r.id)}`,
           lastModified: r.death_date ? new Date(r.death_date) : now,
           changeFrequency: "monthly",
-          priority: 0.6,
-        });
-      }
-      for (const r of detainees.results ?? []) {
-        entries.push({
-          url: `${BASE_URL}/${locale}/record-of-honor/${r.id}`,
-          lastModified: r.arrest_date ? new Date(r.arrest_date) : now,
-          changeFrequency: "monthly",
-          priority: 0.6,
+          priority: 0.65,
         });
       }
 
+      // Detainees: /detainees?id=...
+      for (const r of detainees.results ?? []) {
+        entries.push({
+          url: `${BASE_URL}/${locale}/detainees?id=${encodeURIComponent(r.id)}`,
+          lastModified: r.arrest_date ? new Date(r.arrest_date) : now,
+          changeFrequency: "monthly",
+          priority: 0.65,
+        });
+      }
+
+      // Gallery items (banners + community photos)
       for (const [id, lastModified] of photoIds.entries()) {
         entries.push({
-          url: `${BASE_URL}/${locale}/gallery/${id}`,
+          url: `${BASE_URL}/${locale}/gallery/${encodeURIComponent(id)}`,
           lastModified,
           changeFrequency: "monthly",
           priority: 0.55,
         });
       }
     }
-  } catch {
-    // Keep static sitemap entries if DB is unavailable.
+  } catch (err) {
+    console.error("Sitemap generation error:", err);
+    // نبقي فقط المسارات الثابتة إذا فشل الوصول لقاعدة البيانات.
   }
 
   return entries;
