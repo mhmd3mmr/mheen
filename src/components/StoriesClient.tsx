@@ -436,18 +436,17 @@ export function StoryModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 p-3 backdrop-blur-sm md:p-6" role="dialog" aria-modal="true">
-      <div className="relative mx-auto max-h-[90vh] max-w-5xl overflow-y-auto rounded-2xl bg-background shadow-2xl">
+      <div className="relative mx-auto flex max-h-[90vh] w-full max-w-5xl flex-col overflow-y-auto rounded-2xl bg-white/50 p-0 shadow-2xl dark:bg-slate-900 md:rounded-3xl lg:flex-row lg:overflow-hidden">
         <button
           type="button"
           onClick={onClose}
-          className="absolute end-3 top-3 z-50 inline-flex rounded-full bg-black/50 p-2 text-white transition-colors hover:bg-black/70"
+          className="absolute end-4 top-4 z-50 rounded-full bg-white/80 p-2 text-gray-800 shadow-sm backdrop-blur transition-all hover:bg-white"
           aria-label={t("close")}
         >
           <X className="h-4 w-4" />
         </button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2">
-          <div className="relative h-48 w-full shrink-0 md:h-64 lg:h-full">
+        <div className="relative h-64 w-full shrink-0 lg:sticky lg:top-0 lg:h-auto lg:w-2/5 xl:w-1/2">
             {story.image_url && isImage(story.image_url) ? (
               <Image
                 src={normalizeImageSrc(story.image_url)}
@@ -455,7 +454,7 @@ export function StoryModal({
                 fill
                 sizes="(max-width: 768px) 100vw, 50vw"
                 quality={85}
-                style={{ objectFit: "cover" }}
+                className="object-cover"
                 placeholder="blur"
                 blurDataURL={BLUR_DATA_URL}
               />
@@ -469,10 +468,11 @@ export function StoryModal({
             </span>
           </div>
 
-          <div className="flex flex-col">
-            <div className="border-b border-primary/10 p-6">
-              <h2 className="line-clamp-2 text-xl font-bold text-foreground">{title || t("untitledStory")}</h2>
-              <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-foreground/60">
+          <div className="flex-1 p-6 md:p-10 lg:overflow-y-auto lg:p-12">
+              <h2 className="mb-4 text-3xl font-bold leading-tight text-foreground md:text-4xl">
+                {title || t("untitledStory")}
+              </h2>
+              <div className="mb-8 flex flex-wrap items-center gap-4 border-b border-gray-100 pb-6 text-sm text-gray-500 dark:border-slate-700 dark:text-slate-400">
                 <span className="inline-flex items-center gap-1">
                   <User className="h-3.5 w-3.5" />
                   {author}
@@ -486,13 +486,18 @@ export function StoryModal({
                   {readingTime.replace(/^•\s*/, "")}
                 </span>
               </div>
-            </div>
 
-            <div className="p-6">
-              <p className="whitespace-pre-wrap text-base leading-relaxed text-foreground/80">{fullContent}</p>
-            </div>
+              <div className="space-y-6 text-start text-base leading-loose text-gray-700 md:text-lg dark:text-slate-200">
+                {fullContent
+                  .split("\n")
+                  .filter((line) => line.trim().length > 0)
+                  .map((paragraph, i) => (
+                    <p key={i} className="whitespace-pre-wrap">
+                      {paragraph}
+                    </p>
+                  ))}
+              </div>
           </div>
-        </div>
       </div>
     </div>
   );
