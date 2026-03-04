@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type UIEvent } from "react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
@@ -433,20 +433,29 @@ export function StoryModal({
     other: t("categoryOther"),
   } as const;
   const categoryLabel = categoryMap[(story.category ?? "other") as keyof typeof categoryMap];
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  function handleModalScroll(e: UIEvent<HTMLDivElement>) {
+    if (typeof window !== "undefined" && window.innerWidth >= 1024) return;
+    setIsScrolled(e.currentTarget.scrollTop > 60);
+  }
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 p-3 backdrop-blur-sm md:p-6" role="dialog" aria-modal="true">
-      <div className="relative mx-auto flex max-h-[90vh] w-full max-w-5xl flex-col overflow-y-auto rounded-2xl bg-white/50 p-0 shadow-2xl dark:bg-slate-900 md:rounded-3xl lg:flex-row lg:overflow-hidden">
+      <div
+        onScroll={handleModalScroll}
+        className="relative mx-auto flex max-h-[90vh] w-full max-w-5xl flex-col overflow-y-auto rounded-2xl bg-white/50 p-0 shadow-2xl dark:bg-slate-900 md:rounded-3xl lg:flex-row lg:overflow-hidden"
+      >
         <button
           type="button"
           onClick={onClose}
-          className="absolute end-4 top-4 z-50 rounded-full bg-white/80 p-2 text-gray-800 shadow-sm backdrop-blur transition-all hover:bg-white"
+          className="absolute start-4 top-4 z-50 rounded-full bg-white/80 p-2 text-gray-800 shadow-sm backdrop-blur transition-all hover:bg-white lg:start-auto lg:end-4"
           aria-label={t("close")}
         >
           <X className="h-4 w-4" />
         </button>
 
-        <div className="relative h-64 w-full shrink-0 lg:sticky lg:top-0 lg:h-auto lg:w-2/5 xl:w-1/2">
+        <div className="relative hidden h-64 w-full shrink-0 lg:sticky lg:top-0 lg:block lg:h-auto lg:w-2/5 xl:w-1/2">
             {story.image_url && isImage(story.image_url) ? (
               <Image
                 src={normalizeImageSrc(story.image_url)}
@@ -469,25 +478,102 @@ export function StoryModal({
           </div>
 
           <div className="flex-1 p-6 md:p-10 lg:overflow-y-auto lg:p-12">
-              <h2 className="mb-4 text-3xl font-bold leading-tight text-slate-100 md:text-4xl">
-                {title || t("untitledStory")}
-              </h2>
-              <div className="mb-8 flex flex-wrap items-center gap-4 border-b border-gray-100 pb-6 text-sm text-gray-500 dark:border-slate-700 dark:text-slate-400">
-                <span className="inline-flex items-center gap-1">
-                  <User className="h-3.5 w-3.5" />
-                  {author}
-                </span>
-                <span className="inline-flex items-center gap-1">
-                  <Calendar className="h-3.5 w-3.5" />
-                  {dateStr}
-                </span>
-                <span className="inline-flex items-center gap-1">
-                  <Clock3 className="h-3.5 w-3.5" />
-                  {readingTime.replace(/^•\s*/, "")}
-                </span>
+              <div
+                className={`sticky top-0 z-40 -mx-6 bg-[#1e2329] px-6 pb-4 pt-6 transition-all duration-300 md:-mx-10 md:px-8 lg:hidden ${
+                  isScrolled ? "border-b border-white/10 shadow-md" : ""
+                }`}
+              >
+                <div className="relative">
+                  <div
+                    className={`relative w-full overflow-hidden transition-all duration-500 ease-in-out ${
+                      isScrolled ? "h-0" : "h-56 md:h-72"
+                    }`}
+                  >
+                    {story.image_url && isImage(story.image_url) ? (
+                      <Image
+                        src={normalizeImageSrc(story.image_url)}
+                        alt={title || t("untitledStory") || "صورة من أرشيف بلدة مهين"}
+                        fill
+                        sizes="100vw"
+                        quality={85}
+                        className="rounded-t-2xl object-cover"
+                        placeholder="blur"
+                        blurDataURL={BLUR_DATA_URL}
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center rounded-t-2xl bg-primary/10">
+                        <BookOpen className="h-12 w-12 text-primary/30" />
+                      </div>
+                    )}
+                    <span className="absolute top-3 start-3 rounded-full bg-black/45 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur-sm">
+                      {categoryLabel}
+                    </span>
+                  </div>
+
+                  <div
+                    className={`overflow-hidden transition-all duration-500 ease-in-out ${
+                      isScrolled
+                        ? "absolute end-6 top-6 h-14 w-14 rounded-full border-2 border-slate-600 shadow-lg"
+                        : "pointer-events-none h-0 w-0"
+                    }`}
+                  >
+                    {story.image_url && isImage(story.image_url) ? (
+                      <Image
+                        src={normalizeImageSrc(story.image_url)}
+                        alt={title || t("untitledStory") || "صورة من أرشيف بلدة مهين"}
+                        fill
+                        sizes="56px"
+                        quality={85}
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-slate-700">
+                        <BookOpen className="h-6 w-6 text-slate-300" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <h2 className="mt-4 pe-20 text-2xl font-bold leading-tight text-slate-100">
+                  {title || t("untitledStory")}
+                </h2>
+                <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-slate-300">
+                  <span className="inline-flex items-center gap-1">
+                    <User className="h-3.5 w-3.5" />
+                    {author}
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <Calendar className="h-3.5 w-3.5" />
+                    {dateStr}
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <Clock3 className="h-3.5 w-3.5" />
+                    {readingTime.replace(/^•\s*/, "")}
+                  </span>
+                </div>
               </div>
 
-              <div className="space-y-6 text-start text-base leading-loose text-gray-700 md:text-lg dark:text-slate-200">
+              <div className="hidden lg:block">
+                <h2 className="mb-4 text-3xl font-bold leading-tight text-slate-100 md:text-4xl">
+                  {title || t("untitledStory")}
+                </h2>
+                <div className="mb-8 flex flex-wrap items-center gap-4 border-b border-gray-100 pb-6 text-sm text-gray-500 dark:border-slate-700 dark:text-slate-400">
+                  <span className="inline-flex items-center gap-1">
+                    <User className="h-3.5 w-3.5" />
+                    {author}
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <Calendar className="h-3.5 w-3.5" />
+                    {dateStr}
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <Clock3 className="h-3.5 w-3.5" />
+                    {readingTime.replace(/^•\s*/, "")}
+                  </span>
+                </div>
+              </div>
+
+              <div className="pt-4 md:pt-6 lg:pt-0 space-y-6 text-start text-base leading-loose text-gray-700 md:text-lg dark:text-slate-200">
                 {fullContent
                   .split("\n")
                   .filter((line) => line.trim().length > 0)
