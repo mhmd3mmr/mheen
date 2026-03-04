@@ -107,7 +107,8 @@ async function getRecordsPageOne(): Promise<{ records: UnifiedRecordRow[]; hasMo
     }>();
 
   const records: UnifiedRecordRow[] = [
-    ...(martyrs.results ?? []).map((m) => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ...(martyrs.results ?? []).map((m: any) => ({
       recordType: "martyr" as const,
       id: m.id,
       name_ar: m.name_ar,
@@ -119,7 +120,8 @@ async function getRecordsPageOne(): Promise<{ records: UnifiedRecordRow[]; hasMo
       martyrdom_details: m.martyrdom_details,
       tags: m.tags,
     })),
-    ...(detainees.results ?? []).map((d) => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ...(detainees.results ?? []).map((d: any) => ({
       recordType: "detainee" as const,
       id: d.id,
       name_ar: d.name_ar,
