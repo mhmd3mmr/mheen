@@ -108,6 +108,12 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
     : rawImageUrl.startsWith("/")
       ? `${SITE_URL}${rawImageUrl}`
       : `${SITE_URL}/${rawImageUrl}`;
+  const imagePathWithoutQuery = absoluteImageUrl.split("?")[0].toLowerCase();
+  const mimeType = imagePathWithoutQuery.endsWith(".png")
+    ? "image/png"
+    : imagePathWithoutQuery.endsWith(".webp")
+      ? "image/webp"
+      : "image/jpeg";
   const canonical = `${SITE_URL}/${locale}/stories?id=${story.id}`;
 
   return {
@@ -130,6 +136,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
           url: absoluteImageUrl,
           width: 1200,
           height: 630,
+          type: mimeType,
           alt: title,
         },
       ],
