@@ -153,7 +153,7 @@ export function StoryCard({
   const categoryLabel = categoryMap[(story.category ?? "other") as keyof typeof categoryMap];
 
   async function handleShare() {
-    const shareUrl = `https://miheen.com/${locale}/stories?id=${story.id}`;
+    const shareUrl = `https://miheen.com/${locale}/stories?id=${story.id}&v=${story.created_at}`;
     try {
       if (navigator.share) {
         await navigator.share({
