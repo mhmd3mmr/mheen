@@ -523,11 +523,34 @@ export function StoryModal({
                     </span>
                   </div>
 
+                </div>
+
+                <div className={`relative ${isScrolled ? "pe-24" : ""}`}>
+                  <h2 className="mt-4 ps-14 text-2xl font-bold leading-tight text-slate-100 transition-all duration-300">
+                    {title || t("untitledStory")}
+                  </h2>
+                  <div className="mt-3 flex items-center gap-3 overflow-x-auto ps-14 text-xs text-slate-300 transition-all duration-300">
+                    <span className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap">
+                      <User className="h-3.5 w-3.5" />
+                      {author}
+                    </span>
+                    <span className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap">
+                      <Calendar className="h-3.5 w-3.5" />
+                      {dateStr}
+                    </span>
+                    {!isScrolled && (
+                      <span className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap">
+                        <Clock3 className="h-3.5 w-3.5" />
+                        {readingTime.replace(/^•\s*/, "")}
+                      </span>
+                    )}
+                  </div>
+
                   <div
-                    className={`overflow-hidden transition-all duration-500 ease-in-out ${
+                    className={`pointer-events-none absolute end-1 h-16 w-16 overflow-hidden rounded-full border-2 border-slate-500 shadow-lg transition-all duration-500 ease-in-out ${
                       isScrolled
-                        ? "absolute end-5 top-4 h-16 w-16 scale-100 rounded-full border-2 border-slate-500 opacity-100 shadow-lg"
-                        : "pointer-events-none absolute end-5 top-4 h-16 w-16 scale-75 rounded-full border-2 border-slate-500 opacity-0"
+                        ? "top-1/2 scale-100 opacity-100 -translate-y-[58%]"
+                        : "top-4 scale-75 opacity-0 -translate-y-0"
                     }`}
                   >
                     {story.image_url && isImage(story.image_url) ? (
@@ -535,7 +558,7 @@ export function StoryModal({
                         src={normalizeImageSrc(story.image_url)}
                         alt={title || t("untitledStory") || "صورة من أرشيف بلدة مهين"}
                         fill
-                        sizes="56px"
+                        sizes="64px"
                         quality={85}
                         className="object-cover"
                       />
@@ -545,32 +568,6 @@ export function StoryModal({
                       </div>
                     )}
                   </div>
-                </div>
-
-                <h2
-                  className={`mt-4 text-2xl font-bold leading-tight text-slate-100 transition-all duration-300 ${
-                    isScrolled ? "ps-14 pe-24" : "ps-14 pe-0"
-                  }`}
-                >
-                  {title || t("untitledStory")}
-                </h2>
-                <div
-                  className={`mt-3 flex items-center gap-3 overflow-x-auto text-xs text-slate-300 transition-all duration-300 ${
-                    isScrolled ? "ps-14 pe-24" : "ps-14 pe-0"
-                  }`}
-                >
-                  <span className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap">
-                    <User className="h-3.5 w-3.5" />
-                    {author}
-                  </span>
-                  <span className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap">
-                    <Calendar className="h-3.5 w-3.5" />
-                    {dateStr}
-                  </span>
-                  <span className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap">
-                    <Clock3 className="h-3.5 w-3.5" />
-                    {readingTime.replace(/^•\s*/, "")}
-                  </span>
                 </div>
               </div>
 
