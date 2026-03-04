@@ -149,7 +149,7 @@ export function FileUpload({
       maxSizeMB: 0.15,
       maxWidthOrHeight: 1200,
       useWebWorker: true,
-      fileType: "image/webp",
+      fileType: "image/jpeg",
       initialQuality: 0.75,
     });
 
@@ -158,8 +158,8 @@ export function FileUpload({
         type: "image/webp",
         lastModified: Date.now(),
       }),
-      ogImageFile: new File([ogBlob], `${baseName}.webp`, {
-        type: "image/webp",
+      ogImageFile: new File([ogBlob], `${baseName}-og.jpg`, {
+        type: "image/jpeg",
         lastModified: Date.now(),
       }),
     };
@@ -188,12 +188,13 @@ export function FileUpload({
         file.type !== "image/svg+xml"
       ) {
         const { uiImageFile, ogImageFile } = await buildStoryDualVariants(file);
-        const ext = ".webp";
+        const mainExt = ".webp";
+        const ogExt = ".jpg";
         const safeFolder =
           folder.replace(/[^a-z0-9/_-]/gi, "").replace(/^\/+|\/+$/g, "") || "stories";
         const baseId = crypto.randomUUID();
-        const mainKey = `${safeFolder}/${baseId}${ext}`;
-        const ogKey = `${safeFolder}/${baseId}-og${ext}`;
+        const mainKey = `${safeFolder}/${baseId}${mainExt}`;
+        const ogKey = `${safeFolder}/${baseId}-og${ogExt}`;
 
         const [mainUpload, ogUpload] = await Promise.all([
           uploadSingle(uiImageFile, mainKey),

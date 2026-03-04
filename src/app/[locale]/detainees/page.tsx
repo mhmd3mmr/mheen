@@ -39,18 +39,21 @@ function toOgVariantUrl(mainImageUrl: string) {
   try {
     const url = new URL(mainImageUrl);
     const key = url.searchParams.get("key");
-    if (key && /(\.[\w\d_-]+)$/i.test(key)) {
-      url.searchParams.set("key", key.replace(/(\.[\w\d_-]+)$/i, "-og$1"));
+    if (key) {
+      const updatedKey = key.match(/\.(webp|png|jpe?g)$/i)
+        ? key.replace(/\.(webp|png|jpe?g)$/i, "-og.jpg")
+        : `${key}-og.jpg`;
+      url.searchParams.set("key", updatedKey);
       return url.toString();
     }
-    if (/(\.[\w\d_-]+)$/i.test(url.pathname)) {
-      url.pathname = url.pathname.replace(/(\.[\w\d_-]+)$/i, "-og$1");
+    if (url.pathname.match(/\.(webp|png|jpe?g)$/i)) {
+      url.pathname = url.pathname.replace(/\.(webp|png|jpe?g)$/i, "-og.jpg");
       return url.toString();
     }
     return mainImageUrl;
   } catch {
-    if (/(\.[\w\d_-]+)$/i.test(mainImageUrl)) {
-      return mainImageUrl.replace(/(\.[\w\d_-]+)$/i, "-og$1");
+    if (mainImageUrl.match(/\.(webp|png|jpe?g)$/i)) {
+      return mainImageUrl.replace(/\.(webp|png|jpe?g)$/i, "-og.jpg");
     }
     return mainImageUrl;
   }
