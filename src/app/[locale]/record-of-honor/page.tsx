@@ -29,6 +29,7 @@ type UnifiedRecordRow = {
 const SITE_URL = "https://miheen.com";
 const PAGE_SIZE = 24;
 const DEFAULT_SHARE_IMAGE = "/default-share-image.jpg";
+const DEFAULT_MARTYR_OG_IMAGE = "/images/default-martyr-og.jpg";
 
 function summarize(text: string, max = 150) {
   const s = text.replace(/\s+/g, " ").trim();
@@ -42,27 +43,38 @@ function resolveAbsoluteImage(raw: string | null) {
   return `${SITE_URL}/${candidate}`;
 }
 
+function toOgKeyOrPath(input: string) {
+  // Fix corrupted patterns like "image.webp-og.jpg" and keep idempotency for "-og.jpg".
+  const collapsed = input
+    .replace(/-og(-og)+/gi, "-og")
+    .replace(/\.(webp|png|jpe?g)(?=-og\.)/gi, "")
+    .trim();
+
+  if (/ -og\.jpg$/i.test(collapsed)) return collapsed.replace(/\s+/g, "");
+  if (/-og\.(webp|png|jpe?g)$/i.test(collapsed)) {
+    return collapsed.replace(/-og\.(webp|png|jpe?g)$/i, "-og.jpg");
+  }
+  if (/\.(webp|png|jpe?g)$/i.test(collapsed)) {
+    return collapsed.replace(/\.(webp|png|jpe?g)$/i, "-og.jpg");
+  }
+  return `${collapsed}-og.jpg`;
+}
+
 function toOgVariantUrl(mainImageUrl: string) {
   try {
     const url = new URL(mainImageUrl);
     const key = url.searchParams.get("key");
     if (key) {
-      const updatedKey = key.match(/\.(webp|png|jpe?g)$/i)
-        ? key.replace(/\.(webp|png|jpe?g)$/i, "-og.jpg")
-        : `${key}-og.jpg`;
-      url.searchParams.set("key", updatedKey);
+      url.searchParams.set("key", toOgKeyOrPath(key));
       return url.toString();
     }
-    if (url.pathname.match(/\.(webp|png|jpe?g)$/i)) {
-      url.pathname = url.pathname.replace(/\.(webp|png|jpe?g)$/i, "-og.jpg");
+    url.pathname = toOgKeyOrPath(url.pathname);
+    if (url.pathname.includes("-og.jpg")) {
       return url.toString();
     }
     return mainImageUrl;
   } catch {
-    if (mainImageUrl.match(/\.(webp|png|jpe?g)$/i)) {
-      return mainImageUrl.replace(/\.(webp|png|jpe?g)$/i, "-og.jpg");
-    }
-    return mainImageUrl;
+    return toOgKeyOrPath(mainImageUrl);
   }
 }
 
@@ -209,9 +221,9 @@ export async function generateMetadata({
 
   const summary = summarize(rawSummary);
   const mainImageUrl = resolveAbsoluteImage(record.image_url);
-  const ogImageUrl = record.image_url ? toOgVariantUrl(mainImageUrl) : mainImageUrl;
-  // Temporary debugging for OG image pipeline
-  // eslint-disable-next-line no-console
+  const ogImageUrl = record.image_url
+    ? toOgVariantUrl(mainImageUrl)
+    : resolveAbsoluteImage(DEFAULT_MARTYR_OG_IMAGE);
   console.log("OG URL Generated (record-of-honor):", { mainImageUrl, ogImageUrl, id });
 
   const canonical = `${SITE_URL}/${locale}/record-of-honor?id=${record.id}`;

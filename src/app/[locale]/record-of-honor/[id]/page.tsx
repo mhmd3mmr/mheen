@@ -36,6 +36,44 @@ type HonorRecord =
   | ({ recordType: "detainee" } & DetaineeRow);
 
 const SITE_URL = "https://miheen.com";
+const DEFAULT_MARTYR_OG_IMAGE = `${SITE_URL}/images/default-martyr-og.jpg`;
+
+function resolveAbsoluteImage(raw: string | null) {
+  if (!raw) return "";
+  if (raw.startsWith("http://") || raw.startsWith("https://")) return raw;
+  if (raw.startsWith("/")) return `${SITE_URL}${raw}`;
+  return `${SITE_URL}/${raw}`;
+}
+
+function toOgKeyOrPath(input: string) {
+  const collapsed = input
+    .replace(/-og(-og)+/gi, "-og")
+    .replace(/\.(webp|png|jpe?g)(?=-og\.)/gi, "")
+    .trim();
+  if (/-og\.jpg$/i.test(collapsed)) return collapsed;
+  if (/-og\.(webp|png|jpe?g)$/i.test(collapsed)) {
+    return collapsed.replace(/-og\.(webp|png|jpe?g)$/i, "-og.jpg");
+  }
+  if (/\.(webp|png|jpe?g)$/i.test(collapsed)) {
+    return collapsed.replace(/\.(webp|png|jpe?g)$/i, "-og.jpg");
+  }
+  return `${collapsed}-og.jpg`;
+}
+
+function toOgVariantUrl(mainImageUrl: string) {
+  try {
+    const url = new URL(mainImageUrl);
+    const key = url.searchParams.get("key");
+    if (key) {
+      url.searchParams.set("key", toOgKeyOrPath(key));
+      return url.toString();
+    }
+    url.pathname = toOgKeyOrPath(url.pathname);
+    return url.toString();
+  } catch {
+    return toOgKeyOrPath(mainImageUrl);
+  }
+}
 
 function textSummary(text: string, max = 160) {
   const s = text.replace(/\s+/g, " ").trim();
@@ -88,7 +126,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         (isAr ? "توثيق معتقل/مفقود من بلدة مهين." : "A documented detainee/missing person from Mheen.");
 
   const canonical = `${SITE_URL}/${locale}/record-of-honor/${id}`;
-  const image = record.image_url || `${SITE_URL}/images/mheen-oasis-city.webp`;
+  const mainImageUrl = record.image_url ? resolveAbsoluteImage(record.image_url) : "";
+  const ogImageUrl = record.image_url ? toOgVariantUrl(mainImageUrl) : DEFAULT_MARTYR_OG_IMAGE;
 
   return {
     title: `${name} | ${isAr ? "أرشيف مهين" : "Mheen Archive"}`,
@@ -109,13 +148,25 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url: canonical,
       title: name,
       description: textSummary(summary),
-      images: [{ url: image }],
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          type: "image/jpeg",
+          alt: name,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title: name,
       description: textSummary(summary),
-      images: [image],
+      images: [ogImageUrl],
+    },
+    other: {
+      itemprop: "image",
+      image: ogImageUrl,
     },
   };
 }
