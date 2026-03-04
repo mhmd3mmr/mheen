@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { getDB } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
+export const runtime = "edge";
 
 const BASE_URL = "https://miheen.com";
 const LOCALES = ["ar", "en"] as const;
