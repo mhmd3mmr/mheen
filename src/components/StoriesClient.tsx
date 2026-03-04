@@ -184,7 +184,7 @@ export function StoryCard({
         {story.image_url && isImage(story.image_url) ? (
           <Image
             src={normalizeImageSrc(story.image_url)}
-            alt=""
+            alt={storyTitle || "صورة من أرشيف بلدة مهين"}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             quality={85}
@@ -450,7 +450,7 @@ export function StoryModal({
             {story.image_url && isImage(story.image_url) ? (
               <Image
                 src={normalizeImageSrc(story.image_url)}
-                alt={title || t("untitledStory")}
+                alt={title || t("untitledStory") || "صورة من أرشيف بلدة مهين"}
                 fill
                 sizes="(max-width: 768px) 100vw, 50vw"
                 quality={85}

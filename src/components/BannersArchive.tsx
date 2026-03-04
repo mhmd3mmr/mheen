@@ -66,6 +66,7 @@ export function BannersArchive() {
       <div className="columns-1 gap-4 space-y-4 sm:columns-2 md:columns-3 lg:columns-4">
         {banners.map((banner, i) => {
           const desc = locale === "en" ? (banner.description_en || banner.description_ar) : banner.description_ar;
+          const altText = desc || "صورة من أرشيف بلدة مهين";
           return (
             <motion.figure
               key={banner.id}
@@ -78,7 +79,7 @@ export function BannersArchive() {
             >
               <Image
                 src={banner.image_url}
-                alt={desc}
+                alt={altText}
                 width={400}
                 height={500}
                 className="h-auto w-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -119,7 +120,11 @@ export function BannersArchive() {
               </button>
               <Image
                 src={lightbox.image_url}
-                alt={lightbox.description_ar}
+                alt={
+                  (locale === "en"
+                    ? lightbox.description_en || lightbox.description_ar
+                    : lightbox.description_ar) || "صورة من أرشيف بلدة مهين"
+                }
                 width={1200}
                 height={800}
                 className="h-auto max-h-[70vh] w-full rounded-t-2xl object-contain"

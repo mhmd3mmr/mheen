@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { getDB } from "@/lib/db";
 
 const BASE_URL = "https://miheen.com";
 const LOCALES = ["ar", "en"] as const;
@@ -17,7 +18,12 @@ const ROUTES = [
   "/submit-community-photo",
 ] as const;
 
-export default function sitemap(): MetadataRoute.Sitemap {
+function fromUnix(ts?: number | null) {
+  if (!ts || Number.isNaN(Number(ts))) return new Date();
+  return new Date(Number(ts) * 1000);
+}
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
   const entries: MetadataRoute.Sitemap = [];
 
@@ -30,6 +36,98 @@ export default function sitemap(): MetadataRoute.Sitemap {
         priority: route === "" ? 1 : 0.7,
       });
     }
+  }
+
+  try {
+    const db = await getDB();
+    const stories = await db
+      .prepare(
+        `SELECT id, created_at
+         FROM stories
+         WHERE status = 'approved'
+         ORDER BY created_at DESC`
+      )
+      .all<{ id: string; created_at: number }>();
+
+    const martyrs = await db
+      .prepare(
+        `SELECT id, death_date
+         FROM martyrs
+         WHERE status = 'approved'`
+      )
+      .all<{ id: string; death_date: string | null }>();
+
+    const detainees = await db
+      .prepare(
+        `SELECT id, arrest_date
+         FROM detainees
+         WHERE status = 'approved'`
+      )
+      .all<{ id: string; arrest_date: string | null }>();
+
+    const banners = await db
+      .prepare(
+        `SELECT id, created_at
+         FROM protest_banners
+         ORDER BY created_at DESC`
+      )
+      .all<{ id: string; created_at: number }>();
+
+    const communityPhotos = await db
+      .prepare(
+        `SELECT id, COALESCE(updated_at, created_at) AS updated_at
+         FROM community_photos
+         WHERE status = 'approved'
+         ORDER BY updated_at DESC`
+      )
+      .all<{ id: string; updated_at: number }>();
+
+    const photoIds = new Map<string, Date>();
+    for (const row of banners.results ?? []) {
+      photoIds.set(row.id, fromUnix(row.created_at));
+    }
+    for (const row of communityPhotos.results ?? []) {
+      if (!photoIds.has(row.id)) photoIds.set(row.id, fromUnix(row.updated_at));
+    }
+
+    for (const locale of LOCALES) {
+      for (const s of stories.results ?? []) {
+        entries.push({
+          url: `${BASE_URL}/${locale}/stories/${s.id}`,
+          lastModified: fromUnix(s.created_at),
+          changeFrequency: "weekly",
+          priority: 0.7,
+        });
+      }
+
+      for (const r of martyrs.results ?? []) {
+        entries.push({
+          url: `${BASE_URL}/${locale}/record-of-honor/${r.id}`,
+          lastModified: r.death_date ? new Date(r.death_date) : now,
+          changeFrequency: "monthly",
+          priority: 0.6,
+        });
+      }
+      for (const r of detainees.results ?? []) {
+        entries.push({
+          url: `${BASE_URL}/${locale}/record-of-honor/${r.id}`,
+          lastModified: r.arrest_date ? new Date(r.arrest_date) : now,
+          changeFrequency: "monthly",
+          priority: 0.6,
+        });
+      }
+
+      for (const [id, lastModified] of photoIds.entries()) {
+        entries.push({
+          url: `${BASE_URL}/${locale}/gallery/${id}`,
+          lastModified,
+          changeFrequency: "monthly",
+          priority: 0.55,
+        });
+      }
+    }
+  } catch {
+    // Keep static sitemap entries if DB is unavailable.
   }
 
   return entries;

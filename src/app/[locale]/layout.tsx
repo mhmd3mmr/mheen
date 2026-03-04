@@ -34,6 +34,7 @@ export async function generateMetadata({
       languages: {
         ar: "https://miheen.com/ar",
         en: "https://miheen.com/en",
+        "x-default": "https://miheen.com/ar",
       },
     },
     openGraph: {

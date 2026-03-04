@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, Video, Share2, Copy, MessageCircle, Facebook, X, Play } from "lucide-react";
+import { Camera, Video, Share2, Copy, MessageCircle, X, Play } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 
 type BannerItem = {
@@ -128,8 +128,8 @@ export function GalleryTabsClient() {
   }, [lightbox, locale]);
 
   function getShareUrl(itemId: string) {
-    if (typeof window === "undefined") return `https://miheen.com/${locale}/gallery`;
-    return `${window.location.origin}/${locale}/gallery?photo=${itemId}`;
+    if (typeof window === "undefined") return `https://miheen.com/${locale}/gallery/${itemId}`;
+    return `${window.location.origin}/${locale}/gallery/${itemId}`;
   }
 
   async function copyLink(url: string) {
@@ -183,6 +183,7 @@ export function GalleryTabsClient() {
                   locale === "en"
                     ? item.description_en || item.description_ar
                     : item.description_ar;
+                const altText = desc || "صورة من أرشيف بلدة مهين";
                 return (
                   <figure
                     key={item.id}
@@ -191,7 +192,7 @@ export function GalleryTabsClient() {
                   >
                     <img
                       src={item.image_url}
-                      alt={desc}
+                      alt={altText}
                       className="h-auto w-full object-contain transition-transform duration-500 group-hover:scale-105"
                       loading="lazy"
                     />
@@ -298,7 +299,7 @@ export function GalleryTabsClient() {
 
               <img
                 src={lightbox.image_url}
-                alt={lightboxTitle}
+                alt={lightboxTitle || "صورة من أرشيف بلدة مهين"}
                 className="h-auto max-h-[72vh] w-full object-contain"
               />
 
