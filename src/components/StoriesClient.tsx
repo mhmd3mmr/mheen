@@ -479,8 +479,10 @@ export function StoryModal({
 
           <div className="flex-1 p-6 md:p-10 lg:overflow-y-auto lg:p-12">
               <div
-                className={`sticky top-0 z-40 -mx-6 bg-[#111827] px-6 pb-4 pt-5 transition-all duration-300 md:-mx-10 md:px-8 lg:hidden ${
-                  isScrolled ? "border-b border-white/10 shadow-md" : ""
+                className={`sticky top-0 z-40 -mx-6 px-6 pb-4 pt-5 transition-all duration-300 md:-mx-10 md:px-8 lg:hidden ${
+                  isScrolled
+                    ? "border-b border-white/10 bg-slate-900/70 shadow-md backdrop-blur-md"
+                    : "bg-[#111827]"
                 }`}
               >
                 <button
