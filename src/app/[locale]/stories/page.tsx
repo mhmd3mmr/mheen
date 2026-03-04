@@ -34,13 +34,6 @@ function summarize(text: string, max = 150) {
   return s.length > max ? `${s.slice(0, max - 1)}...` : s;
 }
 
-function toAbsoluteUrl(url: string | null) {
-  if (!url) return `${SITE_URL}/images/mheen-oasis-city.webp`;
-  if (url.startsWith("http://") || url.startsWith("https://")) return url;
-  if (url.startsWith("/")) return `${SITE_URL}${url}`;
-  return `${SITE_URL}/${url}`;
-}
-
 async function getStoriesPageOne() {
   const db = await getDB();
   const [storiesRes, totalRes] = await Promise.all([
@@ -109,7 +102,12 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
     : story.content_en || story.content_ar || story.content || "";
   const title = storyTitle || (isAr ? "قصة من أرشيف مهين" : "Story from Mheen Archive");
   const description = summarize(storyBody || (isAr ? "قصة من أرشيف مهين." : "Story from Mheen Archive."));
-  const imageUrl = toAbsoluteUrl(story.image_url);
+  const rawImageUrl = story.image_url || "/images/mheen-oasis-city.webp";
+  const absoluteImageUrl = rawImageUrl.startsWith("http")
+    ? rawImageUrl
+    : rawImageUrl.startsWith("/")
+      ? `${SITE_URL}${rawImageUrl}`
+      : `${SITE_URL}/${rawImageUrl}`;
   const canonical = `${SITE_URL}/${locale}/stories?id=${story.id}`;
 
   return {
@@ -127,13 +125,20 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
       title,
       description,
       url: canonical,
-      images: [{ url: imageUrl }],
+      images: [
+        {
+          url: absoluteImageUrl,
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [imageUrl],
+      images: [absoluteImageUrl],
     },
   };
 }
