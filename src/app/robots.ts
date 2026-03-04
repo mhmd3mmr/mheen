@@ -1,29 +1,12 @@
-import type { MetadataRoute } from "next";
+import { MetadataRoute } from 'next';
 
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
-      userAgent: "*",
-      allow: "/",
-      disallow: ["/admin/", "/api/"],
+      userAgent: '*',
+      allow: '/',
+      disallow: ['/admin/', '/api/'],
     },
-    sitemap: "https://miheen.com/sitemap.xml",
-  };
-}
-
-
-import type { MetadataRoute } from "next";
-
-export default function robots(): MetadataRoute.Robots {
-  return {
-    rules: [
-      {
-        userAgent: "*",
-        allow: "/",
-        disallow: ["/api/", "/ar/admin/", "/en/admin/", "/admin/"],
-      },
-    ],
-    sitemap: "https://miheen.com/sitemap.xml",
-    host: "https://miheen.com",
+    sitemap: 'https://miheen.com/sitemap.xml',
   };
 }
