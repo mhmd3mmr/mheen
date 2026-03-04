@@ -222,8 +222,9 @@ export function SubmitForm({ onError }: SubmitFormProps) {
           uploadLabel={t("upload")}
           uploadingLabel={t("uploading")}
           folder="stories"
-          imageMaxWidth={800}
+          imageMaxWidth={1200}
           imageWebpQuality={0.8}
+          imageTargetMaxKB={200}
           imageAspectRatio={3 / 4}
         />
         {uploadError && (

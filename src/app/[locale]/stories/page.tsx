@@ -28,11 +28,18 @@ type StoryRow = {
 
 const SITE_URL = "https://miheen.com";
 const PAGE_SIZE = 24;
-const WHATSAPP_TEST_IMAGE = `${SITE_URL}/whatsapp-share.jpg`;
+const DEFAULT_SHARE_IMAGE = "/default-share-image.jpg";
 
 function summarize(text: string, max = 150) {
   const s = text.replace(/\s+/g, " ").trim();
   return s.length > max ? `${s.slice(0, max - 1)}...` : s;
+}
+
+function resolveAbsoluteStoryImage(raw: string | null) {
+  const candidate = (raw || DEFAULT_SHARE_IMAGE).trim();
+  if (candidate.startsWith("http://") || candidate.startsWith("https://")) return candidate;
+  if (candidate.startsWith("/")) return `${SITE_URL}${candidate}`;
+  return `${SITE_URL}/${candidate}`;
 }
 
 async function getStoriesPageOne() {
@@ -103,9 +110,13 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
     : story.content_en || story.content_ar || story.content || "";
   const title = storyTitle || (isAr ? "قصة من أرشيف مهين" : "Story from Mheen Archive");
   const description = summarize(storyBody || (isAr ? "قصة من أرشيف مهين." : "Story from Mheen Archive."));
-  // Temporary hard isolation for WhatsApp debugging:
-  // force a tiny static image to eliminate scraper/size/runtime variables.
-  const finalImageUrl = WHATSAPP_TEST_IMAGE;
+  const finalImageUrl = resolveAbsoluteStoryImage(story.image_url);
+  const imagePathWithoutQuery = finalImageUrl.split("?")[0].toLowerCase();
+  const mimeType = imagePathWithoutQuery.endsWith(".png")
+    ? "image/png"
+    : imagePathWithoutQuery.endsWith(".webp")
+      ? "image/webp"
+      : "image/jpeg";
   const canonical = `${SITE_URL}/${locale}/stories?id=${story.id}`;
 
   return {
@@ -128,7 +139,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
           url: finalImageUrl,
           width: 1200,
           height: 630,
-          type: "image/jpeg",
+          type: mimeType,
           alt: title,
         },
       ],

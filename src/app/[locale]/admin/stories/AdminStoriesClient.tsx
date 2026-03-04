@@ -446,8 +446,9 @@ export default function AdminStoriesClient({ initialStories }: Props) {
                       uploadLabel="اختر صورة جديدة / Choose new photo"
                       uploadingLabel="جارٍ الرفع..."
                       folder="stories"
-                      imageMaxWidth={800}
+                      imageMaxWidth={1200}
                       imageWebpQuality={0.8}
+                      imageTargetMaxKB={200}
                       imageAspectRatio={3 / 4}
                     />
                     {uploadError && <p className="mt-2 text-xs text-red-600">{uploadError}</p>}
