@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState, type UIEvent } from "react";
+import { useEffect, useMemo, useState, type UIEvent } from "react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { motion } from "framer-motion";
 import { PageHeader } from "@/components/PageHeader";
@@ -152,7 +153,7 @@ export function StoryCard({
   const categoryLabel = categoryMap[(story.category ?? "other") as keyof typeof categoryMap];
 
   async function handleShare() {
-    const shareUrl = `https://miheen.com/${locale}/stories#story-${story.id}`;
+    const shareUrl = `https://miheen.com/${locale}/stories?id=${story.id}`;
     try {
       if (navigator.share) {
         await navigator.share({
@@ -254,12 +255,14 @@ export function StoryCard({
 
 export default function StoriesClient({ initialStories, locale, initialHasMore }: Props) {
   const t = useTranslations("pages.stories");
+  const searchParams = useSearchParams();
   const [selectedStory, setSelectedStory] = useState<StoryRow | null>(null);
   const [stories, setStories] = useState(initialStories);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const storyId = searchParams.get("id");
 
   const filtered = useMemo(() => {
     if (!searchQuery) return stories;
@@ -274,6 +277,21 @@ export default function StoriesClient({ initialStories, locale, initialHasMore }
         (s.content_en || "").toLowerCase().includes(q)
     );
   }, [stories, searchQuery]);
+
+  useEffect(() => {
+    if (!storyId || stories.length === 0 || selectedStory) return;
+    const target = stories.find((s) => s.id === storyId);
+    if (!target) return;
+    setSelectedStory(target);
+
+    // Optional polish: remove id from URL after opening the modal.
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("id");
+      const next = `${url.pathname}${url.search}${url.hash}`;
+      window.history.replaceState({}, "", next);
+    }
+  }, [storyId, stories, selectedStory]);
 
   async function handleLoadMore() {
     if (isLoadingMore || !hasMore) return;
