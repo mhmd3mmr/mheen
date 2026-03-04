@@ -102,8 +102,13 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
     : story.content_en || story.content_ar || story.content || "";
   const title = storyTitle || (isAr ? "قصة من أرشيف مهين" : "Story from Mheen Archive");
   const description = summarize(storyBody || (isAr ? "قصة من أرشيف مهين." : "Story from Mheen Archive."));
+  const rawImageUrl = story.image_url || "/images/mheen-oasis-city.webp";
+  const absoluteImageUrl = rawImageUrl.startsWith("http")
+    ? rawImageUrl
+    : rawImageUrl.startsWith("/")
+      ? `${SITE_URL}${rawImageUrl}`
+      : `${SITE_URL}/${rawImageUrl}`;
   const canonical = `${SITE_URL}/${locale}/stories?id=${story.id}`;
-  const ogImageUrl = `${SITE_URL}/api/og/story?id=${story.id}&locale=${locale}`;
 
   return {
     title: `${title} | ${isAr ? "أرشيف مهين" : "Mheen Archive"}`,
@@ -122,7 +127,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
       url: canonical,
       images: [
         {
-          url: ogImageUrl,
+          url: absoluteImageUrl,
           width: 1200,
           height: 630,
           alt: title,
@@ -133,7 +138,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
       card: "summary_large_image",
       title,
       description,
-      images: [ogImageUrl],
+      images: [absoluteImageUrl],
     },
   };
 }
