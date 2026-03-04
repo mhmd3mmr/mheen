@@ -28,10 +28,42 @@ type StoryRow = {
 
 const SITE_URL = "https://miheen.com";
 const PAGE_SIZE = 24;
+const DEFAULT_SHARE_IMAGE = "/default-share-image.jpg";
 
 function summarize(text: string, max = 150) {
   const s = text.replace(/\s+/g, " ").trim();
   return s.length > max ? `${s.slice(0, max - 1)}...` : s;
+}
+
+function resolveRawShareImageUrl(raw: string | null) {
+  const candidate = (raw || DEFAULT_SHARE_IMAGE).trim();
+  const absolute = candidate.startsWith("http")
+    ? candidate
+    : candidate.startsWith("/")
+      ? `${SITE_URL}${candidate}`
+      : `${SITE_URL}/${candidate}`;
+
+  try {
+    const parsed = new URL(absolute);
+
+    // If a wrapped Next.js optimizer URL is stored, unwrap to raw source image URL.
+    if (parsed.pathname === "/_next/image") {
+      const wrapped = parsed.searchParams.get("url");
+      if (wrapped) {
+        if (wrapped.startsWith("http")) return wrapped;
+        return wrapped.startsWith("/") ? `${SITE_URL}${wrapped}` : `${SITE_URL}/${wrapped}`;
+      }
+    }
+
+    // Avoid unstable OG endpoint for WhatsApp; fallback to static share image.
+    if (parsed.pathname.startsWith("/api/og")) {
+      return `${SITE_URL}${DEFAULT_SHARE_IMAGE}`;
+    }
+
+    return absolute;
+  } catch {
+    return `${SITE_URL}${DEFAULT_SHARE_IMAGE}`;
+  }
 }
 
 async function getStoriesPageOne() {
@@ -102,18 +134,9 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
     : story.content_en || story.content_ar || story.content || "";
   const title = storyTitle || (isAr ? "قصة من أرشيف مهين" : "Story from Mheen Archive");
   const description = summarize(storyBody || (isAr ? "قصة من أرشيف مهين." : "Story from Mheen Archive."));
-  const rawImageUrl = story.image_url || "/images/mheen-oasis-city.webp";
-  const absoluteImageUrl = rawImageUrl.startsWith("http")
-    ? rawImageUrl
-    : rawImageUrl.startsWith("/")
-      ? `${SITE_URL}${rawImageUrl}`
-      : `${SITE_URL}/${rawImageUrl}`;
+  const absoluteImageUrl = resolveRawShareImageUrl(story.image_url);
   const imagePathWithoutQuery = absoluteImageUrl.split("?")[0].toLowerCase();
-  const mimeType = imagePathWithoutQuery.endsWith(".png")
-    ? "image/png"
-    : imagePathWithoutQuery.endsWith(".webp")
-      ? "image/webp"
-      : "image/jpeg";
+  const mimeType = imagePathWithoutQuery.endsWith(".png") ? "image/png" : "image/jpeg";
   const canonical = `${SITE_URL}/${locale}/stories?id=${story.id}`;
 
   return {
