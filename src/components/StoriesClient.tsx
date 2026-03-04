@@ -449,7 +449,7 @@ export function StoryModal({
         <button
           type="button"
           onClick={onClose}
-          className="absolute start-4 top-4 z-50 rounded-full bg-white/80 p-2 text-gray-800 shadow-sm backdrop-blur transition-all hover:bg-white lg:start-auto lg:end-4"
+          className="absolute end-4 top-4 z-50 hidden rounded-full bg-white/80 p-2 text-gray-800 shadow-sm backdrop-blur transition-all hover:bg-white lg:inline-flex"
           aria-label={t("close")}
         >
           <X className="h-4 w-4" />
@@ -479,14 +479,25 @@ export function StoryModal({
 
           <div className="flex-1 p-6 md:p-10 lg:overflow-y-auto lg:p-12">
               <div
-                className={`sticky top-0 z-40 -mx-6 bg-[#1e2329] px-6 pb-4 pt-6 transition-all duration-300 md:-mx-10 md:px-8 lg:hidden ${
+                className={`sticky top-0 z-40 -mx-6 bg-[#111827] px-6 pb-4 pt-5 transition-all duration-300 md:-mx-10 md:px-8 lg:hidden ${
                   isScrolled ? "border-b border-white/10 shadow-md" : ""
                 }`}
               >
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="absolute start-5 top-4 z-50 inline-flex rounded-full bg-white/85 p-2 text-gray-800 shadow-sm backdrop-blur transition-all hover:bg-white"
+                  aria-label={t("close")}
+                >
+                  <X className="h-4 w-4" />
+                </button>
+
                 <div className="relative">
                   <div
-                    className={`relative w-full overflow-hidden transition-all duration-500 ease-in-out ${
-                      isScrolled ? "h-0" : "h-56 md:h-72"
+                    className={`relative w-full overflow-hidden rounded-2xl bg-[#111827] transition-[height,opacity,transform] duration-500 ease-in-out ${
+                      isScrolled
+                        ? "h-0 -translate-y-2 opacity-0"
+                        : "h-60 translate-y-0 opacity-100 md:h-80"
                     }`}
                   >
                     {story.image_url && isImage(story.image_url) ? (
@@ -496,7 +507,7 @@ export function StoryModal({
                         fill
                         sizes="100vw"
                         quality={85}
-                        className="rounded-t-2xl object-cover"
+                        className="rounded-2xl object-cover"
                         placeholder="blur"
                         blurDataURL={BLUR_DATA_URL}
                       />
@@ -513,8 +524,8 @@ export function StoryModal({
                   <div
                     className={`overflow-hidden transition-all duration-500 ease-in-out ${
                       isScrolled
-                        ? "absolute end-6 top-6 h-14 w-14 rounded-full border-2 border-slate-600 shadow-lg"
-                        : "pointer-events-none h-0 w-0"
+                        ? "absolute end-5 top-4 h-16 w-16 scale-100 rounded-full border-2 border-slate-500 opacity-100 shadow-lg"
+                        : "pointer-events-none absolute end-5 top-4 h-16 w-16 scale-75 rounded-full border-2 border-slate-500 opacity-0"
                     }`}
                   >
                     {story.image_url && isImage(story.image_url) ? (
@@ -534,10 +545,18 @@ export function StoryModal({
                   </div>
                 </div>
 
-                <h2 className="mt-4 pe-20 text-2xl font-bold leading-tight text-slate-100">
+                <h2
+                  className={`mt-4 text-2xl font-bold leading-tight text-slate-100 transition-all duration-300 ${
+                    isScrolled ? "ps-14 pe-24" : "ps-14 pe-0"
+                  }`}
+                >
                   {title || t("untitledStory")}
                 </h2>
-                <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-slate-300">
+                <div
+                  className={`mt-3 flex flex-wrap items-center gap-4 text-sm text-slate-300 transition-all duration-300 ${
+                    isScrolled ? "ps-14 pe-24" : "ps-14 pe-0"
+                  }`}
+                >
                   <span className="inline-flex items-center gap-1">
                     <User className="h-3.5 w-3.5" />
                     {author}
