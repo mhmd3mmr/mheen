@@ -16,6 +16,7 @@ type FileUploadProps = {
   imageWebpQuality?: number;
   imageTargetMaxKB?: number;
   imageAspectRatio?: number;
+  generateOgVariant?: boolean;
 };
 
 export function FileUpload({
@@ -30,6 +31,7 @@ export function FileUpload({
   imageWebpQuality = 0.8,
   imageTargetMaxKB,
   imageAspectRatio,
+  generateOgVariant = false,
 }: FileUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -130,19 +132,81 @@ export function FileUpload({
     }
   }
 
+  async function buildStoryDualVariants(file: File): Promise<{
+    uiImageFile: File;
+    ogImageFile: File;
+  }> {
+    const normalizedFile = imageAspectRatio ? await cropImageToAspect(file, imageAspectRatio) : file;
+    const baseName = normalizedFile.name.replace(/\.[^.]+$/, "") || "upload";
+    const uiBlob = await imageCompression(normalizedFile, {
+      maxSizeMB: 1,
+      maxWidthOrHeight: 1920,
+      useWebWorker: true,
+      fileType: "image/webp",
+      initialQuality: 0.9,
+    });
+    const ogBlob = await imageCompression(normalizedFile, {
+      maxSizeMB: 0.15,
+      maxWidthOrHeight: 1200,
+      useWebWorker: true,
+      fileType: "image/webp",
+      initialQuality: 0.75,
+    });
+
+    return {
+      uiImageFile: new File([uiBlob], `${baseName}.webp`, {
+        type: "image/webp",
+        lastModified: Date.now(),
+      }),
+      ogImageFile: new File([ogBlob], `${baseName}.webp`, {
+        type: "image/webp",
+        lastModified: Date.now(),
+      }),
+    };
+  }
+
+  async function uploadSingle(file: File, key?: string) {
+    const formData = new FormData();
+    formData.set("file", file);
+    formData.set("folder", folder);
+    if (key) formData.set("key", key);
+    const res = await fetch("/api/upload", { method: "POST", body: formData });
+    if (!res.ok) return null;
+    const data = (await res.json()) as { url?: string; publicUrl?: string; key?: string };
+    return data;
+  }
+
   const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
     onUploadError?.("");
     try {
-      const optimizedFile = await convertImageToWebP(file);
-      const formData = new FormData();
-      formData.set("file", optimizedFile);
-      formData.set("folder", folder);
-      const res = await fetch("/api/upload", { method: "POST", body: formData });
-      if (res.ok) {
-        const data = (await res.json()) as { url?: string };
+      if (
+        generateOgVariant &&
+        file.type.startsWith("image/") &&
+        file.type !== "image/svg+xml"
+      ) {
+        const { uiImageFile, ogImageFile } = await buildStoryDualVariants(file);
+        const ext = ".webp";
+        const safeFolder =
+          folder.replace(/[^a-z0-9/_-]/gi, "").replace(/^\/+|\/+$/g, "") || "stories";
+        const baseId = crypto.randomUUID();
+        const mainKey = `${safeFolder}/${baseId}${ext}`;
+        const ogKey = `${safeFolder}/${baseId}-og${ext}`;
+
+        const [mainUpload, ogUpload] = await Promise.all([
+          uploadSingle(uiImageFile, mainKey),
+          uploadSingle(ogImageFile, ogKey),
+        ]);
+
+        if (mainUpload?.url && ogUpload?.url) {
+          onUploadSuccess?.(mainUpload.url);
+          return;
+        }
+      } else {
+        const optimizedFile = await convertImageToWebP(file);
+        const data = await uploadSingle(optimizedFile);
         if (data?.url) {
           onUploadSuccess?.(data.url);
           return;

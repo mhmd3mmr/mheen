@@ -446,7 +446,8 @@ export default function AdminStoriesClient({ initialStories }: Props) {
                       uploadLabel="اختر صورة جديدة / Choose new photo"
                       uploadingLabel="جارٍ الرفع..."
                       folder="stories"
-                      imageMaxWidth={1200}
+                      generateOgVariant
+                      imageMaxWidth={1920}
                       imageWebpQuality={0.8}
                       imageTargetMaxKB={200}
                       imageAspectRatio={3 / 4}

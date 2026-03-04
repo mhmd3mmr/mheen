@@ -42,6 +42,27 @@ function resolveAbsoluteStoryImage(raw: string | null) {
   return `${SITE_URL}/${candidate}`;
 }
 
+function toOgVariantUrl(mainImageUrl: string) {
+  try {
+    const url = new URL(mainImageUrl);
+    const key = url.searchParams.get("key");
+    if (key && /(\.[\w\d_-]+)$/i.test(key)) {
+      url.searchParams.set("key", key.replace(/(\.[\w\d_-]+)$/i, "-og$1"));
+      return url.toString();
+    }
+    if (/(\.[\w\d_-]+)$/i.test(url.pathname)) {
+      url.pathname = url.pathname.replace(/(\.[\w\d_-]+)$/i, "-og$1");
+      return url.toString();
+    }
+    return mainImageUrl;
+  } catch {
+    if (/(\.[\w\d_-]+)$/i.test(mainImageUrl)) {
+      return mainImageUrl.replace(/(\.[\w\d_-]+)$/i, "-og$1");
+    }
+    return mainImageUrl;
+  }
+}
+
 async function getStoriesPageOne() {
   const db = await getDB();
   const [storiesRes, totalRes] = await Promise.all([
@@ -110,7 +131,8 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
     : story.content_en || story.content_ar || story.content || "";
   const title = storyTitle || (isAr ? "قصة من أرشيف مهين" : "Story from Mheen Archive");
   const description = summarize(storyBody || (isAr ? "قصة من أرشيف مهين." : "Story from Mheen Archive."));
-  const finalImageUrl = resolveAbsoluteStoryImage(story.image_url);
+  const mainImageUrl = resolveAbsoluteStoryImage(story.image_url);
+  const finalImageUrl = story.image_url ? toOgVariantUrl(mainImageUrl) : mainImageUrl;
   const imagePathWithoutQuery = finalImageUrl.split("?")[0].toLowerCase();
   const mimeType = imagePathWithoutQuery.endsWith(".png")
     ? "image/png"

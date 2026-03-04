@@ -9,20 +9,35 @@ type R2Bucket = {
     value: ReadableStream | ArrayBuffer | string,
     options?: { httpMetadata?: { contentType?: string } }
   ) => Promise<void>;
+  get: (key: string) => Promise<R2Object | null>;
+};
+
+type R2Object = {
+  body: ReadableStream | null;
+  httpMetadata?: { contentType?: string };
+};
+
+type ContextWithBucket = {
+  env?: {
+    BUCKET?: R2Bucket;
+  };
 };
 
 function getR2Bucket(): R2Bucket | null {
   try {
-    const ctx = getRequestContext();
-    if ((ctx as any)?.env?.BUCKET) return (ctx as any).env.BUCKET;
+    const ctx = getRequestContext() as unknown as ContextWithBucket;
+    if (ctx?.env?.BUCKET) return ctx.env.BUCKET;
   } catch {}
 
   if ((process.env as Record<string, unknown>).BUCKET) {
     return (process.env as Record<string, unknown>).BUCKET as unknown as R2Bucket;
   }
 
-  if ((globalThis as any).__NEXT_ON_PAGES__?.env?.BUCKET) {
-    return (globalThis as any).__NEXT_ON_PAGES__.env.BUCKET;
+  const globalContext = globalThis as unknown as {
+    __NEXT_ON_PAGES__?: ContextWithBucket;
+  };
+  if (globalContext.__NEXT_ON_PAGES__?.env?.BUCKET) {
+    return globalContext.__NEXT_ON_PAGES__.env.BUCKET;
   }
 
   return null;
@@ -39,6 +54,7 @@ export async function POST(request: Request) {
 
   let file: File;
   let folder = "stories";
+  let requestedKey = "";
   try {
     const formData = await request.formData();
     const f = formData.get("file");
@@ -47,13 +63,17 @@ export async function POST(request: Request) {
     }
     file = f;
     folder = String(formData.get("folder") ?? "").trim() || "stories";
+    requestedKey = String(formData.get("key") ?? "").trim();
   } catch {
     return NextResponse.json({ error: "Invalid form data" }, { status: 400 });
   }
 
   const ext = file.name.replace(/^.*\./, "") || "bin";
   const safeFolder = folder.replace(/[^a-z0-9/_-]/gi, "").replace(/^\/+|\/+$/g, "") || "stories";
-  const key = `${safeFolder}/${crypto.randomUUID()}.${ext}`;
+  const safeRequestedKey = requestedKey
+    .replace(/[^a-z0-9/_\-.]/gi, "")
+    .replace(/^\/+|\/+$/g, "");
+  const key = safeRequestedKey || `${safeFolder}/${crypto.randomUUID()}.${ext}`;
 
   try {
     const buffer = await file.arrayBuffer();
@@ -94,7 +114,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const obj = await (bucket as any).get(key);
+    const obj = await bucket.get(key);
     if (!obj) return new Response("Not found", { status: 404 });
     const headers = new Headers();
     if (obj.httpMetadata?.contentType) {
