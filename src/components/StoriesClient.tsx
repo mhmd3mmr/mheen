@@ -469,7 +469,7 @@ export function StoryModal({
           </div>
 
           <div className="flex-1 p-6 md:p-10 lg:overflow-y-auto lg:p-12">
-              <h2 className="mb-4 text-3xl font-bold leading-tight text-foreground md:text-4xl">
+              <h2 className="mb-4 text-3xl font-bold leading-tight text-slate-100 md:text-4xl">
                 {title || t("untitledStory")}
               </h2>
               <div className="mb-8 flex flex-wrap items-center gap-4 border-b border-gray-100 pb-6 text-sm text-gray-500 dark:border-slate-700 dark:text-slate-400">
