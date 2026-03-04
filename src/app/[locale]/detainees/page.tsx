@@ -134,6 +134,9 @@ export async function generateMetadata({
 
   const mainImageUrl = resolveAbsoluteImage(detainee.image_url);
   const ogImageUrl = detainee.image_url ? toOgVariantUrl(mainImageUrl) : mainImageUrl;
+  // Temporary debugging for OG image pipeline
+  // eslint-disable-next-line no-console
+  console.log("OG URL Generated (detainees):", { mainImageUrl, ogImageUrl, id });
 
   const canonical = `${SITE_URL}/${locale}/detainees?id=${detainee.id}`;
 

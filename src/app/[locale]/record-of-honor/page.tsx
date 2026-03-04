@@ -210,6 +210,9 @@ export async function generateMetadata({
   const summary = summarize(rawSummary);
   const mainImageUrl = resolveAbsoluteImage(record.image_url);
   const ogImageUrl = record.image_url ? toOgVariantUrl(mainImageUrl) : mainImageUrl;
+  // Temporary debugging for OG image pipeline
+  // eslint-disable-next-line no-console
+  console.log("OG URL Generated (record-of-honor):", { mainImageUrl, ogImageUrl, id });
 
   const canonical = `${SITE_URL}/${locale}/record-of-honor?id=${record.id}`;
 
