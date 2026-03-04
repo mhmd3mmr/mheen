@@ -243,6 +243,12 @@ export function MartyrsClient({ initialMartyrs, locale }: Props) {
                       onUploadSuccess={(url) => { setImageUrl(url); setUploadError(""); }}
                       onUploadingChange={setIsUploading}
                       onUploadError={setUploadError}
+                      folder="records"
+                      generateOgVariant
+                      imageMaxWidth={1920}
+                      imageWebpQuality={0.8}
+                      imageTargetMaxKB={200}
+                      imageAspectRatio={3 / 4}
                     />
                     {uploadError && <p className="mt-1 text-xs text-red-600">{uploadError}</p>}
                     {imageUrl && <img src={imageUrl} alt="" className="mt-2 h-16 w-16 rounded-lg border object-cover" />}

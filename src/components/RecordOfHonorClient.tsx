@@ -234,7 +234,8 @@ function RecordCard({
     : row.status_en || row.status_ar || "";
   const isMartyr = row.recordType === "martyr";
   const recordAnchor = `record-${row.recordType}-${row.id}`;
-  const shareUrl = `https://miheen.com/${locale}/record-of-honor#${recordAnchor}`;
+  const basePath = isMartyr ? "record-of-honor" : "detainees";
+  const shareUrl = `https://miheen.com/${locale}/${basePath}?id=${row.id}`;
   const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(`${name} — ${shareUrl}`)}`;
   const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
   const badgeClass = isMartyr

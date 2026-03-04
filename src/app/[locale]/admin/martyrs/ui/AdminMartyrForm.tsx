@@ -146,8 +146,10 @@ export function AdminMartyrForm() {
           uploadLabel="اختر صورة / Choose photo"
           uploadingLabel="جارٍ الرفع..."
           folder="records"
-          imageMaxWidth={800}
+          generateOgVariant
+          imageMaxWidth={1920}
           imageWebpQuality={0.8}
+          imageTargetMaxKB={200}
           imageAspectRatio={3 / 4}
         />
         {uploadError && (
