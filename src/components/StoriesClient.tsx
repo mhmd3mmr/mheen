@@ -516,7 +516,7 @@ export function StoryModal({
                         <BookOpen className="h-12 w-12 text-primary/30" />
                       </div>
                     )}
-                    <span className="absolute top-3 start-3 rounded-full bg-black/45 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur-sm">
+                    <span className="absolute end-3 top-3 rounded-full bg-black/45 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur-sm">
                       {categoryLabel}
                     </span>
                   </div>
@@ -553,19 +553,19 @@ export function StoryModal({
                   {title || t("untitledStory")}
                 </h2>
                 <div
-                  className={`mt-3 flex flex-wrap items-center gap-4 text-sm text-slate-300 transition-all duration-300 ${
+                  className={`mt-3 flex items-center gap-3 overflow-x-auto text-xs text-slate-300 transition-all duration-300 ${
                     isScrolled ? "ps-14 pe-24" : "ps-14 pe-0"
                   }`}
                 >
-                  <span className="inline-flex items-center gap-1">
+                  <span className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap">
                     <User className="h-3.5 w-3.5" />
                     {author}
                   </span>
-                  <span className="inline-flex items-center gap-1">
+                  <span className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap">
                     <Calendar className="h-3.5 w-3.5" />
                     {dateStr}
                   </span>
-                  <span className="inline-flex items-center gap-1">
+                  <span className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap">
                     <Clock3 className="h-3.5 w-3.5" />
                     {readingTime.replace(/^•\s*/, "")}
                   </span>
