@@ -3,7 +3,9 @@
 import { useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
+import { Pencil, Save, X } from "lucide-react";
 import { FileUpload } from "@/components/FileUpload";
+import type { DetaineeRow, MartyrRow } from "@/app/actions/adminActions";
 
 type RecordType = "martyr" | "detainee";
 type FilterType = "all" | RecordType;
@@ -23,7 +25,36 @@ export type UnifiedAdminRow = {
   tags: string | null;
 };
 
-export function AdminRecordOfHonorClient({ initialRows }: { initialRows: UnifiedAdminRow[] }) {
+type EditingRecord = { type: "martyr"; data: MartyrRow } | { type: "detainee"; data: DetaineeRow };
+
+type EditFormMartyr = {
+  name_ar: string;
+  name_en: string;
+  birth_date: string;
+  death_date: string;
+  martyrdom_method: MartyrdomMethod;
+  martyrdom_details: string;
+  tags: string;
+};
+
+type EditFormDetainee = {
+  name_ar: string;
+  name_en: string;
+  arrest_date: string;
+  status_ar: string;
+  status_en: string;
+  tags: string;
+};
+
+export function AdminRecordOfHonorClient({
+  initialRows,
+  fullMartyrs = [],
+  fullDetainees = [],
+}: {
+  initialRows: UnifiedAdminRow[];
+  fullMartyrs?: MartyrRow[];
+  fullDetainees?: DetaineeRow[];
+}) {
   const tAdmin = useTranslations("Admin");
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
@@ -39,6 +70,15 @@ export function AdminRecordOfHonorClient({ initialRows }: { initialRows: Unified
 
   const [activeFilter, setActiveFilter] = useState<FilterType>("all");
   const [searchQuery, setSearchQuery] = useState("");
+
+  const [editingRecord, setEditingRecord] = useState<EditingRecord | null>(null);
+  const [editFormMartyr, setEditFormMartyr] = useState<EditFormMartyr | null>(null);
+  const [editFormDetainee, setEditFormDetainee] = useState<EditFormDetainee | null>(null);
+  const [editImageUrl, setEditImageUrl] = useState("");
+  const [isUploadingEdit, setIsUploadingEdit] = useState(false);
+  const [editUploadError, setEditUploadError] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [editToast, setEditToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
 
   const pendingCount = initialRows.filter((r) => r.status === "pending").length;
   const totals = useMemo(
@@ -59,6 +99,104 @@ export function AdminRecordOfHonorClient({ initialRows }: { initialRows: Unified
       return passType && passSearch;
     });
   }, [activeFilter, initialRows, searchQuery]);
+
+  function startEdit(row: UnifiedAdminRow) {
+    if (row.recordType === "martyr") {
+      const m = fullMartyrs.find((x) => x.id === row.id);
+      if (m) {
+        setEditingRecord({ type: "martyr", data: m });
+        setEditFormMartyr({
+          name_ar: m.name_ar,
+          name_en: m.name_en,
+          birth_date: m.birth_date ?? "",
+          death_date: m.death_date ?? "",
+          martyrdom_method: (m.martyrdom_method as MartyrdomMethod) ?? "combatant",
+          martyrdom_details: m.martyrdom_details ?? "",
+          tags: m.tags ?? "",
+        });
+        setEditFormDetainee(null);
+      }
+    } else {
+      const d = fullDetainees.find((x) => x.id === row.id);
+      if (d) {
+        setEditingRecord({ type: "detainee", data: d });
+        setEditFormDetainee({
+          name_ar: d.name_ar,
+          name_en: d.name_en,
+          arrest_date: d.arrest_date ?? "",
+          status_ar: d.status_ar ?? "",
+          status_en: d.status_en ?? "",
+          tags: d.tags ?? "",
+        });
+        setEditFormMartyr(null);
+      }
+    }
+    setEditImageUrl("");
+    setEditUploadError("");
+  }
+
+  function cancelEdit() {
+    setEditingRecord(null);
+    setEditFormMartyr(null);
+    setEditFormDetainee(null);
+    setEditImageUrl("");
+    setEditUploadError("");
+  }
+
+  function showEditToast(msg: string, type: "success" | "error") {
+    setEditToast({ msg, type });
+    setTimeout(() => setEditToast(null), 3000);
+  }
+
+  async function handleSaveEdit() {
+    if (!editingRecord) return;
+    setSavingEdit(true);
+    try {
+      if (editingRecord.type === "martyr" && editFormMartyr) {
+        const payload = {
+          id: editingRecord.data.id,
+          ...editFormMartyr,
+          image_url: editImageUrl || editingRecord.data.image_url || null,
+        };
+        const res = await fetch("/api/admin/martyrs", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const result = (await res.json()) as { success?: boolean; error?: string };
+        if (res.ok && result.success) {
+          cancelEdit();
+          showEditToast("تم تحديث بيانات الشهيد بنجاح", "success");
+          router.refresh();
+        } else {
+          showEditToast(result.error ?? "فشل التحديث", "error");
+        }
+      } else if (editingRecord.type === "detainee" && editFormDetainee) {
+        const payload = {
+          id: editingRecord.data.id,
+          ...editFormDetainee,
+          image_url: editImageUrl || editingRecord.data.image_url || null,
+        };
+        const res = await fetch("/api/admin/detainees", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const result = (await res.json()) as { success?: boolean; error?: string };
+        if (res.ok && result.success) {
+          cancelEdit();
+          showEditToast("تم تحديث بيانات المعتقل بنجاح", "success");
+          router.refresh();
+        } else {
+          showEditToast(result.error ?? "فشل التحديث", "error");
+        }
+      }
+    } catch {
+      showEditToast("حدث خطأ غير متوقع", "error");
+    } finally {
+      setSavingEdit(false);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -354,7 +492,15 @@ export function AdminRecordOfHonorClient({ initialRows }: { initialRows: Unified
                     )}
                   </td>
                   <td className="px-4 py-3 align-top">
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => startEdit(row)}
+                        className="inline-flex items-center gap-1 rounded-lg border border-primary/20 px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/5"
+                      >
+                        <Pencil className="h-3 w-3" />
+                        تعديل
+                      </button>
                       {row.status === "pending" && (
                         <form action="/api/admin/moderation" method="post">
                           <input type="hidden" name="entity" value={row.recordType} />
@@ -394,6 +540,154 @@ export function AdminRecordOfHonorClient({ initialRows }: { initialRows: Unified
           </table>
         </div>
       </div>
+
+      {/* Edit Modal */}
+      {editingRecord && (editFormMartyr || editFormDetainee) && (
+        <div className="fixed inset-0 z-50 bg-black/60 p-3 backdrop-blur-sm md:p-6">
+          <div className="mx-auto max-h-[95vh] max-w-4xl overflow-hidden rounded-2xl bg-background shadow-2xl">
+            <div className="flex items-center justify-between border-b border-primary/10 px-5 py-3">
+              <h3 className="inline-flex items-center gap-2 text-sm font-semibold text-primary">
+                <Pencil className="h-4 w-4" />
+                {editingRecord.type === "martyr" ? "تعديل بيانات الشهيد" : "تعديل بيانات المعتقل"}
+              </h3>
+              <button onClick={cancelEdit} className="rounded-lg p-1.5 text-foreground/50 hover:bg-primary/5">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="max-h-[calc(95vh-64px)] overflow-y-auto p-5">
+              {editToast && (
+                <div
+                  className={`mb-4 rounded-lg px-4 py-2 text-sm ${
+                    editToast.type === "success" ? "bg-success/10 text-success" : "bg-red-100 text-red-700"
+                  }`}
+                >
+                  {editToast.msg}
+                </div>
+              )}
+              <div className="grid gap-4 lg:grid-cols-2">
+                <div className="space-y-4">
+                  <div className="relative aspect-[3/4] w-full overflow-hidden rounded-xl border border-primary/10 bg-primary/5">
+                    {(editImageUrl || editingRecord.data.image_url) ? (
+                      <img
+                        src={editImageUrl || editingRecord.data.image_url || ""}
+                        alt=""
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-primary/30">—</div>
+                    )}
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-xs font-medium text-foreground/70">تغيير الصورة</label>
+                    <FileUpload
+                      accept="image/*"
+                      onUploadSuccess={(url) => {
+                        setEditImageUrl(url);
+                        setEditUploadError("");
+                      }}
+                      onUploadingChange={setIsUploadingEdit}
+                      onUploadError={setEditUploadError}
+                      uploadLabel="اختر صورة جديدة / Choose new photo"
+                      uploadingLabel="جارٍ الرفع..."
+                      folder="records"
+                      imageMaxWidth={800}
+                      imageWebpQuality={0.8}
+                      imageAspectRatio={3 / 4}
+                    />
+                    {editUploadError && <p className="mt-2 text-xs text-red-600">{editUploadError}</p>}
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {editFormMartyr && (
+                    <>
+                      <EditInput label="الاسم (عربي)" value={editFormMartyr.name_ar} onChange={(v) => setEditFormMartyr((p) => (p ? { ...p, name_ar: v } : p))} />
+                      <EditInput label="Name (English)" value={editFormMartyr.name_en} onChange={(v) => setEditFormMartyr((p) => (p ? { ...p, name_en: v } : p))} />
+                      <EditInput label="تاريخ الميلاد" type="date" value={editFormMartyr.birth_date} onChange={(v) => setEditFormMartyr((p) => (p ? { ...p, birth_date: v } : p))} />
+                      <EditInput label="تاريخ الاستشهاد" type="date" value={editFormMartyr.death_date} onChange={(v) => setEditFormMartyr((p) => (p ? { ...p, death_date: v } : p))} />
+                      <div>
+                        <label className="mb-1 block text-xs font-medium text-foreground/70">طريقة الاستشهاد</label>
+                        <select
+                          value={editFormMartyr.martyrdom_method}
+                          onChange={(e) =>
+                            setEditFormMartyr((p) =>
+                              p ? { ...p, martyrdom_method: e.target.value as MartyrdomMethod } : p
+                            )
+                          }
+                          className="w-full rounded-lg border border-primary/15 bg-background px-3 py-2 text-sm outline-none focus:border-primary/40 focus:ring-1 focus:ring-primary/20"
+                        >
+                          <option value="combatant">مقاتل / Combatant</option>
+                          <option value="detained_then_martyred">معتقل ثم استشهد / Detained then Martyred</option>
+                          <option value="civilian_bombing">مدني - قصف / Civilian - Bombing</option>
+                          <option value="other">أخرى / Other</option>
+                        </select>
+                      </div>
+                      {editFormMartyr.martyrdom_method === "other" && (
+                        <EditInput
+                          label="تفاصيل طريقة الاستشهاد"
+                          value={editFormMartyr.martyrdom_details}
+                          onChange={(v) => setEditFormMartyr((p) => (p ? { ...p, martyrdom_details: v } : p))}
+                        />
+                      )}
+                      <EditInput label="الوسوم" value={editFormMartyr.tags} onChange={(v) => setEditFormMartyr((p) => (p ? { ...p, tags: v } : p))} />
+                    </>
+                  )}
+                  {editFormDetainee && (
+                    <>
+                      <EditInput label="الاسم (عربي)" value={editFormDetainee.name_ar} onChange={(v) => setEditFormDetainee((p) => (p ? { ...p, name_ar: v } : p))} />
+                      <EditInput label="Name (English)" value={editFormDetainee.name_en} onChange={(v) => setEditFormDetainee((p) => (p ? { ...p, name_en: v } : p))} />
+                      <EditInput label="تاريخ الاعتقال" type="date" value={editFormDetainee.arrest_date} onChange={(v) => setEditFormDetainee((p) => (p ? { ...p, arrest_date: v } : p))} />
+                      <EditInput label="حالة المعتقل (عربي)" value={editFormDetainee.status_ar} onChange={(v) => setEditFormDetainee((p) => (p ? { ...p, status_ar: v } : p))} />
+                      <EditInput label="Detainee status (English)" value={editFormDetainee.status_en} onChange={(v) => setEditFormDetainee((p) => (p ? { ...p, status_en: v } : p))} />
+                      <EditInput label="الوسوم" value={editFormDetainee.tags} onChange={(v) => setEditFormDetainee((p) => (p ? { ...p, tags: v } : p))} />
+                    </>
+                  )}
+                </div>
+              </div>
+              <div className="mt-5 flex items-center gap-3 border-t border-primary/10 pt-4">
+                <button
+                  onClick={handleSaveEdit}
+                  disabled={savingEdit || isUploadingEdit}
+                  className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-xs font-medium text-white hover:bg-primary/90 disabled:opacity-60"
+                >
+                  <Save className="h-3.5 w-3.5" />
+                  {savingEdit ? "جاري الحفظ..." : "حفظ التعديلات"}
+                </button>
+                <button
+                  onClick={cancelEdit}
+                  className="rounded-lg border border-primary/15 px-4 py-2 text-xs text-foreground/70 hover:bg-primary/5"
+                >
+                  إلغاء
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function EditInput({
+  label,
+  value,
+  onChange,
+  type = "text",
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  type?: string;
+}) {
+  return (
+    <div>
+      <label className="mb-1 block text-xs font-medium text-foreground/70">{label}</label>
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-lg border border-primary/15 bg-background px-3 py-2 text-sm outline-none focus:border-primary/40 focus:ring-1 focus:ring-primary/20"
+      />
     </div>
   );
 }

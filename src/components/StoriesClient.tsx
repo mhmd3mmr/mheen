@@ -464,7 +464,7 @@ export function StoryModal({
     <div className="fixed inset-0 z-50 bg-black/60 p-3 backdrop-blur-sm md:p-6" role="dialog" aria-modal="true">
       <div
         onScroll={handleModalScroll}
-        className="relative mx-auto flex max-h-[90vh] w-full max-w-5xl flex-col overflow-y-auto rounded-2xl bg-white/50 p-0 shadow-2xl dark:bg-slate-900 md:rounded-3xl lg:flex-row lg:overflow-hidden"
+        className="relative mx-auto flex max-h-[90vh] w-full max-w-5xl flex-col overflow-y-auto rounded-2xl bg-[#0b1220] p-0 shadow-2xl md:rounded-3xl lg:flex-row lg:overflow-hidden"
       >
         <button
           type="button"
@@ -497,7 +497,7 @@ export function StoryModal({
             </span>
           </div>
 
-          <div className="flex-1 p-6 md:p-10 lg:overflow-y-auto lg:p-12">
+          <div className="flex-1 bg-[#0b1220] p-6 md:p-10 lg:overflow-y-auto lg:p-12">
               <div
                 className={`sticky top-0 z-40 -mx-6 px-6 pb-4 pt-5 transition-all duration-300 md:-mx-10 md:px-8 lg:hidden ${
                   isScrolled
@@ -595,7 +595,7 @@ export function StoryModal({
                 <h2 className="mb-4 text-3xl font-bold leading-tight text-slate-100 md:text-4xl">
                   {title || t("untitledStory")}
                 </h2>
-                <div className="mb-8 flex flex-wrap items-center gap-4 border-b border-gray-100 pb-6 text-sm text-gray-500 dark:border-slate-700 dark:text-slate-400">
+                <div className="mb-8 flex flex-wrap items-center gap-4 border-b border-white/10 pb-6 text-sm text-slate-300">
                   <span className="inline-flex items-center gap-1">
                     <User className="h-3.5 w-3.5" />
                     {author}
@@ -611,7 +611,7 @@ export function StoryModal({
                 </div>
               </div>
 
-              <div className="pt-4 md:pt-6 lg:pt-0 space-y-6 text-start text-base leading-loose text-gray-700 md:text-lg dark:text-slate-200">
+              <div className="space-y-6 pt-4 text-start text-base leading-loose text-slate-100/90 md:pt-6 md:text-lg lg:pt-0">
                 {fullContent
                   .split("\n")
                   .filter((line) => line.trim().length > 0)

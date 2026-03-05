@@ -40,5 +40,11 @@ export default async function AdminRecordOfHonorPage() {
     return (b.primary_date ?? "").localeCompare(a.primary_date ?? "");
   });
 
-  return <AdminRecordOfHonorClient initialRows={rows} />;
+  return (
+    <AdminRecordOfHonorClient
+      initialRows={rows}
+      fullMartyrs={martyrs}
+      fullDetainees={detainees}
+    />
+  );
 }
