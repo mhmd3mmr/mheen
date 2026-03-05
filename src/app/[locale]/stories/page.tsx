@@ -44,7 +44,7 @@ function resolveAbsoluteStoryImage(raw: string | null) {
   return `${SITE_URL}/${candidate}`;
 }
 
-export function toOgVariantUrl(mainImageUrl: string) {
+function toOgVariantUrl(mainImageUrl: string) {
   try {
     const url = new URL(mainImageUrl);
     const key = url.searchParams.get("key");

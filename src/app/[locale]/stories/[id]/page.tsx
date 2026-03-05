@@ -4,7 +4,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getDB } from "@/lib/db";
 import { setRequestLocale } from "next-intl/server";
-import { toOgVariantUrl } from "../page";
 
 type Props = {
   params: Promise<{ locale: string; id: string }>;
@@ -31,6 +30,27 @@ const DEFAULT_OG_IMAGE = `${SITE_URL}/images/default-share.jpg`;
 function summary(text: string, max = 150) {
   const s = text.replace(/\s+/g, " ").trim();
   return s.length > max ? `${s.slice(0, max - 1)}…` : s;
+}
+
+function toOgVariantUrl(mainImageUrl: string) {
+  try {
+    const url = new URL(mainImageUrl);
+    const key = url.searchParams.get("key");
+    if (key && /(\.[\w\d_-]+)$/i.test(key)) {
+      url.searchParams.set("key", key.replace(/(\.[\w\d_-]+)$/i, "-og$1"));
+      return url.toString();
+    }
+    if (/(\.[\w\d_-]+)$/i.test(url.pathname)) {
+      url.pathname = url.pathname.replace(/(\.[\w\d_-]+)$/i, "-og$1");
+      return url.toString();
+    }
+    return mainImageUrl;
+  } catch {
+    if (/(\.[\w\d_-]+)$/i.test(mainImageUrl)) {
+      return mainImageUrl.replace(/(\.[\w\d_-]+)$/i, "-og$1");
+    }
+    return mainImageUrl;
+  }
 }
 
 async function getStoryById(id: string): Promise<StoryRow | null> {
