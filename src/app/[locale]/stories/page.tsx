@@ -2,6 +2,7 @@ export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { setRequestLocale } from "next-intl/server";
 import StoriesClient from "@/components/StoriesClient";
 import { getDB } from "@/lib/db";

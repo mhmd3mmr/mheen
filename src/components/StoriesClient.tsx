@@ -153,7 +153,9 @@ export function StoryCard({
   const categoryLabel = categoryMap[(story.category ?? "other") as keyof typeof categoryMap];
 
   async function handleShare() {
-    const shareUrl = `https://miheen.com/${locale}/stories?id=${story.id}`;
+    // Use the dedicated dynamic route /stories/[id] for sharing to ensure
+    // per-story OpenGraph metadata works reliably across platforms.
+    const shareUrl = `https://miheen.com/${locale}/stories/${story.id}`;
     try {
       if (navigator.share) {
         await navigator.share({
