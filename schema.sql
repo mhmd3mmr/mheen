@@ -97,6 +97,18 @@ CREATE TABLE IF NOT EXISTS "stories" (
   "created_at" INTEGER NOT NULL DEFAULT (unixepoch())
 );
 
+CREATE TABLE IF NOT EXISTS "announcements" (
+  "id" TEXT NOT NULL PRIMARY KEY,
+  "title_ar" TEXT NOT NULL,
+  "title_en" TEXT,
+  "content_ar" TEXT NOT NULL,
+  "content_en" TEXT,
+  "image_url" TEXT,
+  "type" TEXT NOT NULL DEFAULT 'general',
+  "author_id" TEXT NOT NULL,
+  "created_at" INTEGER NOT NULL DEFAULT (unixepoch())
+);
+
 CREATE TABLE IF NOT EXISTS "community_photos" (
   "id" TEXT NOT NULL PRIMARY KEY,
   "title" TEXT NOT NULL,

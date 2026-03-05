@@ -108,6 +108,7 @@
       "email": "البريد الإلكتروني",
       "role": "الدور",
       "roleAdmin": "مدير",
+      "roleEditor": "محرّر",
       "roleContributor": "مساهم",
       "rolePublic": "عام",
       "updateRole": "تحديث الدور",

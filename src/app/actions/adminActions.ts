@@ -475,7 +475,7 @@ export async function updateUserRole(
     const role = String(formData.get("role") ?? "").trim();
 
     if (!id) return { success: false, error: "User id is required" };
-    if (!["admin", "contributor", "public"].includes(role)) {
+    if (!["admin", "editor", "contributor", "public"].includes(role)) {
       return { success: false, error: "Invalid role" };
     }
 

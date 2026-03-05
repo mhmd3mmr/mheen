@@ -108,6 +108,7 @@
       "email": "Email",
       "role": "Role",
       "roleAdmin": "Admin",
+      "roleEditor": "Editor",
       "roleContributor": "Contributor",
       "rolePublic": "Public",
       "updateRole": "Update role",

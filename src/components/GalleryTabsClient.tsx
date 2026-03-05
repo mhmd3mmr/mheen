@@ -16,6 +16,14 @@ type PhotoItem = {
   category: string | null;
 };
 
+type BannerItem = {
+  id: string;
+  image_url: string;
+  description_ar: string;
+  description_en: string | null;
+  date: string | null;
+};
+
 type VideoItem = {
   id: string;
   youtube_url: string;

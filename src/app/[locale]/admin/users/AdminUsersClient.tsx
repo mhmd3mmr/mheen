@@ -10,7 +10,7 @@ type Props = {
   initialUsers: UserRow[];
 };
 
-const ROLES = ["admin", "contributor", "public"] as const;
+const ROLES = ["admin", "editor", "contributor", "public"] as const;
 
 export default function AdminUsersClient({ initialUsers }: Props) {
   const [users, setUsers] = useState(initialUsers);
@@ -40,6 +40,8 @@ export default function AdminUsersClient({ initialUsers }: Props) {
     switch (role) {
       case "admin":
         return t("roleAdmin");
+      case "editor":
+        return t("roleEditor");
       case "contributor":
         return t("roleContributor");
       default:
