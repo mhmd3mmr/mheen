@@ -1,4 +1,5 @@
 export const runtime = "edge";
+export const dynamic = "force-dynamic";
 
 import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
@@ -7,7 +8,7 @@ import { getDB } from "@/lib/db";
 
 type Props = {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ id?: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
 type StoryRow = {
@@ -103,25 +104,47 @@ async function getStoryById(id: string) {
 
 export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const { locale } = await params;
-  const { id } = await searchParams;
+  const resolvedSearchParams = await searchParams;
+  const rawId = resolvedSearchParams?.id;
+  const id = typeof rawId === "string" ? rawId : Array.isArray(rawId) ? rawId[0] : undefined;
   const isAr = locale === "ar";
 
-  if (!id) {
+  // 1. Main /stories page (no id) — generic metadata and default image only
+  if (!id || !id.trim()) {
     return {
-      title: isAr ? "القصص | أرشيف مهين" : "Stories | Mheen Archive",
+      title: isAr ? "القصص والشهادات | أرشيف مهين" : "Stories & Testimonies | Mheen Archive",
       description: isAr
         ? "قصص وتجارب أهالي مهين بين الذاكرة والصمود."
         : "Stories and testimonies from Mheen people, memory and resilience.",
+      openGraph: {
+        title: isAr ? "القصص والشهادات | أرشيف مهين" : "Stories & Testimonies | Mheen Archive",
+        description: isAr
+          ? "قصص وتجارب أهالي مهين بين الذاكرة والصمود."
+          : "Stories and testimonies from Mheen people, memory and resilience.",
+        images: [
+          {
+            url: `${SITE_URL}/images/default-martyr-og.jpg`,
+            width: 1200,
+            height: 630,
+            type: "image/jpeg",
+          },
+        ],
+      },
     };
   }
 
-  const story = await getStoryById(id);
+  // 2. Fetch this specific story by ID only (no first-item fallback)
+  let story: StoryRow | null = null;
+  try {
+    story = await getStoryById(id.trim());
+  } catch (err) {
+    console.error("Error fetching story metadata:", err);
+  }
+
   if (!story) {
     return {
-      title: isAr ? "القصص | أرشيف مهين" : "Stories | Mheen Archive",
-      description: isAr
-        ? "قصص وتجارب أهالي مهين بين الذاكرة والصمود."
-        : "Stories and testimonies from Mheen people, memory and resilience.",
+      title: isAr ? "قصة غير موجودة | أرشيف مهين" : "Story Not Found | Mheen Archive",
+      description: isAr ? "لم يتم العثور على القصة المطلوبة." : "The requested story was not found.",
     };
   }
 
@@ -181,7 +204,10 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 
 export default async function StoriesPage({ params, searchParams }: Props) {
   const { locale } = await params;
-  const { id } = await searchParams;
+  const resolvedSearchParams = await searchParams;
+  const rawId = resolvedSearchParams?.id;
+  const id = typeof rawId === "string" ? rawId : Array.isArray(rawId) ? rawId[0] : undefined;
+  const storyId = id?.trim() || undefined;
   setRequestLocale(locale);
 
   let stories: StoryRow[] = [];
@@ -190,8 +216,8 @@ export default async function StoriesPage({ params, searchParams }: Props) {
     const pageOne = await getStoriesPageOne();
     stories = pageOne.stories;
     hasMore = pageOne.hasMore;
-    if (id) {
-      const deepLinked = await getStoryById(id);
+    if (storyId) {
+      const deepLinked = await getStoryById(storyId);
       if (deepLinked && !stories.some((s) => s.id === deepLinked.id)) {
         stories = [deepLinked, ...stories];
       }
