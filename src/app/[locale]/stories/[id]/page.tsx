@@ -27,27 +27,6 @@ type StoryRow = {
 const SITE_URL = "https://miheen.com";
 const DEFAULT_OG_IMAGE = `${SITE_URL}/images/default-martyr-og.jpg`;
 
-function toOgVariantUrl(mainImageUrl: string) {
-  try {
-    const url = new URL(mainImageUrl);
-    const key = url.searchParams.get("key");
-    if (key && /(\.[\w\d_-]+)$/i.test(key)) {
-      url.searchParams.set("key", key.replace(/(\.[\w\d_-]+)$/i, "-og$1"));
-      return url.toString();
-    }
-    if (/(\.[\w\d_-]+)$/i.test(url.pathname)) {
-      url.pathname = url.pathname.replace(/(\.[\w\d_-]+)$/i, "-og$1");
-      return url.toString();
-    }
-    return mainImageUrl;
-  } catch {
-    if (/(\.[\w\d_-]+)$/i.test(mainImageUrl)) {
-      return mainImageUrl.replace(/(\.[\w\d_-]+)$/i, "-og$1");
-    }
-    return mainImageUrl;
-  }
-}
-
 function summary(text: string, max = 150) {
   const s = text.replace(/\s+/g, " ").trim();
   return s.length > max ? `${s.slice(0, max - 1)}…` : s;
@@ -87,15 +66,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const desc = summary(content || (isAr ? "قصة من بلدة مهين." : "A story from Mheen town."));
   const canonical = `${SITE_URL}/${locale}/stories/${id}`;
 
-  // WhatsApp-safe OG image: force -og variant and JPEG mime type.
+  // 1) Get the raw image URL
   const dbImageUrl = story.image_url;
+
+  // 2) Ensure it's absolute or use a reliable default
   let absoluteOgUrl = DEFAULT_OG_IMAGE;
   if (dbImageUrl) {
-    const ogUrlPath = toOgVariantUrl(dbImageUrl);
-    absoluteOgUrl = ogUrlPath.startsWith("http")
-      ? ogUrlPath
-      : `${SITE_URL}${ogUrlPath.startsWith("/") ? "" : "/"}${ogUrlPath}`;
+    absoluteOgUrl = dbImageUrl.startsWith("http")
+      ? dbImageUrl
+      : `${SITE_URL}${dbImageUrl.startsWith("/") ? "" : "/"}${dbImageUrl}`;
   }
+
+  const lowerUrl = absoluteOgUrl.toLowerCase();
+  const mimeType = lowerUrl.endsWith(".webp") ? "image/webp" : "image/jpeg";
 
   return {
     title: `${title} | ${isAr ? "أرشيف مهين" : "Mheen Archive"}`,
@@ -121,7 +104,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           url: absoluteOgUrl,
           width: 1200,
           height: 630,
-          type: "image/jpeg",
+          type: mimeType,
         },
       ],
     },
