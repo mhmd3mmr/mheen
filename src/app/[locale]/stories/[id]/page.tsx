@@ -25,6 +25,28 @@ type StoryRow = {
 };
 
 const SITE_URL = "https://miheen.com";
+const DEFAULT_OG_IMAGE = `${SITE_URL}/images/default-martyr-og.jpg`;
+
+function toOgVariantUrl(mainImageUrl: string) {
+  try {
+    const url = new URL(mainImageUrl);
+    const key = url.searchParams.get("key");
+    if (key && /(\.[\w\d_-]+)$/i.test(key)) {
+      url.searchParams.set("key", key.replace(/(\.[\w\d_-]+)$/i, "-og$1"));
+      return url.toString();
+    }
+    if (/(\.[\w\d_-]+)$/i.test(url.pathname)) {
+      url.pathname = url.pathname.replace(/(\.[\w\d_-]+)$/i, "-og$1");
+      return url.toString();
+    }
+    return mainImageUrl;
+  } catch {
+    if (/(\.[\w\d_-]+)$/i.test(mainImageUrl)) {
+      return mainImageUrl.replace(/(\.[\w\d_-]+)$/i, "-og$1");
+    }
+    return mainImageUrl;
+  }
+}
 
 function summary(text: string, max = 150) {
   const s = text.replace(/\s+/g, " ").trim();
@@ -64,7 +86,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     : story.content_en || story.content_ar || story.content || "";
   const desc = summary(content || (isAr ? "قصة من بلدة مهين." : "A story from Mheen town."));
   const canonical = `${SITE_URL}/${locale}/stories/${id}`;
-  const image = story.image_url || `${SITE_URL}/images/mheen-oasis-city.webp`;
+
+  // WhatsApp-safe OG image: force -og variant and JPEG mime type.
+  const dbImageUrl = story.image_url;
+  let absoluteOgUrl = DEFAULT_OG_IMAGE;
+  if (dbImageUrl) {
+    const ogUrlPath = toOgVariantUrl(dbImageUrl);
+    absoluteOgUrl = ogUrlPath.startsWith("http")
+      ? ogUrlPath
+      : `${SITE_URL}${ogUrlPath.startsWith("/") ? "" : "/"}${ogUrlPath}`;
+  }
 
   return {
     title: `${title} | ${isAr ? "أرشيف مهين" : "Mheen Archive"}`,
@@ -85,13 +116,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url: canonical,
       title,
       description: desc,
-      images: [{ url: image }],
+      images: [
+        {
+          url: absoluteOgUrl,
+          width: 1200,
+          height: 630,
+          type: "image/jpeg",
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description: desc,
-      images: [image],
+      images: [absoluteOgUrl],
+    },
+    other: {
+      itemprop: "image",
+      image: absoluteOgUrl,
     },
   };
 }
