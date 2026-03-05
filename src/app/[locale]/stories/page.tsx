@@ -6,6 +6,7 @@ import { headers } from "next/headers";
 import { setRequestLocale } from "next-intl/server";
 import StoriesClient from "@/components/StoriesClient";
 import { getDB } from "@/lib/db";
+import { toOgVariantUrl } from "@/lib/og";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -42,27 +43,6 @@ function resolveAbsoluteStoryImage(raw: string | null) {
   if (candidate.startsWith("http://") || candidate.startsWith("https://")) return candidate;
   if (candidate.startsWith("/")) return `${SITE_URL}${candidate}`;
   return `${SITE_URL}/${candidate}`;
-}
-
-function toOgVariantUrl(mainImageUrl: string) {
-  try {
-    const url = new URL(mainImageUrl);
-    const key = url.searchParams.get("key");
-    if (key && /(\.[\w\d_-]+)$/i.test(key)) {
-      url.searchParams.set("key", key.replace(/(\.[\w\d_-]+)$/i, "-og$1"));
-      return url.toString();
-    }
-    if (/(\.[\w\d_-]+)$/i.test(url.pathname)) {
-      url.pathname = url.pathname.replace(/(\.[\w\d_-]+)$/i, "-og$1");
-      return url.toString();
-    }
-    return mainImageUrl;
-  } catch {
-    if (/(\.[\w\d_-]+)$/i.test(mainImageUrl)) {
-      return mainImageUrl.replace(/(\.[\w\d_-]+)$/i, "-og$1");
-    }
-    return mainImageUrl;
-  }
 }
 
 async function getStoriesPageOne() {

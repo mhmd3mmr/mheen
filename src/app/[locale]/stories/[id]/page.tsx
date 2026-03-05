@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getDB } from "@/lib/db";
 import { setRequestLocale } from "next-intl/server";
+import { toOgVariantUrl } from "@/lib/og";
 
 type Props = {
   params: Promise<{ locale: string; id: string }>;
@@ -30,27 +31,6 @@ const DEFAULT_OG_IMAGE = `${SITE_URL}/images/default-share.jpg`;
 function summary(text: string, max = 150) {
   const s = text.replace(/\s+/g, " ").trim();
   return s.length > max ? `${s.slice(0, max - 1)}…` : s;
-}
-
-function toOgVariantUrl(mainImageUrl: string) {
-  try {
-    const url = new URL(mainImageUrl);
-    const key = url.searchParams.get("key");
-    if (key && /(\.[\w\d_-]+)$/i.test(key)) {
-      url.searchParams.set("key", key.replace(/(\.[\w\d_-]+)$/i, "-og$1"));
-      return url.toString();
-    }
-    if (/(\.[\w\d_-]+)$/i.test(url.pathname)) {
-      url.pathname = url.pathname.replace(/(\.[\w\d_-]+)$/i, "-og$1");
-      return url.toString();
-    }
-    return mainImageUrl;
-  } catch {
-    if (/(\.[\w\d_-]+)$/i.test(mainImageUrl)) {
-      return mainImageUrl.replace(/(\.[\w\d_-]+)$/i, "-og$1");
-    }
-    return mainImageUrl;
-  }
 }
 
 async function getStoryById(id: string): Promise<StoryRow | null> {
@@ -87,50 +67,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const desc = summary(content || (isAr ? "قصة من بلدة مهين." : "A story from Mheen town."));
   const canonical = `${SITE_URL}/${locale}/stories/${id}`;
 
-  // Build OG images array with HEAD check + fallback
+  // 1. Get raw image URL
   const dbImageUrl = story.image_url;
-  const ogImages: { url: string; width: number; height: number; type: string }[] = [];
 
+  // 2. Default fallback
+  let absoluteOgUrl = DEFAULT_OG_IMAGE;
+
+  // 3. If story has an image, strictly use the -og.jpg variant
   if (dbImageUrl) {
-    const absoluteDbUrl = dbImageUrl.startsWith("http")
-      ? dbImageUrl
-      : `${SITE_URL}${dbImageUrl.startsWith("/") ? "" : "/"}${dbImageUrl}`;
-
-    // Default to the raw WebP (or JPEG) from DB
-    let verifiedUrl = absoluteDbUrl;
-    let verifiedType = absoluteDbUrl.toLowerCase().endsWith(".webp") ? "image/webp" : "image/jpeg";
-
-    try {
-      // Fast check: Does the WhatsApp-friendly JPG exist in Cloudflare R2?
-      const ogVariantUrl = toOgVariantUrl(absoluteDbUrl);
-      if (ogVariantUrl !== absoluteDbUrl) {
-        const response = await fetch(ogVariantUrl, { method: "HEAD" });
-        if (response.ok) {
-          verifiedUrl = ogVariantUrl;
-          verifiedType = "image/jpeg";
-        }
-      }
-    } catch {
-      // Silently fail and stick to the raw URL
-    }
-
-    // 1. Push the specific story image (JPG if new, WebP if old)
-    ogImages.push({
-      url: verifiedUrl,
-      width: 1200,
-      height: 630,
-      type: verifiedType,
-    });
+    const ogPath = toOgVariantUrl(dbImageUrl);
+    absoluteOgUrl = ogPath.startsWith("http")
+      ? ogPath
+      : `${SITE_URL}${ogPath.startsWith("/") ? "" : "/"}${ogPath}`;
   }
-
-  // 2. ALWAYS push a guaranteed JPG fallback for WhatsApp
-  // USER MUST ENSURE THIS FILE EXISTS IN public/images/
-  ogImages.push({
-    url: `${SITE_URL}/images/default-share.jpg`,
-    width: 1200,
-    height: 630,
-    type: "image/jpeg",
-  });
 
   return {
     title: `${title} | ${isAr ? "أرشيف مهين" : "Mheen Archive"}`,
@@ -151,17 +100,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url: canonical,
       title,
       description: desc,
-      images: ogImages,
+      images: [
+        {
+          url: absoluteOgUrl,
+          width: 1200,
+          height: 630,
+          type: "image/jpeg",
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description: desc,
-      images: ogImages.map((img) => img.url),
+      images: [absoluteOgUrl],
     },
     other: {
       itemprop: "image",
-      image: ogImages[0]?.url ?? DEFAULT_OG_IMAGE,
+      image: absoluteOgUrl,
     },
   };
 }
