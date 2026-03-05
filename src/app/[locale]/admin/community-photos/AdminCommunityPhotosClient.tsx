@@ -32,6 +32,7 @@ export default function AdminCommunityPhotosClient({ initialPhotos }: Props) {
   const [editTitleAr, setEditTitleAr] = useState("");
   const [editTitleEn, setEditTitleEn] = useState("");
   const [editImageUrl, setEditImageUrl] = useState("");
+  const [editCategory, setEditCategory] = useState("");
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -64,6 +65,7 @@ export default function AdminCommunityPhotosClient({ initialPhotos }: Props) {
     setEditTitleAr(photo.title_ar ?? photo.title);
     setEditTitleEn(photo.title_en ?? photo.title);
     setEditImageUrl(photo.image_url);
+    setEditCategory(photo.category ?? "");
   }
 
   function cancelEdit() {
@@ -71,6 +73,7 @@ export default function AdminCommunityPhotosClient({ initialPhotos }: Props) {
     setEditTitleAr("");
     setEditTitleEn("");
     setEditImageUrl("");
+    setEditCategory("");
   }
 
   async function handleSave(id: string) {
@@ -83,6 +86,7 @@ export default function AdminCommunityPhotosClient({ initialPhotos }: Props) {
         title_ar: editTitleAr,
         title_en: editTitleEn,
         image_url: editImageUrl,
+        category: editCategory,
       }),
     });
     const result = (await res.json()) as { success?: boolean; error?: string };
@@ -96,6 +100,7 @@ export default function AdminCommunityPhotosClient({ initialPhotos }: Props) {
                 title: editTitleAr,
                 title_ar: editTitleAr,
                 title_en: editTitleEn,
+                category: editCategory || null,
                 image_url: editImageUrl,
               }
             : p
@@ -246,6 +251,11 @@ export default function AdminCommunityPhotosClient({ initialPhotos }: Props) {
               />
 
               <div className="mt-3 space-y-2">
+                {photo.category && !isEditing && (
+                  <span className="inline-flex rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary">
+                    {photo.category}
+                  </span>
+                )}
                 {isEditing ? (
                   <>
                     <input
@@ -258,6 +268,12 @@ export default function AdminCommunityPhotosClient({ initialPhotos }: Props) {
                       value={editTitleEn}
                       onChange={(e) => setEditTitleEn(e.target.value)}
                       placeholder="Title in English"
+                      className="w-full rounded-lg border border-primary/20 px-3 py-2 text-sm"
+                    />
+                    <input
+                      value={editCategory}
+                      onChange={(e) => setEditCategory(e.target.value)}
+                      placeholder="التصنيف (اختياري)"
                       className="w-full rounded-lg border border-primary/20 px-3 py-2 text-sm"
                     />
                     <input

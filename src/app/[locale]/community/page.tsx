@@ -94,7 +94,7 @@ export default function CommunityPage() {
   const tStory = useTranslations("pages.mheenStory");
   const locale = useLocale();
   const [galleryItems, setGalleryItems] = useState<
-    { caption: string; image: string }[]
+    { caption: string; image: string; category?: string | null }[]
   >([]);
 
   const harvestBlocks = [
@@ -141,6 +141,7 @@ export default function CommunityPage() {
           title: string;
           title_ar?: string | null;
           title_en?: string | null;
+          category?: string | null;
           image_url: string;
         }>;
       }) => {
@@ -154,6 +155,7 @@ export default function CommunityPage() {
                   ? r.title_ar || r.title_en || r.title
                   : r.title_en || r.title_ar || r.title,
               image: r.image_url,
+              category: r.category ?? null,
             }))
           );
           return;
@@ -641,6 +643,11 @@ export default function CommunityPage() {
                   className="h-auto w-full object-cover transition-transform duration-700 group-hover:scale-105"
                   loading="lazy"
                 />
+                {item.category && (
+                  <span className="absolute start-3 top-3 rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-medium text-stone-50 backdrop-blur-sm">
+                    {item.category}
+                  </span>
+                )}
                 <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-stone-950/80 to-transparent px-4 pb-4 pt-8 text-sm text-stone-100">
                   {item.caption}
                 </figcaption>

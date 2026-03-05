@@ -6,12 +6,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Camera, Video, Share2, Copy, MessageCircle, X, Play } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 
-type BannerItem = {
+type PhotoItem = {
   id: string;
   image_url: string;
   description_ar: string;
   description_en: string | null;
   date: string | null;
+  source: "banner" | "community";
+  category: string | null;
 };
 
 type VideoItem = {
@@ -55,15 +57,17 @@ export function GalleryTabsClient() {
   const locale = useLocale();
   const [activeTab, setActiveTab] = useState<"photos" | "videos">("photos");
 
-  const [photos, setPhotos] = useState<BannerItem[]>([]);
+  const [photos, setPhotos] = useState<PhotoItem[]>([]);
   const [videos, setVideos] = useState<VideoItem[]>([]);
   const [photosHasMore, setPhotosHasMore] = useState(true);
   const [videosHasMore, setVideosHasMore] = useState(true);
   const [photosLoading, setPhotosLoading] = useState(false);
   const [videosLoading, setVideosLoading] = useState(false);
 
-  const [lightbox, setLightbox] = useState<BannerItem | null>(null);
+  const [lightbox, setLightbox] = useState<PhotoItem | null>(null);
   const [copyToast, setCopyToast] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [communityLoaded, setCommunityLoaded] = useState(false);
 
   async function fetchPhotos(offset: number) {
     setPhotosLoading(true);
@@ -72,7 +76,11 @@ export function GalleryTabsClient() {
         `/api/protest-banners?limit=${PAGE_SIZE}&offset=${offset}`
       );
       const data = (await res.json()) as PhotosResponse;
-      const nextRows = data.banners ?? [];
+      const nextRows = (data.banners ?? []).map<PhotoItem>((b) => ({
+        ...b,
+        source: "banner",
+        category: null,
+      }));
       const hasMore = data.pagination?.hasMore ?? nextRows.length === PAGE_SIZE;
       setPhotos((prev) => (offset === 0 ? nextRows : [...prev, ...nextRows]));
       setPhotosHasMore(hasMore);
@@ -97,9 +105,47 @@ export function GalleryTabsClient() {
     }
   }
 
+  async function fetchCommunityPhotos() {
+    try {
+      const res = await fetch("/api/community-photos");
+      const data = (await res.json()) as {
+        photos?: Array<{
+          id: string;
+          title: string;
+          title_ar?: string | null;
+          title_en?: string | null;
+          category?: string | null;
+          image_url: string;
+          created_at?: number;
+        }>;
+      };
+      const rows = data.photos ?? [];
+      const mapped: PhotoItem[] = rows.map((r) => ({
+        id: r.id,
+        image_url: r.image_url,
+        description_ar: r.title_ar ?? r.title_en ?? r.title,
+        description_en: r.title_en ?? r.title_ar ?? r.title,
+        date: null,
+        source: "community",
+        category: r.category ?? null,
+      }));
+      setPhotos((prev) => {
+        const seen = new Set(prev.map((p) => p.id));
+        const merged = [...mapped.filter((p) => !seen.has(p.id)), ...prev];
+        return merged;
+      });
+      setCommunityLoaded(true);
+    } catch {
+      setCommunityLoaded(true);
+    }
+  }
+
   useEffect(() => {
     void fetchPhotos(0);
-  }, []);
+    if (!communityLoaded) {
+      void fetchCommunityPhotos();
+    }
+  }, [communityLoaded]);
 
   useEffect(() => {
     if (activeTab === "videos" && videos.length === 0 && !videosLoading) {
@@ -126,6 +172,27 @@ export function GalleryTabsClient() {
       ? lightbox.description_en || lightbox.description_ar
       : lightbox.description_ar;
   }, [lightbox, locale]);
+
+  const categories = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          photos
+            .map((p) => (p.category ?? "").trim())
+            .filter((c) => c.length > 0)
+        )
+      ),
+    [photos]
+  );
+
+  const filteredPhotos = useMemo(() => {
+    if (categoryFilter === "all") return photos;
+    const target = categoryFilter.trim();
+    if (!target) return photos;
+    return photos.filter(
+      (p) => (p.category ?? "").trim() === target
+    );
+  }, [photos, categoryFilter]);
 
   function getShareUrl(itemId: string) {
     if (typeof window === "undefined") return `https://miheen.com/${locale}/gallery/${itemId}`;
@@ -177,8 +244,41 @@ export function GalleryTabsClient() {
 
         {activeTab === "photos" ? (
           <>
+            {categories.length > 0 && (
+              <div className="mb-6 flex flex-wrap items-center gap-2">
+                <span className="text-xs font-medium text-foreground/60">
+                  {t("categoryFilterLabel")}:
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setCategoryFilter("all")}
+                  className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                    categoryFilter === "all"
+                      ? "bg-primary text-white"
+                      : "bg-background text-foreground/70 hover:bg-primary/5"
+                  }`}
+                >
+                  {t("categoryAll")}
+                </button>
+                {categories.map((cat) => (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => setCategoryFilter(cat)}
+                    className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                      categoryFilter === cat
+                        ? "bg-primary text-white"
+                        : "bg-background text-foreground/70 hover:bg-primary/5"
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            )}
+
             <div className="columns-2 gap-4 space-y-4 md:columns-3 lg:columns-4">
-              {photos.map((item) => {
+              {filteredPhotos.map((item) => {
                 const desc =
                   locale === "en"
                     ? item.description_en || item.description_ar
@@ -196,6 +296,11 @@ export function GalleryTabsClient() {
                       className="h-auto w-full object-contain transition-transform duration-500 group-hover:scale-105"
                       loading="lazy"
                     />
+                    {item.source === "community" && item.category && (
+                      <span className="absolute start-2 top-2 rounded-full bg-black/55 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur-sm">
+                        {item.category}
+                      </span>
+                    )}
                   </figure>
                 );
               })}
@@ -304,7 +409,16 @@ export function GalleryTabsClient() {
               />
 
               <div className="space-y-4 p-5 md:p-6">
-                <p className="text-base leading-relaxed text-foreground">{lightboxTitle}</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="text-base leading-relaxed text-foreground flex-1">
+                    {lightboxTitle}
+                  </p>
+                  {lightbox.source === "community" && lightbox.category && (
+                    <span className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+                      {lightbox.category}
+                    </span>
+                  )}
+                </div>
                 {lightbox.date && (
                   <p className="text-xs text-foreground/50">{lightbox.date}</p>
                 )}

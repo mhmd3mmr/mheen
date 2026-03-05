@@ -201,6 +201,7 @@ export type CommunityPhotoPublic = {
   id: string;
   title: string;
   image_url: string;
+  category: string | null;
   created_at: number;
 };
 
@@ -211,6 +212,7 @@ export async function submitCommunityPhoto(
   const imageUrl = String(formData.get("image_url") ?? "").trim();
   const submittedByName = String(formData.get("submitted_by_name") ?? "").trim() || null;
   const submittedByEmail = String(formData.get("submitted_by_email") ?? "").trim() || null;
+  const category = String(formData.get("category") ?? "").trim() || null;
 
   if (!title) {
     return { success: false, error: "Photo title is required" };
@@ -225,10 +227,10 @@ export async function submitCommunityPhoto(
     await db
       .prepare(
         `INSERT INTO community_photos
-         (id, title, image_url, status, submitted_by_name, submitted_by_email)
-         VALUES (?, ?, ?, 'pending', ?, ?)`
+         (id, title, category, image_url, status, submitted_by_name, submitted_by_email)
+         VALUES (?, ?, ?, ?, 'pending', ?, ?)`
       )
-      .bind(id, title, imageUrl, submittedByName, submittedByEmail)
+      .bind(id, title, category, imageUrl, submittedByName, submittedByEmail)
       .run();
     return { success: true };
   } catch (err) {
@@ -245,7 +247,7 @@ export async function getApprovedCommunityPhotos(): Promise<CommunityPhotoPublic
     const db = await getDB();
     const { results } = await db
       .prepare(
-        `SELECT id, title, image_url, created_at
+        `SELECT id, title, category, image_url, created_at
          FROM community_photos
          WHERE status = 'approved'
          ORDER BY created_at DESC`

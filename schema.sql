@@ -102,6 +102,7 @@ CREATE TABLE IF NOT EXISTS "community_photos" (
   "title" TEXT NOT NULL,
   "title_ar" TEXT,
   "title_en" TEXT,
+  "category" TEXT,
   "image_url" TEXT NOT NULL,
   "status" TEXT NOT NULL DEFAULT 'pending',
   "submitted_by_name" TEXT,

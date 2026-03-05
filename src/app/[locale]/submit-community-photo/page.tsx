@@ -125,6 +125,14 @@ export default function SubmitCommunityPhotoPage() {
             />
           </div>
           <div className="space-y-1">
+            <label className="text-sm font-medium text-foreground">{t("categoryLabel")}</label>
+            <input
+              name="category"
+              placeholder={t("categoryPlaceholder")}
+              className="w-full rounded-lg border border-primary/20 bg-background px-3 py-2.5 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            />
+          </div>
+          <div className="space-y-1">
             <label className="text-sm font-medium text-foreground">{t("photo")}</label>
             <FileUpload
               accept="image/*"

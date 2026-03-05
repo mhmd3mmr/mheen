@@ -23,6 +23,7 @@ async function ensureCommunityPhotosTable() {
         title TEXT NOT NULL,
         title_ar TEXT,
         title_en TEXT,
+        category TEXT,
         image_url TEXT NOT NULL,
         status TEXT NOT NULL DEFAULT 'pending',
         submitted_by_name TEXT,
@@ -38,6 +39,9 @@ async function ensureCommunityPhotosTable() {
   } catch {}
   try {
     await db.prepare(`ALTER TABLE community_photos ADD COLUMN title_en TEXT`).run();
+  } catch {}
+  try {
+    await db.prepare(`ALTER TABLE community_photos ADD COLUMN category TEXT`).run();
   } catch {}
   try {
     await db
@@ -58,6 +62,7 @@ export async function POST(request: Request) {
     const titleAr = String(formData.get("title_ar") ?? "").trim();
     const titleEn = String(formData.get("title_en") ?? "").trim();
     const imageUrl = String(formData.get("image_url") ?? "").trim();
+    const category = String(formData.get("category") ?? "").trim() || null;
     const submittedByName =
       String(formData.get("submitted_by_name") ?? "").trim() || null;
     const submittedByEmail =
@@ -87,10 +92,10 @@ export async function POST(request: Request) {
     await db
       .prepare(
         `INSERT INTO community_photos
-         (id, title, title_ar, title_en, image_url, status, submitted_by_name, submitted_by_email)
-         VALUES (?, ?, ?, ?, ?, 'pending', ?, ?)`
+         (id, title, title_ar, title_en, category, image_url, status, submitted_by_name, submitted_by_email)
+         VALUES (?, ?, ?, ?, ?, ?, 'pending', ?, ?)`
       )
-      .bind(id, titleAr, titleAr, titleEn, imageUrl, submittedByName, submittedByEmail)
+      .bind(id, titleAr, titleAr, titleEn, category, imageUrl, submittedByName, submittedByEmail)
       .run();
 
     return NextResponse.json({ success: true });
@@ -105,7 +110,7 @@ export async function GET() {
     const db = await ensureCommunityPhotosTable();
     const { results } = await db
       .prepare(
-        `SELECT id, title, title_ar, title_en, image_url, created_at
+        `SELECT id, title, title_ar, title_en, category, image_url, created_at
          FROM community_photos
          WHERE status = 'approved'
          ORDER BY created_at DESC`

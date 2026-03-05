@@ -498,6 +498,7 @@ export type CommunityPhotoRow = {
   title: string;
   title_ar: string | null;
   title_en: string | null;
+  category: string | null;
   image_url: string;
   status: string;
   submitted_by_name: string | null;
@@ -517,6 +518,9 @@ export async function getAllCommunityPhotos(): Promise<CommunityPhotoRow[]> {
       await db.prepare(`ALTER TABLE community_photos ADD COLUMN title_en TEXT`).run();
     } catch {}
     try {
+      await db.prepare(`ALTER TABLE community_photos ADD COLUMN category TEXT`).run();
+    } catch {}
+    try {
       await db
         .prepare(
           `UPDATE community_photos
@@ -528,7 +532,7 @@ export async function getAllCommunityPhotos(): Promise<CommunityPhotoRow[]> {
     } catch {}
     const { results } = await db
       .prepare(
-        `SELECT id, title, title_ar, title_en, image_url, status, submitted_by_name, submitted_by_email, created_at, updated_at
+        `SELECT id, title, title_ar, title_en, category, image_url, status, submitted_by_name, submitted_by_email, created_at, updated_at
          FROM community_photos
          ORDER BY created_at DESC`
       )
