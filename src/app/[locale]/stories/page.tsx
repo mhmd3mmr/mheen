@@ -137,6 +137,9 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   let story: StoryRow | null = null;
   try {
     story = await getStoryById(id.trim());
+    if (story && process.env.NODE_ENV === "development") {
+      console.debug("[stories generateMetadata] id=%s → story.id=%s title=%s", id, story.id, story.title_ar || story.title_en);
+    }
   } catch (err) {
     console.error("Error fetching story metadata:", err);
   }
