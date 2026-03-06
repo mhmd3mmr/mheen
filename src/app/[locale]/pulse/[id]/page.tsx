@@ -70,9 +70,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
-  const title = isAr
-    ? announcement.title_ar || announcement.title_en || "إعلان من بلدة مهين"
-    : announcement.title_en || announcement.title_ar || "Announcement from Mheen";
   const content = isAr
     ? announcement.content_ar || announcement.content_en || ""
     : announcement.content_en || announcement.content_ar || "";
@@ -80,6 +77,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     content || (isAr ? "إعلان من بلدة مهين ضمن نشرة أخبار مهين." : "An announcement from Mheen News.")
   );
   const canonical = `${SITE_URL}/${locale}/pulse/${id}`;
+
+  const newsPrefix = locale === "ar" ? "أخبار مهين | " : "Mheen News | ";
+  const postTitle =
+    locale === "ar"
+      ? announcement.title_ar || announcement.title_en || "إعلان من بلدة مهين"
+      : announcement.title_en || announcement.title_ar || "Announcement from Mheen";
+  const fullTitle = `${newsPrefix}${postTitle}`;
 
   const dbImageUrl = announcement.image_url;
   let absoluteOgUrl = DEFAULT_OG_IMAGE;
@@ -92,7 +96,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   return {
-    title: `${title} | ${isAr ? "أرشيف مهين" : "Mheen Archive"}`,
+    title: fullTitle,
     description: desc,
     alternates: {
       canonical,
@@ -105,7 +109,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       type: "article",
       url: canonical,
-      title,
+      title: fullTitle,
       description: desc,
       images: [
         {
@@ -118,7 +122,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title,
+      title: fullTitle,
       description: desc,
       images: [absoluteOgUrl],
     },
