@@ -254,12 +254,13 @@ export default async function PulsePage({ params, searchParams }: Props) {
     }
   }
 
+  const h = await headers();
   const baseUrl =
     typeof window === "undefined"
       ? SITE_URL
-      : (headers().get("x-forwarded-proto") ?? "https") +
+      : (h.get("x-forwarded-proto") ?? "https") +
         "://" +
-        (headers().get("x-forwarded-host") ?? headers().get("host") ?? "miheen.com");
+        (h.get("x-forwarded-host") ?? h.get("host") ?? "miheen.com");
 
   function typeBadge(type: string) {
     switch (type) {
