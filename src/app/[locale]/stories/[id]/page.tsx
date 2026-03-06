@@ -1,4 +1,5 @@
 export const runtime = "edge";
+export const dynamic = "force-dynamic";
 
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -26,7 +27,6 @@ type StoryRow = {
 };
 
 const SITE_URL = "https://miheen.com";
-const DEFAULT_OG_IMAGE = `${SITE_URL}/images/default-share.jpg`;
 
 function summary(text: string, max = 150) {
   const s = text.replace(/\s+/g, " ").trim();
@@ -67,19 +67,43 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const desc = summary(content || (isAr ? "قصة من بلدة مهين." : "A story from Mheen town."));
   const canonical = `${SITE_URL}/${locale}/stories/${id}`;
 
-  // 1. Get raw image URL
-  const dbImageUrl = story.image_url;
+  const dbImageUrl = story?.image_url;
+  const ogImages: Array<{ url: string; width: number; height: number; type: string }> = [];
 
-  // 2. Default fallback
-  let absoluteOgUrl = DEFAULT_OG_IMAGE;
-
-  // 3. If story has an image, strictly use the -og.jpg variant
   if (dbImageUrl) {
-    const ogPath = toOgVariantUrl(dbImageUrl);
-    absoluteOgUrl = ogPath.startsWith("http")
-      ? ogPath
-      : `${SITE_URL}${ogPath.startsWith("/") ? "" : "/"}${ogPath}`;
+    const absoluteOgUrl = dbImageUrl.startsWith("http")
+      ? dbImageUrl
+      : `${SITE_URL}${dbImageUrl.startsWith("/") ? "" : "/"}${dbImageUrl}`;
+
+    let verifiedUrl = absoluteOgUrl;
+    let verifiedType = absoluteOgUrl.toLowerCase().endsWith(".webp") ? "image/webp" : "image/jpeg";
+
+    try {
+      const jpgVariantUrl = toOgVariantUrl(absoluteOgUrl);
+      const response = await fetch(jpgVariantUrl, { method: "HEAD" });
+      if (response.ok) {
+        verifiedUrl = jpgVariantUrl;
+        verifiedType = "image/jpeg";
+      }
+    } catch {
+      // Silently keep raw URL (WebP for legacy stories)
+    }
+
+    ogImages.push({
+      url: verifiedUrl,
+      width: 1200,
+      height: 630,
+      type: verifiedType,
+    });
   }
+
+  // Guaranteed JPG fallback for WhatsApp when primary is WebP or missing
+  ogImages.push({
+    url: `${SITE_URL}/images/default-share.jpg`,
+    width: 1200,
+    height: 630,
+    type: "image/jpeg",
+  });
 
   return {
     title: `${title} | ${isAr ? "أرشيف مهين" : "Mheen Archive"}`,
@@ -100,24 +124,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url: canonical,
       title,
       description: desc,
-      images: [
-        {
-          url: absoluteOgUrl,
-          width: 1200,
-          height: 630,
-          type: "image/jpeg",
-        },
-      ],
+      images: ogImages,
     },
     twitter: {
       card: "summary_large_image",
       title,
       description: desc,
-      images: [absoluteOgUrl],
+      images: [ogImages[0].url],
     },
     other: {
       itemprop: "image",
-      image: absoluteOgUrl,
+      image: ogImages[0].url,
     },
   };
 }
