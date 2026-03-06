@@ -26,7 +26,8 @@ export async function generateMetadata({
   const description = isAr
     ? "بلدة مهين واحة البادية السورية في ريف حمص."
     : "Mheen town, the oasis of the Syrian Badia in Homs countryside.";
-  const pageUrl = `https://miheen.com/${locale}`;
+  const baseUrl = "https://miheen.com";
+  const pageUrl = `${baseUrl}/${locale}`;
 
   return {
     title,
@@ -34,9 +35,9 @@ export async function generateMetadata({
     alternates: {
       canonical: pageUrl,
       languages: {
-        ar: "https://miheen.com/ar",
-        en: "https://miheen.com/en",
-        "x-default": "https://miheen.com/ar",
+        ar: `${baseUrl}/ar`,
+        en: `${baseUrl}/en`,
+        "x-default": baseUrl,
       },
     },
     openGraph: {
