@@ -100,6 +100,7 @@ export async function DELETE(request: Request) {
   try {
     const session = await auth();
     const role = (session?.user as { role?: string } | null)?.role ?? "public";
+    const userId = (session?.user as { id?: string } | null)?.id ?? "";
     if (!session?.user || !["admin", "editor"].includes(role)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -111,6 +112,19 @@ export async function DELETE(request: Request) {
         { error: "Announcement id is required" },
         { status: 400 }
       );
+    }
+
+    if (role === "editor") {
+      const announcement = await getAnnouncementById(announcementId);
+      if (!announcement) {
+        return NextResponse.json({ error: "Not found" }, { status: 404 });
+      }
+      if (announcement.author_id !== userId) {
+        return NextResponse.json(
+          { error: "You can only delete your own announcements" },
+          { status: 403 }
+        );
+      }
     }
 
     const result = await deleteAnnouncement(announcementId);

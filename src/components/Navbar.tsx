@@ -13,6 +13,7 @@ const NAV_ITEMS = [
   { key: "community", href: "/about-mheen" },
   { key: "recordOfHonor", href: "/record-of-honor" },
   { key: "stories", href: "/stories" },
+  { key: "news", href: "/pulse" },
 ] as const;
 
 function stripLocale(pathname: string | undefined): string {
@@ -30,6 +31,7 @@ export function Navbar() {
   const { data: session, status } = useSession();
   const isAdmin =
     session?.user?.role === "admin" || session?.user?.role === "contributor";
+  const isEditor = session?.user?.role === "editor";
   const isAr = locale === "ar";
   const otherLocale = isAr ? "en" : "ar";
   const isHome = path === "/";
@@ -116,6 +118,14 @@ export function Navbar() {
               className={`rounded-lg px-2.5 py-2 text-[13px] font-medium transition-colors ${mutedTextClass}`}
             >
               {t("dashboard")}
+            </Link>
+          )}
+          {isEditor && (
+            <Link
+              href="/admin/announcements"
+              className={`rounded-lg px-2.5 py-2 text-[13px] font-medium transition-colors ${mutedTextClass}`}
+            >
+              {t("manageAnnouncements")}
             </Link>
           )}
 
@@ -249,6 +259,19 @@ export function Navbar() {
                   }`}
                 >
                   {t("dashboard")}
+                </Link>
+              )}
+              {isEditor && (
+                <Link
+                  href="/admin/announcements"
+                  onClick={() => setMobileOpen(false)}
+                  className={`rounded-lg px-4 py-3 text-sm font-medium ${
+                    transparentAtTop
+                      ? "text-primary/80 hover:bg-primary/5 hover:text-primary"
+                      : "text-white/70 hover:bg-white/5 hover:text-white"
+                  }`}
+                >
+                  {t("manageAnnouncements")}
                 </Link>
               )}
 

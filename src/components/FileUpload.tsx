@@ -176,6 +176,18 @@ export function FileUpload({
     return data;
   }
 
+  async function uploadSingleFileOnly(file: File): Promise<boolean> {
+    const optimizedFile = await convertImageToWebP(file);
+    const data = await uploadSingle(optimizedFile);
+    if (data?.url) {
+      onUploadSuccess?.(data.url);
+      return true;
+    }
+    return false;
+  }
+
+  const DUAL_UPLOAD_TIMEOUT_MS = 25000;
+
   const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -187,35 +199,58 @@ export function FileUpload({
         file.type.startsWith("image/") &&
         file.type !== "image/svg+xml"
       ) {
-        const { uiImageFile, ogImageFile } = await buildStoryDualVariants(file);
-        const mainExt = ".webp";
-        const ogExt = ".jpg";
-        const safeFolder =
-          folder.replace(/[^a-z0-9/_-]/gi, "").replace(/^\/+|\/+$/g, "") || "stories";
-        const baseId = crypto.randomUUID();
-        const mainKey = `${safeFolder}/${baseId}${mainExt}`;
-        const ogKey = `${safeFolder}/${baseId}-og${ogExt}`;
+        const dualTask = async (): Promise<boolean> => {
+          const { uiImageFile, ogImageFile } = await buildStoryDualVariants(file);
+          const mainExt = ".webp";
+          const ogExt = ".jpg";
+          const safeFolder =
+            folder.replace(/[^a-z0-9/_-]/gi, "").replace(/^\/+|\/+$/g, "") || "stories";
+          const baseId = crypto.randomUUID();
+          const mainKey = `${safeFolder}/${baseId}${mainExt}`;
+          const ogKey = `${safeFolder}/${baseId}-og${ogExt}`;
 
-        const [mainUpload, ogUpload] = await Promise.all([
-          uploadSingle(uiImageFile, mainKey),
-          uploadSingle(ogImageFile, ogKey),
-        ]);
+          const [mainUpload, ogUpload] = await Promise.all([
+            uploadSingle(uiImageFile, mainKey),
+            uploadSingle(ogImageFile, ogKey),
+          ]);
 
-        if (mainUpload?.url && ogUpload?.url) {
-          onUploadSuccess?.(mainUpload.url);
-          return;
+          if (mainUpload?.url && ogUpload?.url) {
+            onUploadSuccess?.(mainUpload.url);
+            return true;
+          }
+          return false;
+        };
+
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          setTimeout(() => reject(new Error("UPLOAD_TIMEOUT")), DUAL_UPLOAD_TIMEOUT_MS);
+        });
+
+        let dualOk = false;
+        try {
+          dualOk = await Promise.race([dualTask(), timeoutPromise]);
+        } catch (err) {
+          const isTimeout = err instanceof Error && err.message === "UPLOAD_TIMEOUT";
+          if (isTimeout) {
+            console.warn("[FileUpload] Dual variant upload timed out, falling back to single upload.");
+          }
         }
+
+        if (dualOk) return;
+        const singleOk = await uploadSingleFileOnly(file);
+        if (singleOk) return;
       } else {
-        const optimizedFile = await convertImageToWebP(file);
-        const data = await uploadSingle(optimizedFile);
-        if (data?.url) {
-          onUploadSuccess?.(data.url);
-          return;
-        }
+        const singleOk = await uploadSingleFileOnly(file);
+        if (singleOk) return;
       }
       onUploadError?.("فشل رفع الملف. يرجى المحاولة لاحقاً. / File upload failed. Please try again.");
     } catch (err) {
       console.error("File upload failed:", err);
+      try {
+        const singleOk = await uploadSingleFileOnly(file);
+        if (singleOk) return;
+      } catch {
+        // ignore
+      }
       onUploadError?.("فشل رفع الملف. يرجى المحاولة لاحقاً. / File upload failed. Please try again.");
     } finally {
       setUploading(false);

@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     if (!id) {
       return NextResponse.json({ success: false, error: "User id is required" }, { status: 400 });
     }
-    if (!["admin", "contributor", "public"].includes(role)) {
+    if (!["admin", "editor", "contributor", "public"].includes(role)) {
       return NextResponse.json({ success: false, error: "Invalid role" }, { status: 400 });
     }
 

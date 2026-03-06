@@ -15,6 +15,7 @@ import {
   ImagePlus,
   Video,
   Flag,
+  Megaphone,
 } from "lucide-react";
 
 type Props = {
@@ -27,6 +28,7 @@ const SIDEBAR_ITEMS = [
   { key: "honorRecords", href: "/admin/record-of-honor", icon: Users, adminOnly: false },
   { key: "stories", href: "/admin/stories", icon: BookOpen, adminOnly: false },
   { key: "communityPhotos", href: "/admin/community-photos", icon: Images, adminOnly: false },
+  { key: "announcements", href: "/admin/announcements", icon: Megaphone, adminOnly: false },
   { key: "protestVideos", href: "/admin/protest-videos", icon: Video, adminOnly: true },
   { key: "protestBanners", href: "/admin/protest-banners", icon: Flag, adminOnly: true },
   { key: "heroSlides", href: "/admin/hero-slides", icon: ImagePlus, adminOnly: true },
@@ -47,7 +49,8 @@ export default async function AdminLayout({ children, params }: Props) {
   const session = await auth();
   const role = (session?.user as { role?: string } | null)?.role ?? "public";
   const isAdmin = role === "admin";
-  const allowed = !!session?.user && (isAdmin || role === "contributor");
+  const allowed =
+    !!session?.user && (isAdmin || role === "editor" || role === "contributor");
 
   if (!allowed) {
     return (
@@ -80,10 +83,13 @@ export default async function AdminLayout({ children, params }: Props) {
       <aside className="border-b border-primary/10 bg-primary/10 md:w-64 md:border-b-0 md:border-e md:bg-primary/5">
         <div className="px-4 py-4 md:px-5 md:py-6">
           <h2 className="font-qomra text-lg font-semibold text-primary">
-            {tNav("dashboard")}
+            {role === "editor" ? tAdmin("sidebar.announcements") : tNav("dashboard")}
           </h2>
           <nav className="mt-4 space-y-1" aria-label="Admin navigation">
-            {SIDEBAR_ITEMS.filter((item) => !item.adminOnly || isAdmin).map(({ key, href, icon: Icon }) => (
+            {SIDEBAR_ITEMS.filter((item) => {
+              if (role === "editor") return item.key === "announcements";
+              return !item.adminOnly || isAdmin;
+            }).map(({ key, href, icon: Icon }) => (
               <Link
                 key={key}
                 href={href}

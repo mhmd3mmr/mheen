@@ -183,6 +183,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth(async (request) => {
         );
 
         if (session.user) {
+          if (typeof token.sub === "string") {
+            (session.user as { id?: string }).id = token.sub;
+          }
           // Hard-code owner as admin on the session as well.
           if (session.user.email === ownerEmail) {
             session.user.role = "admin";

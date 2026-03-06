@@ -12,7 +12,7 @@ export type AnnouncementRow = {
   created_at: number;
 };
 
-async function ensureAnnouncementsTable() {
+export async function ensureAnnouncementsTable() {
   const db = await getDB();
   await db
     .prepare(
@@ -52,18 +52,27 @@ async function ensureAnnouncementsTable() {
   return db;
 }
 
-export async function getAnnouncements(limit = 20, offset = 0): Promise<AnnouncementRow[]> {
+export async function getAnnouncements(
+  limit = 20,
+  offset = 0,
+  authorId?: string | null
+): Promise<AnnouncementRow[]> {
   try {
     const db = await ensureAnnouncementsTable();
-    const { results } = await db
-      .prepare(
-        `SELECT id, title_ar, title_en, content_ar, content_en, image_url, type, author_id, created_at
+    const byAuthor = authorId && authorId.trim().length > 0;
+    const sql = byAuthor
+      ? `SELECT id, title_ar, title_en, content_ar, content_en, image_url, type, author_id, created_at
          FROM announcements
+         WHERE author_id = ?
          ORDER BY created_at DESC
          LIMIT ? OFFSET ?`
-      )
-      .bind(limit, offset)
-      .all();
+      : `SELECT id, title_ar, title_en, content_ar, content_en, image_url, type, author_id, created_at
+         FROM announcements
+         ORDER BY created_at DESC
+         LIMIT ? OFFSET ?`;
+    const { results } = byAuthor
+      ? await db.prepare(sql).bind(authorId!.trim(), limit, offset).all()
+      : await db.prepare(sql).bind(limit, offset).all();
     return (results ?? []) as AnnouncementRow[];
   } catch (err) {
     console.error("getAnnouncements error:", err);
@@ -114,7 +123,7 @@ export async function createAnnouncement(
   const contentEn = (input.content_en ?? "").trim() || null;
   const imageUrl = (input.image_url ?? "").trim() || null;
   const rawType = (input.type ?? "").trim().toLowerCase();
-  const allowedTypes = new Set(["urgent", "obituary", "general"]);
+  const allowedTypes = new Set(["urgent", "general"]);
   const type = allowedTypes.has(rawType) ? rawType : "general";
 
   try {
