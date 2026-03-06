@@ -167,6 +167,27 @@ export function GalleryTabsClient() {
     }
   }, [activeTab, videos.length, videosLoading]);
 
+  const categories = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          photos
+            .map((p) => (p.category ?? "").trim())
+            .filter((c) => c.length > 0)
+        )
+      ),
+    [photos]
+  );
+
+  const filteredPhotos = useMemo(() => {
+    if (categoryFilter === "all") return photos;
+    const target = categoryFilter.trim();
+    if (!target) return photos;
+    return photos.filter(
+      (p) => (p.category ?? "").trim() === target
+    );
+  }, [photos, categoryFilter]);
+
   const lightboxIndex = useMemo(
     () => (lightbox ? filteredPhotos.findIndex((p) => p.id === lightbox.id) : -1),
     [lightbox, filteredPhotos]
@@ -201,27 +222,6 @@ export function GalleryTabsClient() {
       ? lightbox.description_en || lightbox.description_ar
       : lightbox.description_ar;
   }, [lightbox, locale]);
-
-  const categories = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          photos
-            .map((p) => (p.category ?? "").trim())
-            .filter((c) => c.length > 0)
-        )
-      ),
-    [photos]
-  );
-
-  const filteredPhotos = useMemo(() => {
-    if (categoryFilter === "all") return photos;
-    const target = categoryFilter.trim();
-    if (!target) return photos;
-    return photos.filter(
-      (p) => (p.category ?? "").trim() === target
-    );
-  }, [photos, categoryFilter]);
 
   function getShareUrl(itemId: string) {
     if (typeof window === "undefined") return `https://miheen.com/${locale}/gallery/${itemId}`;
