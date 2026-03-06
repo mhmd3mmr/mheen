@@ -25,7 +25,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title = locale === "ar" ? "بلدة مهين | الرئيسية" : "Mheen Town | Home";
 
   return {
-    title,
+    title: {
+      absolute: title,
+    },
     openGraph: {
       title,
     },
