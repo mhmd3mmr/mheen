@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
+import Script from "next/script";
 import { routing } from "@/i18n/routing";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
@@ -73,9 +74,21 @@ export default async function LocaleLayout({ children, params }: Props) {
   }
   setRequestLocale(locale);
   const messages = await getMessages();
+  const schemaData = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: locale === "ar" ? "أرشيف مهين | تاريخٌ وحاضر" : "Mheen Archive | Past & Present",
+    alternateName: ["Mheen", "مهين", "Akhawat Aisha", "أخوات عيشة"],
+    url: "https://miheen.com",
+  };
   return (
     <NextIntlClientProvider messages={messages}>
       <SessionProvider>
+        <Script
+          id="schema-org-website"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
+        />
         <div className="flex min-h-screen flex-col bg-background text-foreground">
           <Navbar />
           <main className="flex-1">{children}</main>
