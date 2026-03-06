@@ -90,7 +90,13 @@ export function GalleryTabsClient() {
         category: null,
       }));
       const hasMore = data.pagination?.hasMore ?? nextRows.length === PAGE_SIZE;
-      setPhotos((prev) => (offset === 0 ? nextRows : [...prev, ...nextRows]));
+      setPhotos((prev) => {
+        if (offset === 0) {
+          const communityOnly = prev.filter((p) => p.source === "community");
+          return [...communityOnly, ...nextRows];
+        }
+        return [...prev, ...nextRows];
+      });
       setPhotosHasMore(hasMore);
     } finally {
       setPhotosLoading(false);
