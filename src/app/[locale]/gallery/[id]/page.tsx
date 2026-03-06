@@ -1,9 +1,11 @@
 export const runtime = "edge";
+export const dynamic = "force-dynamic";
 
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getDB } from "@/lib/db";
 import { setRequestLocale } from "next-intl/server";
+import { toOgVariantUrl } from "@/lib/og";
 
 type Props = {
   params: Promise<{ locale: string; id: string }>;
@@ -65,6 +67,44 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     : photo.description_en || photo.description_ar || "Image from Mheen Archive";
   const canonical = `${SITE_URL}/${locale}/gallery/${id}`;
 
+  const dbImageUrl = photo.image_url;
+  const ogImages: Array<{ url: string; width: number; height: number; type: string }> = [];
+
+  if (dbImageUrl) {
+    const absoluteOgUrl = dbImageUrl.startsWith("http")
+      ? dbImageUrl
+      : `${SITE_URL}${dbImageUrl.startsWith("/") ? "" : "/"}${dbImageUrl}`;
+
+    let verifiedUrl = absoluteOgUrl;
+    let verifiedType = absoluteOgUrl.toLowerCase().endsWith(".webp") ? "image/webp" : "image/jpeg";
+
+    try {
+      const jpgVariantUrl = toOgVariantUrl(absoluteOgUrl);
+      const response = await fetch(jpgVariantUrl, { method: "HEAD" });
+      if (response.ok) {
+        verifiedUrl = jpgVariantUrl;
+        verifiedType = "image/jpeg";
+      }
+    } catch {
+      // Silently keep raw URL (WebP for legacy images)
+    }
+
+    ogImages.push({
+      url: verifiedUrl,
+      width: 1200,
+      height: 630,
+      type: verifiedType,
+    });
+  }
+
+  // Guaranteed JPG fallback for WhatsApp when primary is WebP or missing
+  ogImages.push({
+    url: `${SITE_URL}/images/default-share.jpg`,
+    width: 1200,
+    height: 630,
+    type: "image/jpeg",
+  });
+
   return {
     title: `${title} | ${isAr ? "أرشيف مهين" : "Mheen Archive"}`,
     description: textSummary(title),
@@ -81,13 +121,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url: canonical,
       title,
       description: textSummary(title),
-      images: [{ url: photo.image_url }],
+      images: ogImages,
     },
     twitter: {
       card: "summary_large_image",
       title,
       description: textSummary(title),
-      images: [photo.image_url],
+      images: [ogImages[0].url],
+    },
+    other: {
+      itemprop: "image",
+      image: ogImages[0]?.url,
     },
   };
 }
