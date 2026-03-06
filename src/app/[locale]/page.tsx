@@ -1,5 +1,6 @@
 export const runtime = 'edge';
 
+import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
 import { getDB } from "@/lib/db";
 import { HomepageClient } from "@/components/HomepageClient";
@@ -18,6 +19,18 @@ type HeroSlide = {
   is_active: number;
   sort_order: number;
 };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const title = locale === "ar" ? "بلدة مهين | الرئيسية" : "Mheen Town | Home";
+
+  return {
+    title,
+    openGraph: {
+      title,
+    },
+  };
+}
 
 export default async function HomePage({ params }: Props) {
   const { locale } = await params;

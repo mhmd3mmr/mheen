@@ -1,5 +1,6 @@
 export const runtime = 'edge';
 
+import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import {
   Flame,
@@ -21,6 +22,18 @@ import {
 } from "@/components/AboutRevolutionSections";
 
 type Props = { params: Promise<{ locale: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const title = locale === "ar" ? "بلدة مهين | ذاكرة الثورة" : "Mheen Town | Revolution Memory";
+
+  return {
+    title,
+    openGraph: {
+      title,
+    },
+  };
+}
 
 const MILITARY_KEYS = [
   "stickyTitle", "stickySub",

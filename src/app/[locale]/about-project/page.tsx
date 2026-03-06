@@ -1,5 +1,6 @@
 export const runtime = 'edge';
 
+import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import {
   Shield,
@@ -17,6 +18,18 @@ import { PageHeader } from "@/components/PageHeader";
 import { CreatorImage } from "@/components/CreatorImage";
 
 type Props = { params: Promise<{ locale: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const title = locale === "ar" ? "بلدة مهين | عن المشروع" : "Mheen Town | About the Project";
+
+  return {
+    title,
+    openGraph: {
+      title,
+    },
+  };
+}
 
 export default async function AboutProjectPage({ params }: Props) {
   const { locale } = await params;
