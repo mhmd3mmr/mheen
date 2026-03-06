@@ -93,20 +93,20 @@ export function Navbar() {
             }`}
           >
             <span
-              className={`col-start-1 row-start-1 text-xs sm:text-sm transition-opacity duration-1000 ease-in-out ${
+              className={`col-start-1 row-start-1 text-xs sm:text-sm transition-opacity ease-in-out ${
                 sloganIndex === 0
-                  ? "visible opacity-100"
-                  : "invisible pointer-events-none opacity-0"
+                  ? "opacity-100 duration-500 delay-500"
+                  : "opacity-0 duration-500 delay-0 pointer-events-none select-none"
               }`}
               aria-hidden={sloganIndex !== 0}
             >
               {slogans[0]}
             </span>
             <span
-              className={`col-start-1 row-start-1 text-xs sm:text-sm transition-opacity duration-1000 ease-in-out ${
+              className={`col-start-1 row-start-1 text-xs sm:text-sm transition-opacity ease-in-out ${
                 sloganIndex === 1
-                  ? "visible opacity-100"
-                  : "invisible pointer-events-none opacity-0"
+                  ? "opacity-100 duration-500 delay-500"
+                  : "opacity-0 duration-500 delay-0 pointer-events-none select-none"
               }`}
               aria-hidden={sloganIndex !== 1}
             >
