@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, Video, Share2, Copy, MessageCircle, X, Play } from "lucide-react";
+import { Camera, Video, Share2, Copy, MessageCircle, X, Play, ChevronLeft, ChevronRight } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 
 type PhotoItem = {
@@ -167,10 +167,25 @@ export function GalleryTabsClient() {
     }
   }, [activeTab, videos.length, videosLoading]);
 
+  const lightboxIndex = useMemo(
+    () => (lightbox ? filteredPhotos.findIndex((p) => p.id === lightbox.id) : -1),
+    [lightbox, filteredPhotos]
+  );
+  const hasPrev = lightboxIndex > 0;
+  const hasNext = lightboxIndex >= 0 && lightboxIndex < filteredPhotos.length - 1;
+
   useEffect(() => {
     if (!lightbox) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setLightbox(null);
+      if (e.key === "ArrowLeft" && hasPrev) {
+        e.preventDefault();
+        setLightbox(filteredPhotos[lightboxIndex - 1]);
+      }
+      if (e.key === "ArrowRight" && hasNext) {
+        e.preventDefault();
+        setLightbox(filteredPhotos[lightboxIndex + 1]);
+      }
     };
     document.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
@@ -178,7 +193,7 @@ export function GalleryTabsClient() {
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = "";
     };
-  }, [lightbox]);
+  }, [lightbox, lightboxIndex, hasPrev, hasNext, filteredPhotos]);
 
   const lightboxTitle = useMemo(() => {
     if (!lightbox) return "";
@@ -415,6 +430,33 @@ export function GalleryTabsClient() {
               >
                 <X className="h-5 w-5" />
               </button>
+
+              {hasPrev && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setLightbox(filteredPhotos[lightboxIndex - 1]);
+                  }}
+                  className="absolute start-2 top-1/2 z-20 -translate-y-1/2 inline-flex h-12 w-12 items-center justify-center rounded-full bg-black/55 text-white transition-colors hover:bg-black/75"
+                  aria-label={locale === "ar" ? "الصورة السابقة" : "Previous image"}
+                >
+                  <ChevronLeft className="h-7 w-7" />
+                </button>
+              )}
+              {hasNext && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setLightbox(filteredPhotos[lightboxIndex + 1]);
+                  }}
+                  className="absolute end-2 top-1/2 z-20 -translate-y-1/2 inline-flex h-12 w-12 items-center justify-center rounded-full bg-black/55 text-white transition-colors hover:bg-black/75"
+                  aria-label={locale === "ar" ? "الصورة التالية" : "Next image"}
+                >
+                  <ChevronRight className="h-7 w-7" />
+                </button>
+              )}
 
               <img
                 src={lightbox.image_url}
