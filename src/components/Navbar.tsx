@@ -28,6 +28,7 @@ export function Navbar() {
   const path = stripLocale(pathname);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [sloganIndex, setSloganIndex] = useState(0);
   const { data: session, status } = useSession();
   const isAdmin =
     session?.user?.role === "admin" || session?.user?.role === "contributor";
@@ -44,12 +45,24 @@ export function Navbar() {
     ? "text-white/85 hover:bg-white/10 hover:text-white"
     : "text-white/40 hover:bg-white/10 hover:text-white";
 
+  const slogans =
+    locale === "en"
+      ? (["Past & Present", "Akhawat Aisha"] as const)
+      : (["تاريخٌ وحاضر", "أخوات عيشة"] as const);
+
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 8);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setSloganIndex((i) => (i + 1) % slogans.length);
+    }, 3500);
+    return () => window.clearInterval(id);
+  }, [slogans.length]);
 
   return (
     <>
@@ -62,7 +75,10 @@ export function Navbar() {
       >
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-6 px-4 sm:px-6">
         {/* ── Logo ── */}
-        <Link href="/" className="group flex shrink-0 items-baseline gap-2">
+        <Link
+          href="/"
+          className="group flex shrink-0 flex-row items-baseline gap-2"
+        >
           <span
             className={`font-qomra text-2xl font-bold tracking-tight transition-opacity group-hover:opacity-90 ${
               transparentAtTop ? "text-white" : "text-white"
@@ -70,13 +86,29 @@ export function Navbar() {
           >
             {isAr ? "مهين" : "Mheen"}
           </span>
-          <span
-            className={`hidden text-[11px] lg:inline ${
+          {/* Render both slogans overlapped to avoid layout shift */}
+          <div
+            className={`grid items-baseline text-xs sm:text-sm ${
               transparentAtTop ? "text-white/70" : "text-white/35"
             }`}
           >
-            {t("archiveLabel")}
-          </span>
+            <span
+              className={`col-start-1 row-start-1 transition-opacity duration-700 ${
+                sloganIndex === 0 ? "opacity-100" : "pointer-events-none opacity-0"
+              }`}
+              aria-hidden={sloganIndex !== 0}
+            >
+              {slogans[0]}
+            </span>
+            <span
+              className={`col-start-1 row-start-1 transition-opacity duration-700 ${
+                sloganIndex === 1 ? "opacity-100" : "pointer-events-none opacity-0"
+              }`}
+              aria-hidden={sloganIndex !== 1}
+            >
+              {slogans[1]}
+            </span>
+          </div>
         </Link>
 
         {/* ── Desktop nav links ── */}
