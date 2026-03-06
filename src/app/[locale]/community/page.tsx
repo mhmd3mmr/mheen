@@ -93,6 +93,7 @@ export default function CommunityPage() {
   const t = useTranslations("pages.community");
   const tStory = useTranslations("pages.mheenStory");
   const locale = useLocale();
+  const isAr = locale === "ar";
   const [galleryItems, setGalleryItems] = useState<
     { caption: string; image: string; category?: string | null }[]
   >([]);
@@ -666,6 +667,72 @@ export default function CommunityPage() {
             </Link>
           </div>
         </Reveal>
+      </section>
+
+      {/* FAQ */}
+      <section className="bg-neutral-50 py-16 md:py-24">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <Reveal>
+            <div className="mb-10">
+              <h2 className="font-qomra text-3xl font-bold text-primary md:text-4xl">
+                {isAr ? "أسئلة شائعة عن مهين" : "Frequently Asked Questions about Mheen"}
+              </h2>
+              <p className="mt-3 max-w-3xl text-base leading-relaxed text-foreground/60">
+                {isAr
+                  ? "إجابات عن بعض الأسئلة المتكررة حول بلدة مهين وتاريخها وموقعها الجغرافي وسكانها."
+                  : "Answers to some common questions about Mheen, its history, location, and population."}
+              </p>
+            </div>
+          </Reveal>
+
+          <div className="space-y-3">
+            {(
+              isAr
+                ? [
+                    {
+                      q: "ما معنى اسم بلدة مهين؟",
+                      a: "تتعدد الروايات حول تسمية بلدة مهين، ويُرجح الباحثون أن الاسم يعود لجذور سريانية أو آرامية قديمة تعني \"الماء\" أو \"الواحة\"، نظراً لطبيعة البلدة كواحة خضراء في قلب البادية السورية وتوفر المياه الجوفية فيها تاريخياً.",
+                    },
+                    {
+                      q: "كم عدد سكان بلدة مهين؟",
+                      a: "بلغ عدد سكان بلدة مهين حوالي 17,064 نسمة بحسب الإحصاء الرسمي لعام 2010، إلا أن هذا الرقم تعرض لتغيرات كبيرة خلال السنوات الماضية نتيجة ظروف الحرب والتهجير التي مرت بها المنطقة.",
+                    },
+                    {
+                      q: "أين تقع بلدة مهين جغرافياً؟",
+                      a: "تقع بلدة مهين في ريف محافظة حمص الجنوبي الشرقي في سوريا. تبعد عن مدينة حمص حوالي 85 كيلومتراً، وتجاورها مدينة القريتين وبلدة حوارين، وتعتبر بوابة حيوية للبادية السورية.",
+                    },
+                  ]
+                : [
+                    {
+                      q: "What does the name Mheen mean?",
+                      a: "The exact origin of the name Mheen is debated, but historians suggest it has ancient Syriac or Aramaic roots referring to \"water\" or \"oasis\". This reflects the town's historical nature as a green oasis with abundant groundwater in the Syrian desert.",
+                    },
+                    {
+                      q: "What is the population of Mheen?",
+                      a: "According to the official 2010 census, Mheen had a population of approximately 17,064. However, this number has fluctuated significantly in recent years due to the war and displacement in the region.",
+                    },
+                    {
+                      q: "Where is Mheen located?",
+                      a: "Mheen is located in the southeastern countryside of Homs Governorate, Syria. It is situated about 85 kilometers from the city of Homs, neighboring Al-Qaryatayn and Hawarin, and serves as a vital gateway to the Syrian Desert.",
+                    },
+                  ]
+            ).map((item) => (
+              <Reveal key={item.q} className="rounded-2xl border border-primary/10 bg-background p-5 shadow-sm">
+                <details className="group">
+                  <summary className="cursor-pointer list-none select-none text-base font-semibold text-foreground marker:hidden">
+                    <div className="flex items-start justify-between gap-4">
+                      <span>{item.q}</span>
+                      <span className="mt-1 text-foreground/40 transition-transform group-open:rotate-180">
+                        ▾
+                      </span>
+                    </div>
+                  </summary>
+                  <p className="mt-3 text-sm leading-relaxed text-foreground/70">{item.a}</p>
+                </details>
+              </Reveal>
+            ))}
+          </div>
+        </div>
       </section>
     </div>
   );
