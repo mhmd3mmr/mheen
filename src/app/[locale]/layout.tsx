@@ -3,6 +3,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import Script from "next/script";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import { routing } from "@/i18n/routing";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
@@ -84,6 +85,7 @@ export default async function LocaleLayout({ children, params }: Props) {
   return (
     <NextIntlClientProvider messages={messages}>
       <SessionProvider>
+        <GoogleAnalytics gaId="G-RN3GXEJSJN" />
         <Script
           id="schema-org-website"
           type="application/ld+json"
