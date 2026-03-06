@@ -88,21 +88,25 @@ export function Navbar() {
           </span>
           {/* Render both slogans overlapped to avoid layout shift */}
           <div
-            className={`grid items-baseline text-xs sm:text-sm ${
+            className={`grid items-baseline ${
               transparentAtTop ? "text-white/70" : "text-white/35"
             }`}
           >
             <span
-              className={`col-start-1 row-start-1 transition-opacity duration-700 ${
-                sloganIndex === 0 ? "opacity-100" : "pointer-events-none opacity-0"
+              className={`col-start-1 row-start-1 text-xs sm:text-sm transition-opacity duration-1000 ease-in-out ${
+                sloganIndex === 0
+                  ? "visible opacity-100"
+                  : "invisible pointer-events-none opacity-0"
               }`}
               aria-hidden={sloganIndex !== 0}
             >
               {slogans[0]}
             </span>
             <span
-              className={`col-start-1 row-start-1 transition-opacity duration-700 ${
-                sloganIndex === 1 ? "opacity-100" : "pointer-events-none opacity-0"
+              className={`col-start-1 row-start-1 text-xs sm:text-sm transition-opacity duration-1000 ease-in-out ${
+                sloganIndex === 1
+                  ? "visible opacity-100"
+                  : "invisible pointer-events-none opacity-0"
               }`}
               aria-hidden={sloganIndex !== 1}
             >
