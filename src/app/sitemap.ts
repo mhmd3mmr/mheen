@@ -18,6 +18,7 @@ const ROUTES = [
   "/timeline",
   "/uprising",
   "/gallery",
+  "/contact",
   "/submit",
   "/submit-community-photo",
 ] as const;

@@ -142,3 +142,14 @@ CREATE TABLE IF NOT EXISTS "protest_banners" (
   "sort_order" INTEGER NOT NULL DEFAULT 0,
   "created_at" INTEGER NOT NULL DEFAULT (unixepoch())
 );
+
+-- Contact form messages (status: PENDING | CONTACTED | POSTPONED | RESOLVED | CANCELLED)
+CREATE TABLE IF NOT EXISTS "contact_messages" (
+  "id" TEXT NOT NULL PRIMARY KEY,
+  "name" TEXT NOT NULL,
+  "whatsapp" TEXT NOT NULL,
+  "message" TEXT NOT NULL,
+  "status" TEXT NOT NULL DEFAULT 'PENDING',
+  "created_at" INTEGER NOT NULL DEFAULT (unixepoch()),
+  "updated_at" INTEGER NOT NULL DEFAULT (unixepoch())
+);

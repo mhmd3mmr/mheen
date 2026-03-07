@@ -16,6 +16,7 @@ import {
   Video,
   Flag,
   Megaphone,
+  MessageSquare,
 } from "lucide-react";
 
 type Props = {
@@ -29,6 +30,7 @@ const SIDEBAR_ITEMS = [
   { key: "stories", href: "/admin/stories", icon: BookOpen, adminOnly: false },
   { key: "communityPhotos", href: "/admin/community-photos", icon: Images, adminOnly: false },
   { key: "announcements", href: "/admin/announcements", icon: Megaphone, adminOnly: false },
+  { key: "messages", href: "/admin/messages", icon: MessageSquare, adminOnly: true },
   { key: "protestVideos", href: "/admin/protest-videos", icon: Video, adminOnly: true },
   { key: "protestBanners", href: "/admin/protest-banners", icon: Flag, adminOnly: true },
   { key: "heroSlides", href: "/admin/hero-slides", icon: ImagePlus, adminOnly: true },

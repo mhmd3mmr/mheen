@@ -90,7 +90,8 @@
       "protestVideos": "Protest Videos",
       "protestBanners": "Protest Banners",
       "heroSlides": "Hero Slides",
-      "users": "Manage Users"
+      "users": "Manage Users",
+      "messages": "User Messages"
     },
     "buttons": {
       "addNew": "Add New",
@@ -119,6 +120,16 @@
       "noMatch": "No users match your search.",
       "searchPlaceholder": "Search by name or email...",
       "roleUpdated": "Role updated successfully"
+    },
+    "contactMessages": {
+      "title": "User Messages",
+      "noMessages": "No messages.",
+      "statusPending": "Pending",
+      "statusContacted": "Contacted",
+      "statusPostponed": "Postponed",
+      "statusResolved": "Resolved",
+      "statusCancelled": "Cancelled",
+      "statusUpdated": "Status updated"
     }
   },
   "pages": {
@@ -265,6 +276,21 @@
       "copied": "Link copied",
       "copyFailed": "Failed to copy link",
       "close": "Close"
+    },
+    "contact": {
+      "title": "Contact Us",
+      "subtitle": "Send your message and we will get back to you via WhatsApp",
+      "nameLabel": "Name",
+      "namePlaceholder": "Your full name",
+      "whatsappLabel": "WhatsApp number",
+      "whatsappPlaceholder": "Phone number without country code",
+      "messageLabel": "Message",
+      "messagePlaceholder": "Write your message here...",
+      "submit": "Send",
+      "sending": "Sending...",
+      "success": "Your message was sent successfully. We will get back to you soon.",
+      "errorRequired": "Name, WhatsApp number, and message are required.",
+      "errorSubmit": "Failed to send message. Please try again."
     },
     "timeline": {
       "title": "Timeline",

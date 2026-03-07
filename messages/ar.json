@@ -90,7 +90,8 @@
       "protestVideos": "فيديوهات الثورة",
       "protestBanners": "لافتات الثورة",
       "heroSlides": "صور الهيرو",
-      "users": "إدارة المستخدمين"
+      "users": "إدارة المستخدمين",
+      "messages": "تواصل المستخدم"
     },
     "buttons": {
       "addNew": "إضافة جديد",
@@ -119,6 +120,16 @@
       "noMatch": "لا توجد نتائج تطابق البحث.",
       "searchPlaceholder": "البحث بالاسم أو البريد...",
       "roleUpdated": "تم تحديث الدور بنجاح"
+    },
+    "contactMessages": {
+      "title": "تواصل المستخدم",
+      "noMessages": "لا توجد رسائل.",
+      "statusPending": "قيد الانتظار",
+      "statusContacted": "تم التواصل",
+      "statusPostponed": "مؤجل",
+      "statusResolved": "تم الحل",
+      "statusCancelled": "إلغاء",
+      "statusUpdated": "تم تحديث الحالة"
     }
   },
   "pages": {
@@ -265,6 +276,21 @@
       "copied": "تم نسخ الرابط",
       "copyFailed": "تعذر نسخ الرابط",
       "close": "إغلاق"
+    },
+    "contact": {
+      "title": "تواصل معنا",
+      "subtitle": "أرسل رسالتك وسنتواصل معك عبر واتساب",
+      "nameLabel": "الاسم",
+      "namePlaceholder": "اسمك الكامل",
+      "whatsappLabel": "رقم واتساب",
+      "whatsappPlaceholder": "رقم الهاتف بدون مفتاح الدولة",
+      "messageLabel": "الرسالة",
+      "messagePlaceholder": "اكتب رسالتك هنا...",
+      "submit": "إرسال",
+      "sending": "جاري الإرسال...",
+      "success": "تم إرسال رسالتك بنجاح. سنتواصل معك قريباً.",
+      "errorRequired": "الاسم ورقم واتساب والرسالة مطلوبة.",
+      "errorSubmit": "تعذر إرسال الرسالة. حاول مرة أخرى."
     },
     "timeline": {
       "title": "الخط الزمني",

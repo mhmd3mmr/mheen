@@ -85,7 +85,7 @@ export function Footer() {
           <p>{t("copyright", { year })}</p>
           <div className="flex items-center gap-4">
             <Link
-              href="/submit"
+              href="/contact"
               className="transition-colors hover:text-white"
             >
               {t("contact")}
