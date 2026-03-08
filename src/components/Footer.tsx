@@ -10,7 +10,7 @@ const QUICK_LINKS = [
   { key: "revolution" as const, href: "/revolution" as const },
   { key: "recordOfHonor" as const, href: "/record-of-honor" as const },
   { key: "stories" as const, href: "/stories" as const },
-  { key: "submit" as const, href: "/submit" as const },
+  { key: "gallery" as const, href: "/gallery" as const },
 ];
 
 export function Footer() {
