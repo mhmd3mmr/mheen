@@ -39,6 +39,7 @@ export async function submitMartyr(
   const birthDate = String(formData.get("birth_date") ?? "").trim() || null;
   const deathDate = String(formData.get("death_date") ?? "").trim() || null;
   const imageUrl = String(formData.get("image_url") ?? "").trim() || null;
+  const previewImageUrl = String(formData.get("preview_image_url") ?? "").trim() || null;
   const submittedBy = String(formData.get("submitted_by") ?? "").trim() || null;
 
   if (!nameAr) {
@@ -50,10 +51,10 @@ export async function submitMartyr(
     const id = crypto.randomUUID();
     await db
       .prepare(
-        `INSERT INTO martyrs (id, name_ar, name_en, birth_date, death_date, image_url, status, submitted_by)
-         VALUES (?, ?, ?, ?, ?, ?, 'pending', ?)`
+        `INSERT INTO martyrs (id, name_ar, name_en, birth_date, death_date, image_url, preview_image_url, status, submitted_by)
+         VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?)`
       )
-      .bind(id, nameAr, nameEn || nameAr, birthDate, deathDate, imageUrl, submittedBy)
+      .bind(id, nameAr, nameEn || nameAr, birthDate, deathDate, imageUrl, previewImageUrl, submittedBy)
       .run();
     return { success: true };
   } catch (err) {
@@ -101,6 +102,7 @@ export async function submitDetainee(
   const statusAr = String(formData.get("status_ar") ?? "").trim() || null;
   const statusEn = String(formData.get("status_en") ?? "").trim() || null;
   const imageUrl = String(formData.get("image_url") ?? "").trim() || null;
+  const previewImageUrl = String(formData.get("preview_image_url") ?? "").trim() || null;
   const submittedBy = String(formData.get("submitted_by") ?? "").trim() || null;
 
   if (!nameAr) {
@@ -112,10 +114,10 @@ export async function submitDetainee(
     const id = crypto.randomUUID();
     await db
       .prepare(
-        `INSERT INTO detainees (id, name_ar, name_en, arrest_date, status_ar, status_en, image_url, status, submitted_by)
-         VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?)`
+        `INSERT INTO detainees (id, name_ar, name_en, arrest_date, status_ar, status_en, image_url, preview_image_url, status, submitted_by)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)`
       )
-      .bind(id, nameAr, nameEn || nameAr, arrestDate, statusAr, statusEn, imageUrl, submittedBy)
+      .bind(id, nameAr, nameEn || nameAr, arrestDate, statusAr, statusEn, imageUrl, previewImageUrl, submittedBy)
       .run();
     return { success: true };
   } catch (err) {

@@ -62,6 +62,7 @@ export function AdminRecordOfHonorClient({
   const [recordType, setRecordType] = useState<RecordType>("martyr");
   const [martyrdomMethod, setMartyrdomMethod] = useState<MartyrdomMethod>("combatant");
   const [imageUrl, setImageUrl] = useState("");
+  const [previewImageUrl, setPreviewImageUrl] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [uploadError, setUploadError] = useState("");
@@ -75,6 +76,7 @@ export function AdminRecordOfHonorClient({
   const [editFormMartyr, setEditFormMartyr] = useState<EditFormMartyr | null>(null);
   const [editFormDetainee, setEditFormDetainee] = useState<EditFormDetainee | null>(null);
   const [editImageUrl, setEditImageUrl] = useState("");
+  const [editPreviewImageUrl, setEditPreviewImageUrl] = useState("");
   const [isUploadingEdit, setIsUploadingEdit] = useState(false);
   const [editUploadError, setEditUploadError] = useState("");
   const [savingEdit, setSavingEdit] = useState(false);
@@ -140,6 +142,7 @@ export function AdminRecordOfHonorClient({
     setEditFormMartyr(null);
     setEditFormDetainee(null);
     setEditImageUrl("");
+    setEditPreviewImageUrl("");
     setEditUploadError("");
   }
 
@@ -157,6 +160,7 @@ export function AdminRecordOfHonorClient({
           id: editingRecord.data.id,
           ...editFormMartyr,
           image_url: editImageUrl || editingRecord.data.image_url || null,
+          preview_image_url: editPreviewImageUrl || null,
         };
         const res = await fetch("/api/admin/martyrs", {
           method: "PATCH",
@@ -176,6 +180,7 @@ export function AdminRecordOfHonorClient({
           id: editingRecord.data.id,
           ...editFormDetainee,
           image_url: editImageUrl || editingRecord.data.image_url || null,
+          preview_image_url: editPreviewImageUrl || null,
         };
         const res = await fetch("/api/admin/detainees", {
           method: "PATCH",
@@ -207,6 +212,7 @@ export function AdminRecordOfHonorClient({
     try {
       const formData = new FormData(e.currentTarget);
       if (imageUrl) formData.set("image_url", imageUrl);
+      if (previewImageUrl) formData.set("preview_image_url", previewImageUrl);
       formData.set("desired_status", "approved");
 
       if (recordType === "martyr") {
@@ -224,6 +230,7 @@ export function AdminRecordOfHonorClient({
         setSuccessMsg("تمت الإضافة بنجاح / Added successfully");
         formRef.current?.reset();
         setImageUrl("");
+        setPreviewImageUrl("");
         setMartyrdomMethod("combatant");
         setRecordType("martyr");
         router.refresh();
@@ -318,7 +325,7 @@ export function AdminRecordOfHonorClient({
                 <option value="combatant">Combatant / مقاتل</option>
                 <option value="detained_then_martyred">Detained then Martyred / معتقل ثم استشهد</option>
                 <option value="civilian_bombing">Civilian - Bombing / مدني - قصف</option>
-                <option value="other">Other / أخرى</option>
+                <option value="other">Other method / طريقة غير</option>
               </select>
             </div>
             {martyrdomMethod === "other" && (
@@ -362,11 +369,16 @@ export function AdminRecordOfHonorClient({
               setImageUrl(url);
               setUploadError("");
             }}
+            onUploadSuccessDetailed={(r) => {
+              if (r.previewUrl) setPreviewImageUrl(r.previewUrl);
+            }}
             onUploadingChange={setIsUploading}
             onUploadError={setUploadError}
             uploadLabel="اختر صورة / Choose photo"
             uploadingLabel="جارٍ الرفع..."
             folder="records"
+            generateOgVariant
+            generatePreviewVariant
             imageMaxWidth={800}
             imageWebpQuality={0.8}
             imageAspectRatio={3 / 4}
@@ -382,6 +394,7 @@ export function AdminRecordOfHonorClient({
             </div>
           )}
           <input type="hidden" name="image_url" value={imageUrl} />
+          <input type="hidden" name="preview_image_url" value={previewImageUrl} />
         </div>
 
         <div className="flex items-center gap-4 md:col-span-2 lg:col-span-3">
@@ -585,11 +598,16 @@ export function AdminRecordOfHonorClient({
                         setEditImageUrl(url);
                         setEditUploadError("");
                       }}
+                      onUploadSuccessDetailed={(r) => {
+                        if (r.previewUrl) setEditPreviewImageUrl(r.previewUrl);
+                      }}
                       onUploadingChange={setIsUploadingEdit}
                       onUploadError={setEditUploadError}
                       uploadLabel="اختر صورة جديدة / Choose new photo"
                       uploadingLabel="جارٍ الرفع..."
                       folder="records"
+                      generateOgVariant
+                      generatePreviewVariant
                       imageMaxWidth={800}
                       imageWebpQuality={0.8}
                       imageAspectRatio={3 / 4}
@@ -619,7 +637,7 @@ export function AdminRecordOfHonorClient({
                           <option value="combatant">مقاتل / Combatant</option>
                           <option value="detained_then_martyred">معتقل ثم استشهد / Detained then Martyred</option>
                           <option value="civilian_bombing">مدني - قصف / Civilian - Bombing</option>
-                          <option value="other">أخرى / Other</option>
+                          <option value="other">طريقة غير / Other method</option>
                         </select>
                       </div>
                       {editFormMartyr.martyrdom_method === "other" && (

@@ -38,6 +38,7 @@ export async function PATCH(request: Request) {
       martyrdom_details?: string | null;
       tags?: string | null;
       image_url?: string | null;
+      preview_image_url?: string | null;
     };
 
     const id = String(payload.id ?? "").trim();
@@ -73,12 +74,17 @@ export async function PATCH(request: Request) {
     const martyrdomDetails = String(payload.martyrdom_details ?? "").trim() || null;
     const tags = String(payload.tags ?? "").trim() || null;
     const imageUrl = String(payload.image_url ?? "").trim() || null;
+    const previewImageUrl = String(payload.preview_image_url ?? "").trim() || null;
 
     const db = await getDB();
+    // Backward-compatible migration for older production DBs.
+    try {
+      await db.prepare(`ALTER TABLE martyrs ADD COLUMN preview_image_url TEXT`).run();
+    } catch {}
     const existing = await db
-      .prepare(`SELECT image_url FROM martyrs WHERE id = ?`)
+      .prepare(`SELECT image_url, preview_image_url FROM martyrs WHERE id = ?`)
       .bind(id)
-      .first<{ image_url: string | null }>();
+      .first<{ image_url: string | null; preview_image_url?: string | null }>();
 
     if (!existing) {
       return NextResponse.json({ success: false, error: "Martyr not found" }, { status: 404 });
@@ -89,7 +95,8 @@ export async function PATCH(request: Request) {
         `UPDATE martyrs SET
           name_ar = ?, name_en = ?, birth_date = ?, death_date = ?,
           martyrdom_method = ?, martyrdom_details = ?, tags = ?,
-          image_url = COALESCE(?, image_url)
+          image_url = COALESCE(?, image_url),
+          preview_image_url = COALESCE(?, preview_image_url)
          WHERE id = ?`
       )
       .bind(
@@ -101,12 +108,16 @@ export async function PATCH(request: Request) {
         martyrdomDetails,
         tags,
         imageUrl,
+        previewImageUrl,
         id
       )
       .run();
 
     if (imageUrl && existing?.image_url && existing.image_url !== imageUrl) {
       await tryDeleteImage(existing.image_url);
+    }
+    if (previewImageUrl && existing?.preview_image_url && existing.preview_image_url !== previewImageUrl) {
+      await tryDeleteImage(existing.preview_image_url);
     }
 
     revalidatePath("/[locale]/admin/record-of-honor", "page");

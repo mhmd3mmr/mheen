@@ -17,6 +17,7 @@ export function SubmitHonorForm({ onError, initialRecordType = "martyr" }: Props
   const [recordType, setRecordType] = useState<RecordType>(initialRecordType);
   const [martyrdomMethod, setMartyrdomMethod] = useState<MartyrdomMethod>("combatant");
   const [imageUrl, setImageUrl] = useState("");
+  const [previewImageUrl, setPreviewImageUrl] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
@@ -30,6 +31,7 @@ export function SubmitHonorForm({ onError, initialRecordType = "martyr" }: Props
     try {
       const formData = new FormData(e.currentTarget);
       if (imageUrl) formData.set("image_url", imageUrl);
+      if (previewImageUrl) formData.set("preview_image_url", previewImageUrl);
       if (recordType === "martyr") {
         formData.set("martyrdom_method", martyrdomMethod);
       }
@@ -56,6 +58,7 @@ export function SubmitHonorForm({ onError, initialRecordType = "martyr" }: Props
   function handleReset() {
     setIsSuccess(false);
     setImageUrl("");
+    setPreviewImageUrl("");
     setUploadError("");
     setRecordType("martyr");
     setMartyrdomMethod("combatant");
@@ -200,11 +203,16 @@ export function SubmitHonorForm({ onError, initialRecordType = "martyr" }: Props
             setImageUrl(url);
             setUploadError("");
           }}
+          onUploadSuccessDetailed={(r) => {
+            if (r.previewUrl) setPreviewImageUrl(r.previewUrl);
+          }}
           onUploadingChange={setIsUploading}
           onUploadError={setUploadError}
           uploadLabel={t("upload")}
           uploadingLabel={t("uploading")}
           folder="records"
+          generateOgVariant
+          generatePreviewVariant
           imageMaxWidth={800}
           imageWebpQuality={0.8}
           imageAspectRatio={3 / 4}
@@ -218,6 +226,7 @@ export function SubmitHonorForm({ onError, initialRecordType = "martyr" }: Props
           />
         )}
         <input type="hidden" name="image_url" value={imageUrl} />
+        <input type="hidden" name="preview_image_url" value={previewImageUrl} />
       </div>
 
       <div className="space-y-1">

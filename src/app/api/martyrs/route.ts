@@ -17,6 +17,7 @@ async function ensureMartyrsTable() {
         martyrdom_details TEXT,
         tags TEXT,
         image_url TEXT,
+        preview_image_url TEXT,
         status TEXT NOT NULL DEFAULT 'approved',
         submitted_by TEXT
       )`
@@ -32,6 +33,9 @@ async function ensureMartyrsTable() {
   } catch {}
   try {
     await db.prepare(`ALTER TABLE martyrs ADD COLUMN image_url TEXT`).run();
+  } catch {}
+  try {
+    await db.prepare(`ALTER TABLE martyrs ADD COLUMN preview_image_url TEXT`).run();
   } catch {}
   try {
     await db.prepare(`ALTER TABLE martyrs ADD COLUMN martyrdom_method TEXT`).run();
@@ -65,6 +69,7 @@ export async function POST(request: Request) {
     const martyrdomDetails = String(formData.get("martyrdom_details") ?? "").trim() || null;
     const tags = String(formData.get("tags") ?? "").trim() || null;
     const imageUrl = String(formData.get("image_url") ?? "").trim() || null;
+    const previewImageUrl = String(formData.get("preview_image_url") ?? "").trim() || null;
     const submittedBy = String(formData.get("submitted_by") ?? "").trim() || null;
     const requestedStatus = String(formData.get("desired_status") ?? "").trim();
 
@@ -113,9 +118,9 @@ export async function POST(request: Request) {
       .prepare(
         `INSERT INTO martyrs (
            id, name_ar, name_en, birth_date, death_date,
-           martyrdom_method, martyrdom_details, tags, image_url, status, submitted_by
+           martyrdom_method, martyrdom_details, tags, image_url, preview_image_url, status, submitted_by
          )
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
       )
       .bind(
         id,
@@ -127,6 +132,7 @@ export async function POST(request: Request) {
         martyrdomDetails,
         tags,
         imageUrl,
+        previewImageUrl,
         status,
         submittedBy
       )

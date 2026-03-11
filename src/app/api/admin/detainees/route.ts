@@ -35,6 +35,7 @@ export async function PATCH(request: Request) {
       status_en?: string | null;
       tags?: string | null;
       image_url?: string | null;
+      preview_image_url?: string | null;
     };
 
     const id = String(payload.id ?? "").trim();
@@ -56,12 +57,17 @@ export async function PATCH(request: Request) {
     const statusEn = String(payload.status_en ?? "").trim() || null;
     const tags = String(payload.tags ?? "").trim() || null;
     const imageUrl = String(payload.image_url ?? "").trim() || null;
+    const previewImageUrl = String(payload.preview_image_url ?? "").trim() || null;
 
     const db = await getDB();
+    // Backward-compatible migration for older production DBs.
+    try {
+      await db.prepare(`ALTER TABLE detainees ADD COLUMN preview_image_url TEXT`).run();
+    } catch {}
     const existing = await db
-      .prepare(`SELECT image_url FROM detainees WHERE id = ?`)
+      .prepare(`SELECT image_url, preview_image_url FROM detainees WHERE id = ?`)
       .bind(id)
-      .first<{ image_url: string | null }>();
+      .first<{ image_url: string | null; preview_image_url?: string | null }>();
 
     if (!existing) {
       return NextResponse.json({ success: false, error: "Detainee not found" }, { status: 404 });
@@ -71,14 +77,17 @@ export async function PATCH(request: Request) {
       .prepare(
         `UPDATE detainees SET
           name_ar = ?, name_en = ?, arrest_date = ?, status_ar = ?, status_en = ?,
-          tags = ?, image_url = COALESCE(?, image_url)
+          tags = ?, image_url = COALESCE(?, image_url), preview_image_url = COALESCE(?, preview_image_url)
          WHERE id = ?`
       )
-      .bind(nameAr, nameEn, arrestDate, statusAr, statusEn, tags, imageUrl, id)
+      .bind(nameAr, nameEn, arrestDate, statusAr, statusEn, tags, imageUrl, previewImageUrl, id)
       .run();
 
     if (imageUrl && existing?.image_url && existing.image_url !== imageUrl) {
       await tryDeleteImage(existing.image_url);
+    }
+    if (previewImageUrl && existing?.preview_image_url && existing.preview_image_url !== previewImageUrl) {
+      await tryDeleteImage(existing.preview_image_url);
     }
 
     revalidatePath("/[locale]/admin/record-of-honor", "page");

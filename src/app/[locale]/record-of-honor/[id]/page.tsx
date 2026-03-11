@@ -17,6 +17,7 @@ type MartyrRow = {
   death_date: string | null;
   martyrdom_details: string | null;
   image_url: string | null;
+  preview_image_url?: string | null;
   status: string;
 };
 
@@ -28,6 +29,7 @@ type DetaineeRow = {
   status_ar: string | null;
   status_en: string | null;
   image_url: string | null;
+  preview_image_url?: string | null;
   status: string;
 };
 
@@ -84,7 +86,7 @@ async function getRecordById(id: string): Promise<HonorRecord | null> {
   const db = await getDB();
   const martyr = await db
     .prepare(
-      `SELECT id, name_ar, name_en, birth_date, death_date, martyrdom_details, image_url, status
+      `SELECT id, name_ar, name_en, birth_date, death_date, martyrdom_details, image_url, preview_image_url, status
        FROM martyrs
        WHERE id = ? AND status = 'approved'
        LIMIT 1`
@@ -95,7 +97,7 @@ async function getRecordById(id: string): Promise<HonorRecord | null> {
 
   const detainee = await db
     .prepare(
-      `SELECT id, name_ar, name_en, arrest_date, status_ar, status_en, image_url, status
+      `SELECT id, name_ar, name_en, arrest_date, status_ar, status_en, image_url, preview_image_url, status
        FROM detainees
        WHERE id = ? AND status = 'approved'
        LIMIT 1`
@@ -128,6 +130,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const canonical = `${SITE_URL}/${locale}/record-of-honor/${id}`;
   const mainImageUrl = record.image_url ? resolveAbsoluteImage(record.image_url) : "";
   const ogImageUrl = record.image_url ? toOgVariantUrl(mainImageUrl) : DEFAULT_MARTYR_OG_IMAGE;
+  const previewUrl = record.preview_image_url ? resolveAbsoluteImage(record.preview_image_url) : "";
 
   return {
     title: `${name} | ${isAr ? "أرشيف مهين" : "Mheen Archive"}`,
@@ -149,6 +152,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: name,
       description: textSummary(summary),
       images: [
+        {
+          url: previewUrl || ogImageUrl,
+          width: 300,
+          height: 300,
+          type: "image/jpeg",
+          alt: name,
+        },
         {
           url: ogImageUrl,
           width: 1200,

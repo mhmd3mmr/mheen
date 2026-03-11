@@ -17,6 +17,7 @@ export function AdminMartyrForm() {
   const [successMsg, setSuccessMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [method, setMethod] = useState("combatant");
+  const [previewImageUrl, setPreviewImageUrl] = useState("");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -27,6 +28,7 @@ export function AdminMartyrForm() {
     try {
       const formData = new FormData(e.currentTarget);
       if (imageUrl) formData.set("image_url", imageUrl);
+      if (previewImageUrl) formData.set("preview_image_url", previewImageUrl);
       formData.set("martyrdom_method", method);
       formData.set("desired_status", "approved");
       const response = await fetch("/api/martyrs", { method: "POST", body: formData });
@@ -36,6 +38,7 @@ export function AdminMartyrForm() {
         setSuccessMsg("تمت الإضافة بنجاح / Added successfully");
         formRef.current?.reset();
         setImageUrl("");
+        setPreviewImageUrl("");
         setMethod("combatant");
         router.refresh();
         setTimeout(() => setSuccessMsg(""), 4000);
@@ -108,7 +111,7 @@ export function AdminMartyrForm() {
           <option value="combatant">مقاتل / Combatant</option>
           <option value="detained_then_martyred">معتقل ثم استشهد / Detained then Martyred</option>
           <option value="civilian_bombing">مدني - قصف / Civilian - Bombing</option>
-          <option value="other">أخرى / Other</option>
+          <option value="other">طريقة غير / Other method</option>
         </select>
       </div>
       {method === "other" && (
@@ -141,12 +144,16 @@ export function AdminMartyrForm() {
         <FileUpload
           accept="image/*"
           onUploadSuccess={(url) => { setImageUrl(url); setUploadError(""); }}
+          onUploadSuccessDetailed={(r) => {
+            if (r.previewUrl) setPreviewImageUrl(r.previewUrl);
+          }}
           onUploadingChange={setIsUploading}
           onUploadError={setUploadError}
           uploadLabel="اختر صورة / Choose photo"
           uploadingLabel="جارٍ الرفع..."
           folder="records"
           generateOgVariant
+          generatePreviewVariant
           imageMaxWidth={1920}
           imageWebpQuality={0.8}
           imageTargetMaxKB={200}
@@ -165,6 +172,7 @@ export function AdminMartyrForm() {
           </div>
         )}
         <input type="hidden" name="image_url" value={imageUrl} />
+        <input type="hidden" name="preview_image_url" value={previewImageUrl} />
       </div>
 
       <div className="flex items-center gap-4 md:col-span-2 lg:col-span-3">

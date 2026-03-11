@@ -48,11 +48,12 @@ export async function POST(request: Request) {
         await db.prepare(`UPDATE martyrs SET status = 'approved' WHERE id = ?`).bind(id).run();
       } else {
         const row = await db
-          .prepare(`SELECT image_url FROM martyrs WHERE id = ?`)
+          .prepare(`SELECT image_url, preview_image_url FROM martyrs WHERE id = ?`)
           .bind(id)
-          .first<{ image_url: string | null }>();
+          .first<{ image_url: string | null; preview_image_url?: string | null }>();
         await db.prepare(`DELETE FROM martyrs WHERE id = ?`).bind(id).run();
         await tryDeleteImage(row?.image_url);
+        await tryDeleteImage(row?.preview_image_url);
       }
       revalidatePath("/[locale]/admin/martyrs", "page");
       revalidatePath("/[locale]/admin/record-of-honor", "page");
@@ -63,11 +64,12 @@ export async function POST(request: Request) {
         await db.prepare(`UPDATE detainees SET status = 'approved' WHERE id = ?`).bind(id).run();
       } else {
         const row = await db
-          .prepare(`SELECT image_url FROM detainees WHERE id = ?`)
+          .prepare(`SELECT image_url, preview_image_url FROM detainees WHERE id = ?`)
           .bind(id)
-          .first<{ image_url: string | null }>();
+          .first<{ image_url: string | null; preview_image_url?: string | null }>();
         await db.prepare(`DELETE FROM detainees WHERE id = ?`).bind(id).run();
         await tryDeleteImage(row?.image_url);
+        await tryDeleteImage(row?.preview_image_url);
       }
       revalidatePath("/[locale]/admin/detainees", "page");
       revalidatePath("/[locale]/admin/record-of-honor", "page");

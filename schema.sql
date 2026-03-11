@@ -63,6 +63,7 @@ CREATE TABLE IF NOT EXISTS "martyrs" (
   "martyrdom_details" TEXT,
   "tags" TEXT,
   "image_url" TEXT,
+  "preview_image_url" TEXT,
   "status" TEXT NOT NULL DEFAULT 'approved',
   "submitted_by" TEXT
 );
@@ -76,6 +77,7 @@ CREATE TABLE IF NOT EXISTS "detainees" (
   "status_en" TEXT,
   "tags" TEXT,
   "image_url" TEXT,
+  "preview_image_url" TEXT,
   "status" TEXT NOT NULL DEFAULT 'approved',
   "submitted_by" TEXT
 );

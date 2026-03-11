@@ -29,6 +29,7 @@ export function DetaineesClient({ initialDetainees, locale }: Props) {
   const [selectedYear, setSelectedYear] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
+  const [previewImageUrl, setPreviewImageUrl] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
@@ -43,6 +44,7 @@ export function DetaineesClient({ initialDetainees, locale }: Props) {
     try {
       const formData = new FormData(e.currentTarget);
       if (imageUrl) formData.set("image_url", imageUrl);
+      if (previewImageUrl) formData.set("preview_image_url", previewImageUrl);
       const response = await fetch("/api/detainees", {
         method: "POST",
         body: formData,
@@ -64,6 +66,7 @@ export function DetaineesClient({ initialDetainees, locale }: Props) {
     setFormSuccess(false);
     setFormError("");
     setImageUrl("");
+    setPreviewImageUrl("");
     setUploadError("");
     formRef.current?.reset();
   }
@@ -244,10 +247,14 @@ export function DetaineesClient({ initialDetainees, locale }: Props) {
                     <FileUpload
                       accept="image/*"
                       onUploadSuccess={(url) => { setImageUrl(url); setUploadError(""); }}
+                      onUploadSuccessDetailed={(r) => {
+                        if (r.previewUrl) setPreviewImageUrl(r.previewUrl);
+                      }}
                       onUploadingChange={setIsUploading}
                       onUploadError={setUploadError}
                       folder="records"
                       generateOgVariant
+                      generatePreviewVariant
                       imageMaxWidth={1920}
                       imageWebpQuality={0.8}
                       imageTargetMaxKB={200}
@@ -256,6 +263,7 @@ export function DetaineesClient({ initialDetainees, locale }: Props) {
                     {uploadError && <p className="mt-1 text-xs text-red-600">{uploadError}</p>}
                     {imageUrl && <img src={imageUrl} alt="" className="mt-2 h-16 w-16 rounded-lg border object-cover" />}
                     <input type="hidden" name="image_url" value={imageUrl} />
+                    <input type="hidden" name="preview_image_url" value={previewImageUrl} />
                   </div>
                   <div>
                     <label className="mb-1 block text-xs font-medium text-foreground/70">{t("submitter")}</label>

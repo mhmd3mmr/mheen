@@ -6,6 +6,7 @@ import imageCompression from "browser-image-compression";
 
 type FileUploadProps = {
   onUploadSuccess?: (url: string) => void;
+  onUploadSuccessDetailed?: (result: { url: string; ogUrl?: string; previewUrl?: string }) => void;
   onUploadingChange?: (uploading: boolean) => void;
   onUploadError?: (message: string) => void;
   accept?: string;
@@ -17,10 +18,12 @@ type FileUploadProps = {
   imageTargetMaxKB?: number;
   imageAspectRatio?: number;
   generateOgVariant?: boolean;
+  generatePreviewVariant?: boolean;
 };
 
 export function FileUpload({
   onUploadSuccess,
+  onUploadSuccessDetailed,
   onUploadingChange,
   onUploadError,
   accept = "image/*,.pdf,.doc,.docx",
@@ -32,6 +35,7 @@ export function FileUpload({
   imageTargetMaxKB,
   imageAspectRatio,
   generateOgVariant = false,
+  generatePreviewVariant = false,
 }: FileUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -165,6 +169,62 @@ export function FileUpload({
     };
   }
 
+  async function buildWhatsAppPreviewJpg(file: File): Promise<File> {
+    if (!file.type.startsWith("image/") || file.type === "image/svg+xml") {
+      return file;
+    }
+
+    const normalizedFile = imageAspectRatio ? await cropImageToAspect(file, imageAspectRatio) : file;
+    const objectUrl = URL.createObjectURL(normalizedFile);
+    try {
+      const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+        const el = new window.Image();
+        el.onload = () => resolve(el);
+        el.onerror = reject;
+        el.src = objectUrl;
+      });
+
+      const srcW = img.naturalWidth;
+      const srcH = img.naturalHeight;
+      const side = Math.min(srcW, srcH);
+      const sx = Math.round((srcW - side) / 2);
+      const sy = Math.round((srcH - side) / 2);
+
+      const canvas = document.createElement("canvas");
+      canvas.width = 300;
+      canvas.height = 300;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return normalizedFile;
+
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+      ctx.drawImage(img, sx, sy, side, side, 0, 0, 300, 300);
+
+      const tryEncode = (quality: number) =>
+        new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
+
+      // Try to keep under ~300KB by reducing quality if needed.
+      let quality = 0.8;
+      let blob = await tryEncode(quality);
+      while (blob && blob.size > 300 * 1024 && quality > 0.55) {
+        quality = Math.max(0.55, quality - 0.1);
+        blob = await tryEncode(quality);
+      }
+      if (!blob) return normalizedFile;
+
+      const baseName = normalizedFile.name.replace(/\.[^.]+$/, "") || "upload";
+      return new File([blob], `${baseName}-wa.jpg`, {
+        type: "image/jpeg",
+        lastModified: Date.now(),
+      });
+    } catch (err) {
+      console.warn("[upload:wa-preview] build failed, skipping preview variant", err);
+      return normalizedFile;
+    } finally {
+      URL.revokeObjectURL(objectUrl);
+    }
+  }
+
   async function uploadSingle(file: File, key?: string) {
     const formData = new FormData();
     formData.set("file", file);
@@ -181,6 +241,7 @@ export function FileUpload({
     const data = await uploadSingle(optimizedFile);
     if (data?.url) {
       onUploadSuccess?.(data.url);
+      onUploadSuccessDetailed?.({ url: data.url });
       return true;
     }
     return false;
@@ -195,27 +256,44 @@ export function FileUpload({
     onUploadError?.("");
     try {
       if (
-        generateOgVariant &&
+        (generateOgVariant || generatePreviewVariant) &&
         file.type.startsWith("image/") &&
         file.type !== "image/svg+xml"
       ) {
         const dualTask = async (): Promise<boolean> => {
-          const { uiImageFile, ogImageFile } = await buildStoryDualVariants(file);
+          const { uiImageFile, ogImageFile } = generateOgVariant
+            ? await buildStoryDualVariants(file)
+            : { uiImageFile: await convertImageToWebP(file), ogImageFile: await convertImageToWebP(file) };
+          const previewImageFile = generatePreviewVariant ? await buildWhatsAppPreviewJpg(file) : null;
+
           const mainExt = ".webp";
           const ogExt = ".jpg";
+          const previewExt = ".jpg";
           const safeFolder =
             folder.replace(/[^a-z0-9/_-]/gi, "").replace(/^\/+|\/+$/g, "") || "stories";
           const baseId = crypto.randomUUID();
           const mainKey = `${safeFolder}/${baseId}${mainExt}`;
           const ogKey = `${safeFolder}/${baseId}-og${ogExt}`;
+          const previewKey = `${safeFolder}/${baseId}-wa${previewExt}`;
 
-          const [mainUpload, ogUpload] = await Promise.all([
+          const uploads = await Promise.all([
             uploadSingle(uiImageFile, mainKey),
-            uploadSingle(ogImageFile, ogKey),
+            generateOgVariant ? uploadSingle(ogImageFile, ogKey) : Promise.resolve(null),
+            previewImageFile ? uploadSingle(previewImageFile, previewKey) : Promise.resolve(null),
           ]);
+          const [mainUpload, ogUpload, previewUpload] = uploads as [
+            { url?: string } | null,
+            { url?: string } | null,
+            { url?: string } | null,
+          ];
 
-          if (mainUpload?.url && ogUpload?.url) {
+          if (mainUpload?.url) {
             onUploadSuccess?.(mainUpload.url);
+            onUploadSuccessDetailed?.({
+              url: mainUpload.url,
+              ogUrl: ogUpload?.url,
+              previewUrl: previewUpload?.url,
+            });
             return true;
           }
           return false;
