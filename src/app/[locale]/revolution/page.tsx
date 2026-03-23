@@ -119,10 +119,10 @@ export default async function RevolutionPage({ params }: Props) {
         </FadeUp>
       </section>
 
-      <MheenInTheLinesOfRevolution />
-
       {/* Military Geography */}
       <MilitarySection t={militaryT} />
+
+      <MheenInTheLinesOfRevolution />
 
       {/* Revolution Timeline */}
       <section className="mx-auto max-w-5xl px-4 py-16 sm:px-6 md:py-24">
