@@ -190,15 +190,17 @@ export function FileUpload({
       const sx = Math.round((srcW - side) / 2);
       const sy = Math.round((srcH - side) / 2);
 
+      // 600×600 matches common WhatsApp / Meta expectations; keep file ≤300KB via quality steps.
+      const OUT = 600;
       const canvas = document.createElement("canvas");
-      canvas.width = 300;
-      canvas.height = 300;
+      canvas.width = OUT;
+      canvas.height = OUT;
       const ctx = canvas.getContext("2d");
       if (!ctx) return normalizedFile;
 
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = "high";
-      ctx.drawImage(img, sx, sy, side, side, 0, 0, 300, 300);
+      ctx.drawImage(img, sx, sy, side, side, 0, 0, OUT, OUT);
 
       const tryEncode = (quality: number) =>
         new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
@@ -206,8 +208,8 @@ export function FileUpload({
       // Try to keep under ~300KB by reducing quality if needed.
       let quality = 0.8;
       let blob = await tryEncode(quality);
-      while (blob && blob.size > 300 * 1024 && quality > 0.55) {
-        quality = Math.max(0.55, quality - 0.1);
+      while (blob && blob.size > 300 * 1024 && quality > 0.35) {
+        quality = Math.max(0.35, quality - 0.05);
         blob = await tryEncode(quality);
       }
       if (!blob) return normalizedFile;

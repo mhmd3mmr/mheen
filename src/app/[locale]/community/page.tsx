@@ -94,6 +94,9 @@ export default function CommunityPage() {
   const tStory = useTranslations("pages.mheenStory");
   const locale = useLocale();
   const isAr = locale === "ar";
+  const [isHawarinModalOpen, setIsHawarinModalOpen] = useState(false);
+  const [isSadadModalOpen, setIsSadadModalOpen] = useState(false);
+  const [isQaryataynModalOpen, setIsQaryataynModalOpen] = useState(false);
   const [galleryItems, setGalleryItems] = useState<
     { caption: string; image: string; category?: string | null }[]
   >([]);
@@ -212,6 +215,19 @@ export default function CommunityPage() {
       mounted = false;
     };
   }, [t, locale]);
+
+  useEffect(() => {
+    if (!isSadadModalOpen && !isHawarinModalOpen && !isQaryataynModalOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsSadadModalOpen(false);
+        setIsHawarinModalOpen(false);
+        setIsQaryataynModalOpen(false);
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isSadadModalOpen, isHawarinModalOpen, isQaryataynModalOpen]);
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-stone-50 text-foreground">
@@ -591,26 +607,80 @@ export default function CommunityPage() {
             </p>
           </Reveal>
 
-          <div className="relative grid grid-cols-1 gap-6 md:grid-cols-3">
+          <div className="relative grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
             <div className="pointer-events-none absolute inset-x-0 top-1/2 z-0 hidden h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent md:block" />
 
             {[
-              { name: tStory("fab1Name"), desc: tStory("fab1Desc"), color: "border-primary/20 bg-primary/5", dot: "bg-primary" },
-              { name: tStory("fab2Name"), desc: tStory("fab2Desc"), color: "border-blue-200 bg-blue-50", dot: "bg-blue-500" },
-              { name: tStory("fab3Name"), desc: tStory("fab3Desc"), color: "border-amber-200 bg-amber-50", dot: "bg-amber-500" },
+              { key: "mheen", name: tStory("fab1Name"), desc: tStory("fab1Desc"), color: "border-primary/20 bg-primary/5", dot: "bg-primary" },
+              { key: "sadad", name: tStory("fab2Name"), desc: tStory("fab2Desc"), color: "border-blue-200 bg-blue-50", dot: "bg-blue-500" },
+              { key: "hawarin", name: tStory("fab3Name"), desc: tStory("fab3Desc"), color: "border-amber-200 bg-amber-50", dot: "bg-amber-500" },
+              { key: "qaryatayn", name: "القريتين", desc: "بوابة الصحراء وتوأم البادية في الجوار والمصير.", color: "border-purple-200 bg-purple-50", dot: "bg-purple-500" },
             ].map((card, i) => (
               <Reveal key={card.name} delay={0.1 + i * 0.1} className="relative z-10">
-                <div
-                  className={`flex h-full flex-col items-center rounded-3xl border ${card.color} p-8 text-center transition-all hover:-translate-y-1 hover:shadow-lg`}
-                >
-                  <div className={`h-4 w-4 rounded-full ${card.dot} ring-4 ring-background shadow-lg`} />
-                  <h3 className="mt-5 text-xl font-bold text-foreground">
-                    {card.name}
-                  </h3>
-                  <p className="mt-3 text-sm leading-relaxed text-foreground/60">
-                    {card.desc}
-                  </p>
-                </div>
+                {card.key === "sadad" ? (
+                  <button
+                    type="button"
+                    onClick={() => setIsSadadModalOpen(true)}
+                    className={`flex h-full w-full flex-col items-center rounded-3xl border ${card.color} p-8 text-center transition-all hover:-translate-y-1 hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary/40 cursor-pointer`}
+                    aria-haspopup="dialog"
+                    aria-expanded={isSadadModalOpen}
+                    aria-controls="sadad-context-modal"
+                  >
+                    <div className={`h-4 w-4 rounded-full ${card.dot} ring-4 ring-background shadow-lg`} />
+                    <h3 className="mt-5 text-xl font-bold text-foreground">
+                      {card.name}
+                    </h3>
+                    <p className="mt-3 text-sm leading-relaxed text-foreground/60">
+                      {card.desc}
+                    </p>
+                  </button>
+                ) : card.key === "hawarin" ? (
+                  <button
+                    type="button"
+                    onClick={() => setIsHawarinModalOpen(true)}
+                    className={`flex h-full w-full flex-col items-center rounded-3xl border ${card.color} p-8 text-center transition-all hover:-translate-y-1 hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary/40 cursor-pointer`}
+                    aria-haspopup="dialog"
+                    aria-expanded={isHawarinModalOpen}
+                    aria-controls="hawarin-context-modal"
+                  >
+                    <div className={`h-4 w-4 rounded-full ${card.dot} ring-4 ring-background shadow-lg`} />
+                    <h3 className="mt-5 text-xl font-bold text-foreground">
+                      {card.name}
+                    </h3>
+                    <p className="mt-3 text-sm leading-relaxed text-foreground/60">
+                      {card.desc}
+                    </p>
+                  </button>
+                ) : card.key === "qaryatayn" ? (
+                  <button
+                    type="button"
+                    onClick={() => setIsQaryataynModalOpen(true)}
+                    className={`flex h-full w-full flex-col items-center rounded-3xl border ${card.color} p-8 text-center transition-all hover:-translate-y-1 hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary/40 cursor-pointer`}
+                    aria-haspopup="dialog"
+                    aria-expanded={isQaryataynModalOpen}
+                    aria-controls="qaryatayn-context-modal"
+                  >
+                    <div className={`h-4 w-4 rounded-full ${card.dot} ring-4 ring-background shadow-lg`} />
+                    <h3 className="mt-5 text-xl font-bold text-foreground">
+                      {card.name}
+                    </h3>
+                    <p className="mt-3 text-sm leading-relaxed text-foreground/60">
+                      {card.desc}
+                    </p>
+                  </button>
+                ) : (
+                  <div
+                    className={`flex h-full flex-col items-center rounded-3xl border ${card.color} p-8 text-center transition-all hover:-translate-y-1 hover:shadow-lg`}
+                  >
+                    <div className={`h-4 w-4 rounded-full ${card.dot} ring-4 ring-background shadow-lg`} />
+                    <h3 className="mt-5 text-xl font-bold text-foreground">
+                      {card.name}
+                    </h3>
+                    <p className="mt-3 text-sm leading-relaxed text-foreground/60">
+                      {card.desc}
+                    </p>
+                  </div>
+                )}
               </Reveal>
             ))}
           </div>
@@ -734,6 +804,151 @@ export default function CommunityPage() {
           </div>
         </div>
       </section>
+
+      {isSadadModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+          onClick={() => setIsSadadModalOpen(false)}
+          aria-hidden="true"
+        >
+          <div
+            id="sadad-context-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="sadad-modal-title"
+            className="relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-800"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setIsSadadModalOpen(false)}
+              className="absolute end-3 top-3 rounded-full p-2 text-foreground/60 transition-colors hover:bg-black/5 hover:text-foreground"
+              aria-label="إغلاق النافذة"
+            >
+              ✕
+            </button>
+
+            <h3 id="sadad-modal-title" className="pe-8 font-qomra text-2xl font-bold text-primary">
+              صدد ومهين: حكاية جوار وعلم و"خبز وملح"
+            </h3>
+
+            <div className="mt-5 space-y-4 text-sm leading-8 text-foreground/80 md:text-base">
+              <p>
+                تُشكل العلاقة بين بلدتي صدد ومهين نموذجاً تاريخياً فريداً للتعايش السلمي في البادية السورية.
+                فرغم التنوع الديني؛ حيث تُعتبر صدد بلدة مسيحية سريانية عريقة بينما مهين مجتمع مسلم، إلا أن
+                الجوار الجغرافي نسج بينهما روابط اجتماعية واقتصادية لا تُنفصم.
+              </p>
+              <p>
+                تجلى أبهى صور هذا الجوار في قطاع التعليم؛ ففي منتصف القرن العشرين، توافد العشرات من المعلمين
+                والأساتذة من أبناء صدد للتدريس في مدارس مهين. لقد كانوا بمثابة "رُسل معرفة" أسهموا في محو
+                الأمية وتأسيس الأجيال الأولى من أطباء ومهندسي مهين، وحظوا باحترام وتوقير مطلق من الأهالي.
+              </p>
+              <p>
+                لم تقتصر هذه الأخوّة على أسوار المدارس، بل امتدت لتشمل التبادل التجاري اليومي للمحاصيل
+                والمواشي، والمشاركة الصادقة في الأفراح والأتراح، لترسم لوحة أصيلة من العيش المشترك الذي لا يزال
+                حياً في ذاكرة الأجيال.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isHawarinModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+          onClick={() => setIsHawarinModalOpen(false)}
+          aria-hidden="true"
+        >
+          <div
+            id="hawarin-context-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="hawarin-modal-title"
+            className="relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-800"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setIsHawarinModalOpen(false)}
+              className="absolute end-3 top-3 rounded-full p-2 text-foreground/60 transition-colors hover:bg-black/5 hover:text-foreground"
+              aria-label="إغلاق النافذة"
+            >
+              ✕
+            </button>
+
+            <h3 id="hawarin-modal-title" className="pe-8 font-qomra text-2xl font-bold text-primary">
+              حوارين ومهين: توأمة البادية والتاريخ العريق
+            </h3>
+
+            <div className="mt-5 space-y-4 text-sm leading-8 text-foreground/80 md:text-base">
+              <p>
+                على تخوم البادية السورية، لا يُذكر اسم «مهين» تاريخياً إلا ويقترن باسم جارتها وتوأمها «حوارين».
+                لا تفصل بين البلدتين سوى مسافة قصيرة، لكن ما يجمعهما هو نسيج اجتماعي وثقافي ضارب في جذور
+                التاريخ.
+              </p>
+              <p>
+                بينما تميزت حوارين بإرثها الآرامي والأموي العريق، حيث كانت تضم حصوناً وقصوراً تاريخية، كانت
+                مهين بمثابة العمق الزراعي والعشائري. وقد تقاسمت البلدتان عبر مئات السنين مصادر المياه، والمراعي،
+                ونمط الحياة الأصيل.
+              </p>
+              <p>
+                لقد وثّق الرحالة والمؤرخون هذا التجاور منذ القدم؛ ففي عام 1812م كُتب عنهما: «مررنا ببلدتين
+                صغيرتين متجاورتين هما مهين وحوارين، بينهما ماء يكفيهما.. لباس أهلهما لباس أهل البادية ولهجتهم
+                لهجة البادية». واليوم، لا تزال هذه التوأمة حية، حيث يتشارك أبناء البلدتين العادات، الأصالة، وكرم
+                الضيافة، ليمثلا معاً قلباً واحداً ينبض في البادية.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isQaryataynModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+          onClick={() => setIsQaryataynModalOpen(false)}
+          aria-hidden="true"
+        >
+          <div
+            id="qaryatayn-context-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="qaryatayn-modal-title"
+            className="relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-800"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setIsQaryataynModalOpen(false)}
+              className="absolute end-3 top-3 rounded-full p-2 text-foreground/60 transition-colors hover:bg-black/5 hover:text-foreground"
+              aria-label="إغلاق النافذة"
+            >
+              ✕
+            </button>
+
+            <h3 id="qaryatayn-modal-title" className="pe-8 font-qomra text-2xl font-bold text-primary">
+              القريتين ومهين: بوابة البادية ووحدة المصير
+            </h3>
+
+            <div className="mt-5 space-y-4 text-sm leading-8 text-foreground/80 md:text-base">
+              <p>
+                تشكل «القريتين» امتداداً طبيعياً وعمقاً جغرافياً لبلدة مهين باتجاه الشرق. وإذا كانت مهين لؤلؤة
+                البادية، فإن القريتين كانت تاريخياً «بوابة الصحراء» والمحطة الأهم لقوافل التجارة المتجهة نحو
+                تدمر.
+              </p>
+              <p>
+                تقاسمت البلدتان عبر الزمن قساوة البادية وخيراتها، فكان التبادل التجاري والزراعي والرعوي شريان
+                حياة يربط بينهما. كما عكست القريتين، بتركيبتها السكانية الأصيلة التي جمعت بين المسلمين
+                والمسيحيين، امتداداً لروح التعايش والمحبة التي ميزت جيرانها في مهين وصدد.
+              </p>
+              <p>
+                في التاريخ الحديث، ارتبط مصير البلدتين ارتباطاً وثيقاً؛ فقد واجهتا معاً تحديات الحرب، وقسوة
+                التهجير، وتقاسم أهلهما آلام النزوح وأمل العودة وإعادة الإعمار. لتظل القريتين ومهين اليوم دليلاً
+                حياً على صمود إنسان البادية السورية وتمسكه بأرضه مهما اشتدت الظروف.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

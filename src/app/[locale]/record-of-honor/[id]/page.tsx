@@ -47,6 +47,13 @@ function resolveAbsoluteImage(raw: string | null) {
   return `${SITE_URL}/${raw}`;
 }
 
+/** Meta / WhatsApp expect HTTPS og:image and og:image:secure_url */
+function ensureHttpsAbsolute(url: string) {
+  if (!url) return url;
+  if (url.startsWith("http://")) return `https://${url.slice("http://".length)}`;
+  return url;
+}
+
 function toOgKeyOrPath(input: string) {
   const collapsed = input
     .replace(/-og(-og)+/gi, "-og")
@@ -129,12 +136,51 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const canonical = `${SITE_URL}/${locale}/record-of-honor/${id}`;
   const mainImageUrl = record.image_url ? resolveAbsoluteImage(record.image_url) : "";
-  const ogImageUrl = record.image_url ? toOgVariantUrl(mainImageUrl) : DEFAULT_MARTYR_OG_IMAGE;
-  const previewUrl = record.preview_image_url ? resolveAbsoluteImage(record.preview_image_url) : "";
+  const ogImageUrlRaw = record.image_url ? toOgVariantUrl(mainImageUrl) : DEFAULT_MARTYR_OG_IMAGE;
+  const previewUrlRaw = record.preview_image_url ? resolveAbsoluteImage(record.preview_image_url) : "";
+
+  const ogImageUrl = ensureHttpsAbsolute(ogImageUrlRaw);
+  const previewUrl = previewUrlRaw ? ensureHttpsAbsolute(previewUrlRaw) : "";
+
+  const ogTitle =
+    isAr && record.recordType === "martyr"
+      ? `${name} | توثيق شهداء مهين`
+      : `${name} | ${isAr ? "أرشيف مهين" : "Mheen Archive"}`;
+  const ogDescription =
+    isAr && record.recordType === "martyr"
+      ? `توثيق الشهيد ${name} من بلدة مهين.`
+      : textSummary(summary);
+
+  // Primary OG image: small JPG preview for WhatsApp when available (actual file is 600×600 JPEG ≤300KB).
+  const primaryOg = previewUrl || ogImageUrl;
+  const primaryWidth = previewUrl ? 600 : 1200;
+  const primaryHeight = previewUrl ? 600 : 630;
+
+  const ogImages: NonNullable<Metadata["openGraph"]>["images"] = [
+    {
+      url: primaryOg,
+      secureUrl: primaryOg,
+      width: primaryWidth,
+      height: primaryHeight,
+      type: "image/jpeg",
+      alt: name,
+    },
+  ];
+  if (previewUrl) {
+    ogImages.push({
+      url: ogImageUrl,
+      secureUrl: ogImageUrl,
+      width: 1200,
+      height: 630,
+      type: "image/jpeg",
+      alt: name,
+    });
+  }
 
   return {
-    title: `${name} | ${isAr ? "أرشيف مهين" : "Mheen Archive"}`,
-    description: textSummary(summary),
+    metadataBase: new URL(SITE_URL),
+    title: ogTitle,
+    description: ogDescription,
     keywords: isAr
       ? ["مهين", "سجل الخالدين", "شهداء مهين", "معتقلي مهين", "ريف حمص"]
       : ["Mheen", "record of honor", "Mheen martyrs", "Mheen detainees", "Homs countryside"],
@@ -147,31 +193,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       },
     },
     openGraph: {
-      type: "profile",
+      type: "website",
       url: canonical,
-      title: name,
-      description: textSummary(summary),
-      images: [
-        {
-          url: previewUrl || ogImageUrl,
-          width: 300,
-          height: 300,
-          type: "image/jpeg",
-          alt: name,
-        },
-        {
-          url: ogImageUrl,
-          width: 1200,
-          height: 630,
-          type: "image/jpeg",
-          alt: name,
-        },
-      ],
+      siteName: isAr ? "بلدة مهين" : "Mheen",
+      locale: isAr ? "ar_AR" : "en_US",
+      title: ogTitle,
+      description: ogDescription,
+      images: ogImages,
     },
     twitter: {
       card: "summary_large_image",
       title: name,
-      description: textSummary(summary),
+      description: isAr && record.recordType === "martyr" ? `توثيق شهيد من بلدة مهين.` : textSummary(summary),
       images: [ogImageUrl],
     },
     other: {
