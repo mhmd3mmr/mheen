@@ -20,6 +20,7 @@ import {
   RecoveryStats,
   HumanCostSection,
 } from "@/components/AboutRevolutionSections";
+import { MheenInTheLinesOfRevolution } from "@/components/MheenInTheLinesOfRevolution";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -117,6 +118,8 @@ export default async function RevolutionPage({ params }: Props) {
           </p>
         </FadeUp>
       </section>
+
+      <MheenInTheLinesOfRevolution />
 
       {/* Military Geography */}
       <MilitarySection t={militaryT} />
