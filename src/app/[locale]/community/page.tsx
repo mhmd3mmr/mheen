@@ -101,6 +101,55 @@ export default function CommunityPage() {
     { caption: string; image: string; category?: string | null }[]
   >([]);
 
+  const mosaicI18n = isAr
+    ? {
+        closeLabel: "إغلاق النافذة",
+        qaryataynCardTitle: "القريتين",
+        qaryataynCardDesc: "بوابة الصحراء وتوأم البادية في الجوار والمصير.",
+        sadad: {
+          title: 'صدد ومهين: حكاية جوار وعلم و"خبز وملح"',
+          p1: "تُشكل العلاقة بين بلدتي صدد ومهين نموذجاً تاريخياً فريداً للتعايش السلمي في البادية السورية. فرغم التنوع الديني؛ حيث تُعتبر صدد بلدة مسيحية سريانية عريقة بينما مهين مجتمع مسلم، إلا أن الجوار الجغرافي نسج بينهما روابط اجتماعية واقتصادية لا تُنفصم.",
+          p2: 'تجلى أبهى صور هذا الجوار في قطاع التعليم؛ ففي منتصف القرن العشرين، توافد العشرات من المعلمين والأساتذة من أبناء صدد للتدريس في مدارس مهين. لقد كانوا بمثابة "رُسل معرفة" أسهموا في محو الأمية وتأسيس الأجيال الأولى من أطباء ومهندسي مهين، وحظوا باحترام وتوقير مطلق من الأهالي.',
+          p3: "لم تقتصر هذه الأخوّة على أسوار المدارس، بل امتدت لتشمل التبادل التجاري اليومي للمحاصيل والمواشي، والمشاركة الصادقة في الأفراح والأتراح، لترسم لوحة أصيلة من العيش المشترك الذي لا يزال حياً في ذاكرة الأجيال.",
+        },
+        hawarin: {
+          title: "حوارين ومهين: توأمة البادية والتاريخ العريق",
+          p1: "على تخوم البادية السورية، لا يُذكر اسم «مهين» تاريخياً إلا ويقترن باسم جارتها وتوأمها «حوارين». لا تفصل بين البلدتين سوى مسافة قصيرة، لكن ما يجمعهما هو نسيج اجتماعي وثقافي ضارب في جذور التاريخ.",
+          p2: "بينما تميزت حوارين بإرثها الآرامي والأموي العريق، حيث كانت تضم حصوناً وقصوراً تاريخية، كانت مهين بمثابة العمق الزراعي والعشائري. وقد تقاسمت البلدتان عبر مئات السنين مصادر المياه، والمراعي، ونمط الحياة الأصيل.",
+          p3: "لقد وثّق الرحالة والمؤرخون هذا التجاور منذ القدم؛ ففي عام 1812م كُتب عنهما: «مررنا ببلدتين صغيرتين متجاورتين هما مهين وحوارين، بينهما ماء يكفيهما.. لباس أهلهما لباس أهل البادية ولهجتهم لهجة البادية». واليوم، لا تزال هذه التوأمة حية، حيث يتشارك أبناء البلدتين العادات، الأصالة، وكرم الضيافة، ليمثلا معاً قلباً واحداً ينبض في البادية.",
+        },
+        qaryatayn: {
+          title: "القريتين ومهين: بوابة البادية ووحدة المصير",
+          p1: "تشكل «القريتين» امتداداً طبيعياً وعمقاً جغرافياً لبلدة مهين باتجاه الشرق. وإذا كانت مهين لؤلؤة البادية، فإن القريتين كانت تاريخياً «بوابة الصحراء» والمحطة الأهم لقوافل التجارة المتجهة نحو تدمر.",
+          p2: "تقاسمت البلدتان عبر الزمن قساوة البادية وخيراتها، فكان التبادل التجاري والزراعي والرعوي شريان حياة يربط بينهما. كما عكست القريتين، بتركيبتها السكانية الأصيلة التي جمعت بين المسلمين والمسيحيين، امتداداً لروح التعايش والمحبة التي ميزت جيرانها في مهين وصدد.",
+          p3: "في التاريخ الحديث، ارتبط مصير البلدتين ارتباطاً وثيقاً؛ فقد واجهتا معاً تحديات الحرب، وقسوة التهجير، وتقاسم أهلهما آلام النزوح وأمل العودة وإعادة الإعمار. لتظل القريتين ومهين اليوم دليلاً حياً على صمود إنسان البادية السورية وتمسكه بأرضه مهما اشتدت الظروف.",
+        },
+      }
+    : {
+        closeLabel: "Close dialog",
+        qaryataynCardTitle: "Al-Qaryatayn",
+        qaryataynCardDesc:
+          "The gateway to the desert and the twin of the Badia in neighborhood and destiny.",
+        sadad: {
+          title: 'Sadad & Mheen: A Tale of Neighborliness, Education, and "Bread and Salt"',
+          p1: "The relationship between the towns of Sadad and Mheen forms a unique historical model of peaceful coexistence in the Syrian Badia. Despite religious diversity—Sadad being an ancient Syriac Christian town while Mheen is a Muslim community—geographic proximity has woven unbreakable social and economic ties between them.",
+          p2: `The most beautiful aspect of this neighborliness manifested in education. In the mid-20th century, dozens of teachers from Sadad came to teach in Mheen's schools. They acted as "messengers of knowledge," contributing to the eradication of illiteracy and establishing the first generations of Mheen's doctors and engineers, earning absolute respect and reverence from the locals.`,
+          p3: "This brotherhood extended beyond school walls to include the daily trade of crops and livestock, and sincere participation in joys and sorrows, painting an authentic picture of coexistence that remains alive in the memory of generations.",
+        },
+        hawarin: {
+          title: "Hawarin & Mheen: Twinning of the Badia and Ancient History",
+          p1: `On the outskirts of the Syrian Badia, the name "Mheen" is historically inextricably linked with its neighbor and twin, "Hawarin." Only a short distance separates the two towns, but what unites them is a social and cultural fabric deeply rooted in history.`,
+          p2: "While Hawarin was distinguished by its ancient Aramean and Umayyad heritage, featuring historical forts and palaces, Mheen served as the agricultural and tribal depth. For hundreds of years, the two towns shared water sources, pastures, and an authentic way of life.",
+          p3: `Travelers and historians have documented this juxtaposition since ancient times. In 1812, it was written about them: "We passed by two small adjacent towns, Mheen and Hawarin, with enough water between them... the dress of their people is the dress of the Badia, and their dialect is the dialect of the Badia." Today, this twinning remains alive, as the people of both towns share customs, authenticity, and hospitality, representing together one heart beating in the Badia.`,
+        },
+        qaryatayn: {
+          title: "Al-Qaryatayn & Mheen: The Gateway to the Badia and Unity of Destiny",
+          p1: `"Al-Qaryatayn" forms a natural extension and geographic depth to the town of Mheen towards the east. If Mheen is the pearl of the Badia, Al-Qaryatayn has historically been the "Gateway to the Desert" and the most important station for trade caravans heading towards Palmyra.`,
+          p2: "Over time, the two towns shared the harshness and bounties of the Badia, with agricultural, pastoral, and commercial exchange acting as a lifeline connecting them. Al-Qaryatayn, with its authentic demographic fabric bringing Muslims and Christians together, also reflected the spirit of coexistence and love that characterized its neighbors in Mheen and Sadad.",
+          p3: "In modern history, the destiny of the two towns has been closely intertwined. They faced the challenges of war and the harshness of displacement together, and their people shared the pains of exile and the hope for return and reconstruction. Al-Qaryatayn and Mheen remain today a living testament to the resilience of the people of the Syrian Badia and their devotion to their land regardless of the circumstances.",
+        },
+      };
+
   const harvestBlocks = [
     {
       title: t("harvest1Title"),
@@ -614,7 +663,7 @@ export default function CommunityPage() {
               { key: "mheen", name: tStory("fab1Name"), desc: tStory("fab1Desc"), color: "border-primary/20 bg-primary/5", dot: "bg-primary" },
               { key: "sadad", name: tStory("fab2Name"), desc: tStory("fab2Desc"), color: "border-blue-200 bg-blue-50", dot: "bg-blue-500" },
               { key: "hawarin", name: tStory("fab3Name"), desc: tStory("fab3Desc"), color: "border-amber-200 bg-amber-50", dot: "bg-amber-500" },
-              { key: "qaryatayn", name: "القريتين", desc: "بوابة الصحراء وتوأم البادية في الجوار والمصير.", color: "border-purple-200 bg-purple-50", dot: "bg-purple-500" },
+              { key: "qaryatayn", name: mosaicI18n.qaryataynCardTitle, desc: mosaicI18n.qaryataynCardDesc, color: "border-purple-200 bg-purple-50", dot: "bg-purple-500" },
             ].map((card, i) => (
               <Reveal key={card.name} delay={0.1 + i * 0.1} className="relative z-10">
                 {card.key === "sadad" ? (
@@ -823,31 +872,19 @@ export default function CommunityPage() {
               type="button"
               onClick={() => setIsSadadModalOpen(false)}
               className="absolute end-3 top-3 rounded-full p-2 text-foreground/60 transition-colors hover:bg-black/5 hover:text-foreground"
-              aria-label="إغلاق النافذة"
+              aria-label={mosaicI18n.closeLabel}
             >
               ✕
             </button>
 
             <h3 id="sadad-modal-title" className="pe-8 font-qomra text-2xl font-bold text-primary">
-              صدد ومهين: حكاية جوار وعلم و"خبز وملح"
+              {mosaicI18n.sadad.title}
             </h3>
 
             <div className="mt-5 space-y-4 text-sm leading-8 text-foreground/80 md:text-base">
-              <p>
-                تُشكل العلاقة بين بلدتي صدد ومهين نموذجاً تاريخياً فريداً للتعايش السلمي في البادية السورية.
-                فرغم التنوع الديني؛ حيث تُعتبر صدد بلدة مسيحية سريانية عريقة بينما مهين مجتمع مسلم، إلا أن
-                الجوار الجغرافي نسج بينهما روابط اجتماعية واقتصادية لا تُنفصم.
-              </p>
-              <p>
-                تجلى أبهى صور هذا الجوار في قطاع التعليم؛ ففي منتصف القرن العشرين، توافد العشرات من المعلمين
-                والأساتذة من أبناء صدد للتدريس في مدارس مهين. لقد كانوا بمثابة "رُسل معرفة" أسهموا في محو
-                الأمية وتأسيس الأجيال الأولى من أطباء ومهندسي مهين، وحظوا باحترام وتوقير مطلق من الأهالي.
-              </p>
-              <p>
-                لم تقتصر هذه الأخوّة على أسوار المدارس، بل امتدت لتشمل التبادل التجاري اليومي للمحاصيل
-                والمواشي، والمشاركة الصادقة في الأفراح والأتراح، لترسم لوحة أصيلة من العيش المشترك الذي لا يزال
-                حياً في ذاكرة الأجيال.
-              </p>
+              <p>{mosaicI18n.sadad.p1}</p>
+              <p>{mosaicI18n.sadad.p2}</p>
+              <p>{mosaicI18n.sadad.p3}</p>
             </div>
           </div>
         </div>
@@ -871,32 +908,19 @@ export default function CommunityPage() {
               type="button"
               onClick={() => setIsHawarinModalOpen(false)}
               className="absolute end-3 top-3 rounded-full p-2 text-foreground/60 transition-colors hover:bg-black/5 hover:text-foreground"
-              aria-label="إغلاق النافذة"
+              aria-label={mosaicI18n.closeLabel}
             >
               ✕
             </button>
 
             <h3 id="hawarin-modal-title" className="pe-8 font-qomra text-2xl font-bold text-primary">
-              حوارين ومهين: توأمة البادية والتاريخ العريق
+              {mosaicI18n.hawarin.title}
             </h3>
 
             <div className="mt-5 space-y-4 text-sm leading-8 text-foreground/80 md:text-base">
-              <p>
-                على تخوم البادية السورية، لا يُذكر اسم «مهين» تاريخياً إلا ويقترن باسم جارتها وتوأمها «حوارين».
-                لا تفصل بين البلدتين سوى مسافة قصيرة، لكن ما يجمعهما هو نسيج اجتماعي وثقافي ضارب في جذور
-                التاريخ.
-              </p>
-              <p>
-                بينما تميزت حوارين بإرثها الآرامي والأموي العريق، حيث كانت تضم حصوناً وقصوراً تاريخية، كانت
-                مهين بمثابة العمق الزراعي والعشائري. وقد تقاسمت البلدتان عبر مئات السنين مصادر المياه، والمراعي،
-                ونمط الحياة الأصيل.
-              </p>
-              <p>
-                لقد وثّق الرحالة والمؤرخون هذا التجاور منذ القدم؛ ففي عام 1812م كُتب عنهما: «مررنا ببلدتين
-                صغيرتين متجاورتين هما مهين وحوارين، بينهما ماء يكفيهما.. لباس أهلهما لباس أهل البادية ولهجتهم
-                لهجة البادية». واليوم، لا تزال هذه التوأمة حية، حيث يتشارك أبناء البلدتين العادات، الأصالة، وكرم
-                الضيافة، ليمثلا معاً قلباً واحداً ينبض في البادية.
-              </p>
+              <p>{mosaicI18n.hawarin.p1}</p>
+              <p>{mosaicI18n.hawarin.p2}</p>
+              <p>{mosaicI18n.hawarin.p3}</p>
             </div>
           </div>
         </div>
@@ -920,31 +944,19 @@ export default function CommunityPage() {
               type="button"
               onClick={() => setIsQaryataynModalOpen(false)}
               className="absolute end-3 top-3 rounded-full p-2 text-foreground/60 transition-colors hover:bg-black/5 hover:text-foreground"
-              aria-label="إغلاق النافذة"
+              aria-label={mosaicI18n.closeLabel}
             >
               ✕
             </button>
 
             <h3 id="qaryatayn-modal-title" className="pe-8 font-qomra text-2xl font-bold text-primary">
-              القريتين ومهين: بوابة البادية ووحدة المصير
+              {mosaicI18n.qaryatayn.title}
             </h3>
 
             <div className="mt-5 space-y-4 text-sm leading-8 text-foreground/80 md:text-base">
-              <p>
-                تشكل «القريتين» امتداداً طبيعياً وعمقاً جغرافياً لبلدة مهين باتجاه الشرق. وإذا كانت مهين لؤلؤة
-                البادية، فإن القريتين كانت تاريخياً «بوابة الصحراء» والمحطة الأهم لقوافل التجارة المتجهة نحو
-                تدمر.
-              </p>
-              <p>
-                تقاسمت البلدتان عبر الزمن قساوة البادية وخيراتها، فكان التبادل التجاري والزراعي والرعوي شريان
-                حياة يربط بينهما. كما عكست القريتين، بتركيبتها السكانية الأصيلة التي جمعت بين المسلمين
-                والمسيحيين، امتداداً لروح التعايش والمحبة التي ميزت جيرانها في مهين وصدد.
-              </p>
-              <p>
-                في التاريخ الحديث، ارتبط مصير البلدتين ارتباطاً وثيقاً؛ فقد واجهتا معاً تحديات الحرب، وقسوة
-                التهجير، وتقاسم أهلهما آلام النزوح وأمل العودة وإعادة الإعمار. لتظل القريتين ومهين اليوم دليلاً
-                حياً على صمود إنسان البادية السورية وتمسكه بأرضه مهما اشتدت الظروف.
-              </p>
+              <p>{mosaicI18n.qaryatayn.p1}</p>
+              <p>{mosaicI18n.qaryatayn.p2}</p>
+              <p>{mosaicI18n.qaryatayn.p3}</p>
             </div>
           </div>
         </div>
