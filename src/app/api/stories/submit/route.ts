@@ -63,6 +63,9 @@ async function ensureStoryColumns() {
   try {
     await db.prepare(`ALTER TABLE stories ADD COLUMN tags TEXT`).run();
   } catch {}
+  try {
+    await db.prepare(`ALTER TABLE stories ADD COLUMN submitted_by_email TEXT`).run();
+  } catch {}
   return db;
 }
 
@@ -99,6 +102,7 @@ export async function POST(request: Request) {
       category,
       tags,
     } = parsed.data;
+    const submittedByEmail = String(formData.get("email") ?? "").trim() || null;
     let imageUrl = String(formData.get("image_url") ?? "").trim() || null;
     const file = formData.get("file");
 
@@ -127,9 +131,9 @@ export async function POST(request: Request) {
       .prepare(
         `INSERT INTO stories (
            id, author_name, author_ar, author_en, title_ar, title_en, category,
-           content, content_ar, content_en, tags, image_url, status
+           content, content_ar, content_en, tags, image_url, submitted_by_email, status
          )
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')`
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')`
       )
       .bind(
         id,
@@ -143,7 +147,8 @@ export async function POST(request: Request) {
         contentAr,
         contentEn,
         tags || null,
-        imageUrl
+        imageUrl,
+        submittedByEmail
       )
       .run();
 

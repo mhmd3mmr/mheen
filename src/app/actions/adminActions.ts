@@ -276,6 +276,7 @@ export async function deleteDetainee(formData: FormData) {
 export type StoryRow = {
   id: string;
   author_name: string;
+  submitted_by_email: string | null;
   author_ar: string | null;
   author_en: string | null;
   title_ar: string | null;
@@ -318,10 +319,13 @@ export async function getAllStories(): Promise<StoryRow[]> {
     try {
       await db.prepare(`ALTER TABLE stories ADD COLUMN tags TEXT`).run();
     } catch {}
+    try {
+      await db.prepare(`ALTER TABLE stories ADD COLUMN submitted_by_email TEXT`).run();
+    } catch {}
     const { results } = await db
       .prepare(
         `SELECT id, author_name, author_ar, author_en, title_ar, title_en, category,
-                content, content_ar, content_en, tags, image_url, status, created_at
+                content, content_ar, content_en, tags, image_url, submitted_by_email, status, created_at
          FROM stories
          ORDER BY created_at DESC`
       )
@@ -337,10 +341,13 @@ export async function getPendingStories(): Promise<StoryRow[]> {
   try {
     await assertAdmin();
     const db = await getDB();
+    try {
+      await db.prepare(`ALTER TABLE stories ADD COLUMN submitted_by_email TEXT`).run();
+    } catch {}
     const { results } = await db
       .prepare(
         `SELECT id, author_name, author_ar, author_en, title_ar, title_en, category,
-                content, content_ar, content_en, tags, image_url, status, created_at
+                content, content_ar, content_en, tags, image_url, submitted_by_email, status, created_at
          FROM stories
          WHERE status = 'pending'
          ORDER BY created_at DESC`

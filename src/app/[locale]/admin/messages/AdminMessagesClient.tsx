@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { MessageSquare, ExternalLink } from "lucide-react";
+import { MessageSquare, ExternalLink, Eye, X } from "lucide-react";
 import type { ContactMessageRow } from "@/lib/api/contact";
 
 type Props = {
@@ -20,6 +20,7 @@ const STATUS_OPTIONS = [
 export default function AdminMessagesClient({ initialMessages }: Props) {
   const [messages, setMessages] = useState(initialMessages);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [selectedMessage, setSelectedMessage] = useState<ContactMessageRow | null>(null);
   const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
   const t = useTranslations("Admin.contactMessages");
 
@@ -110,6 +111,7 @@ export default function AdminMessagesClient({ initialMessages }: Props) {
                 <th className="px-4 py-3 text-start font-medium text-foreground">{t("message")}</th>
                 <th className="px-4 py-3 text-start font-medium text-foreground">{t("date")}</th>
                 <th className="px-4 py-3 text-start font-medium text-foreground">{t("status")}</th>
+                <th className="px-4 py-3 text-start font-medium text-foreground">الإجراءات</th>
               </tr>
             </thead>
             <tbody>
@@ -147,10 +149,65 @@ export default function AdminMessagesClient({ initialMessages }: Props) {
                       ))}
                     </select>
                   </td>
+                  <td className="px-4 py-3">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedMessage(m)}
+                      className="inline-flex items-center gap-1 rounded-lg border border-primary/15 px-3 py-1.5 text-xs text-primary hover:bg-primary/5"
+                    >
+                      <Eye className="h-3.5 w-3.5" />
+                      عرض الاستمارة
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {selectedMessage && (
+        <div className="fixed inset-0 z-50 bg-black/55 p-3 backdrop-blur-sm md:p-6">
+          <div className="mx-auto max-w-2xl rounded-2xl border border-primary/10 bg-background shadow-2xl">
+            <div className="flex items-center justify-between border-b border-primary/10 px-5 py-3">
+              <h3 className="inline-flex items-center gap-2 text-sm font-semibold text-primary">
+                <Eye className="h-4 w-4" />
+                تفاصيل استمارة التواصل
+              </h3>
+              <button
+                type="button"
+                onClick={() => setSelectedMessage(null)}
+                className="rounded-lg p-1.5 text-foreground/50 hover:bg-primary/5"
+                aria-label="إغلاق"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="space-y-4 p-5 text-sm">
+              <InfoRow label="الاسم" value={selectedMessage.name} />
+              <InfoRow label="واتساب" value={selectedMessage.whatsapp} />
+              <InfoRow label="الحالة" value={getStatusLabel(selectedMessage.status)} />
+              <InfoRow label="تاريخ الإرسال" value={formatDate(selectedMessage.created_at)} />
+              <InfoRow label="آخر تحديث" value={formatDate(selectedMessage.updated_at)} />
+              <div>
+                <p className="mb-2 text-xs font-medium text-foreground/60">نص الرسالة</p>
+                <div className="max-h-64 overflow-y-auto rounded-xl border border-primary/10 bg-primary/5 p-3 leading-7 text-foreground/90">
+                  {selectedMessage.message}
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-primary/10 px-5 py-3">
+              <button
+                type="button"
+                onClick={() => setSelectedMessage(null)}
+                className="rounded-lg border border-primary/15 px-4 py-2 text-xs text-foreground/70 hover:bg-primary/5"
+              >
+                إغلاق
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -165,6 +222,15 @@ export default function AdminMessagesClient({ initialMessages }: Props) {
           {toast.msg}
         </div>
       )}
+    </div>
+  );
+}
+
+function InfoRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg border border-primary/10 bg-background px-3 py-2">
+      <p className="text-xs font-medium text-foreground/60">{label}</p>
+      <p className="mt-1 text-foreground/90">{value || "—"}</p>
     </div>
   );
 }

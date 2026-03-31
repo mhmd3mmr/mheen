@@ -21,6 +21,7 @@ import { FileUpload } from "@/components/FileUpload";
 type StoryRow = {
   id: string;
   author_name: string;
+  submitted_by_email: string | null;
   author_ar: string | null;
   author_en: string | null;
   title_ar: string | null;
@@ -457,6 +458,12 @@ export default function AdminStoriesClient({ initialStories }: Props) {
                 </div>
 
                 <div className="space-y-4">
+                  <InputField
+                    label="البريد الإلكتروني للمرسل"
+                    value={editingStory.submitted_by_email || "غير متوفر"}
+                    onChange={() => {}}
+                    readOnly
+                  />
                   <InputField label="العنوان بالعربية" value={editForm.title_ar} onChange={(v) => setEditForm((p) => ({ ...p, title_ar: v }))} />
                   <InputField label="العنوان بالإنجليزية" value={editForm.title_en} onChange={(v) => setEditForm((p) => ({ ...p, title_en: v }))} />
                   <InputField label="الكاتب بالعربية" value={editForm.author_ar} onChange={(v) => setEditForm((p) => ({ ...p, author_ar: v }))} />
@@ -505,10 +512,12 @@ function InputField({
   label,
   value,
   onChange,
+  readOnly = false,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
+  readOnly?: boolean;
 }) {
   return (
     <div>
@@ -516,7 +525,10 @@ function InputField({
       <input
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-lg border border-primary/15 bg-background px-3 py-2 text-sm outline-none focus:border-primary/40 focus:ring-1 focus:ring-primary/20"
+        readOnly={readOnly}
+        className={`w-full rounded-lg border border-primary/15 bg-background px-3 py-2 text-sm outline-none focus:border-primary/40 focus:ring-1 focus:ring-primary/20 ${
+          readOnly ? "cursor-not-allowed bg-primary/5 text-foreground/70" : ""
+        }`}
       />
     </div>
   );
