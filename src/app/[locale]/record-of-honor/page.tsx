@@ -27,7 +27,6 @@ type UnifiedRecordRow = {
 };
 
 const SITE_URL = "https://miheen.com";
-const PAGE_SIZE = 24;
 const DEFAULT_SHARE_IMAGE = "/default-share-image.jpg";
 const DEFAULT_MARTYR_OG_IMAGE = "/images/default-martyr-og.jpg";
 
@@ -85,10 +84,8 @@ async function getRecordsPageOne(): Promise<{ records: UnifiedRecordRow[]; hasMo
       `SELECT id, name_ar, name_en, image_url, death_date, birth_date, martyrdom_method, martyrdom_details, tags
        FROM martyrs
        WHERE status = 'approved'
-       ORDER BY death_date DESC, name_ar ASC
-       LIMIT ?`
+       ORDER BY death_date DESC, name_ar ASC`
     )
-    .bind(PAGE_SIZE)
     .all<{
       id: string;
       name_ar: string;
@@ -106,10 +103,8 @@ async function getRecordsPageOne(): Promise<{ records: UnifiedRecordRow[]; hasMo
       `SELECT id, name_ar, name_en, image_url, arrest_date, status_ar, status_en, tags
        FROM detainees
        WHERE status = 'approved'
-       ORDER BY arrest_date DESC, name_ar ASC
-       LIMIT ?`
+       ORDER BY arrest_date DESC, name_ar ASC`
     )
-    .bind(PAGE_SIZE)
     .all<{
       id: string;
       name_ar: string;
